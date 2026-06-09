@@ -1,0 +1,183 @@
+import { Head, Link } from '@inertiajs/react';
+import PublicLayout from '../Layouts/PublicLayout';
+
+const categories = [
+    'Разработка и IT',
+    'Дизайн',
+    'Тексты',
+    'Маркетинг',
+    'Учебная помощь',
+    'Бизнес-задачи',
+];
+
+const advantages = [
+    {
+        title: 'Две модели работы',
+        text: 'Покупайте готовые услуги или публикуйте индивидуальные задания с откликами исполнителей.',
+    },
+    {
+        title: 'Сделка внутри платформы',
+        text: 'Чат, файлы, статусы, споры и платежная заглушка собраны в единой рабочей области заказа.',
+    },
+    {
+        title: 'Защита контактов',
+        text: 'MVP сразу предусматривает модерацию сообщений, описаний и файлов от попыток увести сделку.',
+    },
+];
+
+const steps = [
+    'Опишите задачу или выберите готовую услугу',
+    'Согласуйте условия внутри Таскоры',
+    'Получите результат и оставьте отзыв',
+];
+
+export default function Home() {
+    return (
+        <PublicLayout>
+            <Head title="Главная" />
+
+            <section className="border-b border-slate-200 bg-white">
+                <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-20">
+                    <div className="flex flex-col justify-center">
+                        <div className="mb-6 inline-flex w-fit items-center rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+                            Маркетплейс задач и услуг
+                        </div>
+                        <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-normal text-slate-950 sm:text-5xl lg:text-6xl">
+                            Таскора помогает находить исполнителей без лишнего шума
+                        </h1>
+                        <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+                            Премиальная основа для сервиса, где заказчики размещают задачи и покупают услуги, а исполнители работают через прозрачную систему заказов.
+                        </p>
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                            <Link
+                                href="/catalog"
+                                className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                            >
+                                Смотреть каталог
+                            </Link>
+                            <Link
+                                href="/tasks"
+                                className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-100"
+                            >
+                                Разместить задание
+                            </Link>
+                        </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                        <div className="rounded-md bg-white p-5 shadow-sm">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <p className="text-sm font-medium text-slate-500">Заказ в работе</p>
+                                    <h2 className="mt-2 text-2xl font-semibold text-slate-950">Лендинг для онлайн-школы</h2>
+                                </div>
+                                <span className="rounded-md bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                                    В срок
+                                </span>
+                            </div>
+                            <div className="mt-6 grid grid-cols-3 gap-3">
+                                {['Бриф', 'Дизайн', 'Верстка'].map((item, index) => (
+                                    <div key={item} className="rounded-md border border-slate-200 p-3">
+                                        <p className="text-xs font-medium text-slate-500">Этап {index + 1}</p>
+                                        <p className="mt-1 text-sm font-semibold text-slate-900">{item}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-6 rounded-md border border-blue-100 bg-blue-50 p-4">
+                                <p className="text-sm font-medium text-blue-900">Рабочая область</p>
+                                <p className="mt-1 text-sm leading-6 text-blue-800">
+                                    Статусы, чат, файлы и решения по заказу остаются внутри платформы.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+                <div className="mb-8 max-w-2xl">
+                    <p className="text-sm font-semibold uppercase text-blue-700">Преимущества</p>
+                    <h2 className="mt-2 text-3xl font-semibold text-slate-950">Что делает Таскору удобной для рынка услуг</h2>
+                </div>
+                <div className="grid gap-4 md:grid-cols-3">
+                    {advantages.map((item) => (
+                        <article key={item.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                            <h3 className="text-lg font-semibold text-slate-950">{item.title}</h3>
+                            <p className="mt-3 text-sm leading-6 text-slate-600">{item.text}</p>
+                        </article>
+                    ))}
+                </div>
+            </section>
+
+            <section className="border-y border-slate-200 bg-white">
+                <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+                    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                        <div>
+                            <p className="text-sm font-semibold uppercase text-blue-700">Категории</p>
+                            <h2 className="mt-2 text-3xl font-semibold text-slate-950">Стартовые направления MVP</h2>
+                        </div>
+                        <Link href="/catalog" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
+                            Перейти в каталог
+                        </Link>
+                    </div>
+                    <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {categories.map((category) => (
+                            <div key={category} className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+                                <p className="text-base font-semibold text-slate-950">{category}</p>
+                                <p className="mt-2 text-sm text-slate-600">Готовые услуги и индивидуальные задания в одном направлении.</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            <section className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+                <div>
+                    <p className="text-sm font-semibold uppercase text-blue-700">Как работает сервис</p>
+                    <h2 className="mt-2 text-3xl font-semibold text-slate-950">Простой процесс без внешних договоренностей</h2>
+                    <p className="mt-4 text-sm leading-6 text-slate-600">
+                        MVP строится вокруг понятного заказа: условия фиксируются в системе, общение идет в чате, а ключевые действия сохраняются в истории.
+                    </p>
+                </div>
+                <div className="space-y-3">
+                    {steps.map((step, index) => (
+                        <div key={step} className="flex gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-950 text-sm font-semibold text-white">
+                                {index + 1}
+                            </span>
+                            <p className="self-center text-base font-medium text-slate-900">{step}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <section className="bg-slate-950">
+                <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+                    <div className="grid gap-8 text-white lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+                        <div>
+                            <p className="text-sm font-semibold uppercase text-blue-300">Доверие</p>
+                            <h2 className="mt-2 text-3xl font-semibold">Контроль качества с первого MVP</h2>
+                            <p className="mt-4 text-sm leading-6 text-slate-300">
+                                Таскора проектируется вокруг прозрачных правил, модерации и сохранения истории заказа внутри платформы.
+                            </p>
+                        </div>
+                        <div className="grid gap-6 md:grid-cols-3">
+                            <div>
+                                <p className="text-3xl font-semibold">MVP</p>
+                                <p className="mt-2 text-sm text-slate-300">Без платежного шлюза и ИИ-функций</p>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-semibold">2 сценария</p>
+                                <p className="mt-2 text-sm text-slate-300">Готовая услуга и индивидуальное задание</p>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-semibold">Контроль</p>
+                                <p className="mt-2 text-sm text-slate-300">Модерация и защита от передачи контактов</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </PublicLayout>
+    );
+}
