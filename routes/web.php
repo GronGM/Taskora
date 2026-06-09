@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
+use App\Http\Controllers\Performer\PerformerServiceController;
 use App\Http\Controllers\Public\CatalogController;
 use App\Http\Controllers\Public\HomeController;
 use Inertia\Inertia;
@@ -43,6 +44,16 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/performer/dashboard', [RoleDashboardController::class, 'performer'])
         ->middleware('role:performer')
         ->name('performer.dashboard');
+
+    Route::middleware('role:performer')->prefix('performer')->name('performer.')->group(function (): void {
+        Route::get('/services', [PerformerServiceController::class, 'index'])->name('services.index');
+        Route::get('/services/create', [PerformerServiceController::class, 'create'])->name('services.create');
+        Route::post('/services', [PerformerServiceController::class, 'store'])->name('services.store');
+        Route::get('/services/{service}/edit', [PerformerServiceController::class, 'edit'])->name('services.edit');
+        Route::match(['put', 'patch'], '/services/{service}', [PerformerServiceController::class, 'update'])->name('services.update');
+        Route::post('/services/{service}/submit-review', [PerformerServiceController::class, 'submitReview'])->name('services.submit-review');
+        Route::post('/services/{service}/archive', [PerformerServiceController::class, 'archive'])->name('services.archive');
+    });
 
     Route::get('/moderator/dashboard', [RoleDashboardController::class, 'moderator'])
         ->middleware('role:moderator')
