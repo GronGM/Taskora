@@ -43,9 +43,8 @@ resources/js/
   Layouts/
   Pages/
     Public/
-    Customer/
-    Performer/
-    Admin/
+    Auth/
+    Dashboards/
   lib/
 
 routes/
@@ -99,7 +98,39 @@ ModuleName/
 - `moderator` — модератор.
 - `admin` — администратор.
 
-Один пользователь может иметь несколько ролей, но в MVP можно начать с одной основной роли и отдельного админского флага.
+В текущем MVP используется одна основная роль в поле `users.role`. Новые публичные регистрации получают роль `customer` или `performer`; роли `moderator` и `admin` нельзя выбрать на публичной регистрации.
+
+Модель `User` содержит методы:
+
+- `isCustomer()`
+- `isPerformer()`
+- `isModerator()`
+- `isAdmin()`
+- `dashboardPath()`
+
+Защита кабинетов выполняется через middleware `role`.
+
+## Auth И Dashboard-Маршруты
+
+| Метод | Маршрут | Назначение | Доступ |
+|---|---|---|---|
+| `GET` | `/login` | страница входа | guest |
+| `POST` | `/login` | вход | guest |
+| `GET` | `/register` | страница регистрации | guest |
+| `POST` | `/register` | регистрация заказчика или исполнителя | guest |
+| `POST` | `/logout` | выход | auth |
+| `GET` | `/dashboard` | редирект в кабинет по роли | auth |
+| `GET` | `/customer/dashboard` | кабинет заказчика | `role:customer` |
+| `GET` | `/performer/dashboard` | кабинет исполнителя | `role:performer` |
+| `GET` | `/moderator/dashboard` | панель модератора | `role:moderator` |
+| `GET` | `/admin/dashboard` | админ-панель | `role:admin` |
+
+Редиректы после входа:
+
+- `customer` → `/customer/dashboard`
+- `performer` → `/performer/dashboard`
+- `moderator` → `/moderator/dashboard`
+- `admin` → `/admin/dashboard`
 
 ## Основные Сущности
 
@@ -257,6 +288,6 @@ canceled
 Основные layout:
 
 - `PublicLayout` — публичная часть.
-- `DashboardLayout` — кабинеты заказчика и исполнителя.
+- `DashboardLayout` — кабинеты пользователей по ролям.
 - `OrderWorkspaceLayout` — рабочая область заказа.
 - `AdminLayout` — админка и модерация.

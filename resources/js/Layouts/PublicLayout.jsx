@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const navigation = [
     { label: 'Главная', href: '/' },
@@ -8,6 +8,10 @@ const navigation = [
 ];
 
 export default function PublicLayout({ children }) {
+    const { auth } = usePage().props;
+    const user = auth?.user;
+    const dashboardUrl = auth?.dashboard_url ?? '/dashboard';
+
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
             <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -31,20 +35,39 @@ export default function PublicLayout({ children }) {
                         ))}
                     </nav>
 
-                    <div className="flex items-center gap-2">
-                        <Link
-                            href="/login"
-                            className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 sm:inline-flex"
-                        >
-                            Войти
-                        </Link>
-                        <Link
-                            href="/register"
-                            className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                        >
-                            Регистрация
-                        </Link>
-                    </div>
+                    {user ? (
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href={dashboardUrl}
+                                className="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                            >
+                                Кабинет
+                            </Link>
+                            <Link
+                                href="/logout"
+                                method="post"
+                                as="button"
+                                className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                            >
+                                Выйти
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href="/login"
+                                className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 sm:inline-flex"
+                            >
+                                Войти
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                            >
+                                Регистрация
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </header>
 
