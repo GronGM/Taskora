@@ -4,19 +4,16 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
+use App\Http\Controllers\Public\CatalogController;
+use App\Http\Controllers\Public\HomeController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return Inertia::render('Home');
-})->name('home');
+Route::get('/', HomeController::class)->name('home');
 
-Route::get('/catalog', function () {
-    return Inertia::render('Placeholder', [
-        'title' => 'Каталог',
-        'description' => 'Здесь появится каталог готовых услуг исполнителей Таскоры.',
-    ]);
-})->name('catalog');
+Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
+Route::get('/catalog/{category:slug}', [CatalogController::class, 'category'])->name('catalog.category');
+Route::get('/services/{service:slug}', [CatalogController::class, 'service'])->name('services.show');
 
 Route::get('/tasks', function () {
     return Inertia::render('Placeholder', [
@@ -25,12 +22,7 @@ Route::get('/tasks', function () {
     ]);
 })->name('tasks');
 
-Route::get('/performers', function () {
-    return Inertia::render('Placeholder', [
-        'title' => 'Исполнители',
-        'description' => 'Здесь будет витрина исполнителей с рейтингами, специализациями и бейджами доверия.',
-    ]);
-})->name('performers');
+Route::get('/performers', [CatalogController::class, 'performers'])->name('performers');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');

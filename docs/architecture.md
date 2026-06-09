@@ -44,6 +44,9 @@ resources/js/
   Pages/
     Public/
     Auth/
+    Catalog/
+    Services/
+    Performers/
     Dashboards/
   lib/
 
@@ -140,7 +143,7 @@ ModuleName/
 | `PerformerProfile` | публичный профиль исполнителя |
 | `Category` | категория или подкатегория |
 | `Service` | готовая услуга |
-| `ServiceOption` | дополнительная опция услуги |
+| `ServicePackage` | пакет услуги с ценой, сроком и количеством правок |
 | `Task` | индивидуальное задание |
 | `Offer` | отклик исполнителя на задание |
 | `Order` | заказ из услуги или выбранного отклика |
@@ -151,6 +154,59 @@ ModuleName/
 | `Dispute` | спор по заказу |
 | `ModerationFlag` | срабатывание модерации |
 | `Notification` | уведомление пользователя |
+
+## Категории И Публичный Каталог
+
+В текущем MVP реализованы таблицы:
+
+`categories`:
+
+- `parent_id` для дерева категорий;
+- `name`, `slug`, `description`, `icon`;
+- `sort_order`;
+- `is_active`.
+
+`services`:
+
+- `user_id` — исполнитель;
+- `category_id`;
+- `title`, `slug`, `short_description`, `description`;
+- `price_from`, `delivery_days`;
+- `status`: `draft`, `pending_review`, `published`, `rejected`, `archived`;
+- `rating`, `reviews_count`, `orders_count`;
+- `is_featured`.
+
+`service_packages`:
+
+- `service_id`;
+- `name`, `description`;
+- `price`, `delivery_days`;
+- `revisions_count`;
+- `sort_order`.
+
+Связи:
+
+- `Category hasMany Services`
+- `Category belongsTo parent Category`
+- `Category hasMany children Categories`
+- `Service belongsTo User`
+- `Service belongsTo Category`
+- `Service hasMany ServicePackages`
+- `ServicePackage belongsTo Service`
+- `User hasMany Services`
+
+Публичные маршруты:
+
+| Метод | Маршрут | Назначение | Доступ |
+|---|---|---|---|
+| `GET` | `/` | главная с категориями и популярными услугами | guest |
+| `GET` | `/catalog` | каталог опубликованных услуг | guest |
+| `GET` | `/catalog?category={slug}` | фильтр каталога по категории | guest |
+| `GET` | `/catalog/{category:slug}` | страница категории | guest |
+| `GET` | `/services/{service:slug}` | страница опубликованной услуги | guest |
+| `GET` | `/performers` | публичная витрина исполнителей | guest |
+
+Публично отображаются только услуги со статусом `published`. Черновики, архивные и отклоненные услуги не должны попадать в каталог и карточки услуг.
 
 ## Поток Заказа Из Готовой Услуги
 

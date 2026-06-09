@@ -1,14 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '../Layouts/PublicLayout';
-
-const categories = [
-    'Разработка и IT',
-    'Дизайн',
-    'Тексты',
-    'Маркетинг',
-    'Учебная помощь',
-    'Бизнес-задачи',
-];
+import ServiceCard from '../Components/ServiceCard';
 
 const advantages = [
     {
@@ -31,7 +23,7 @@ const steps = [
     'Получите результат и оставьте отзыв',
 ];
 
-export default function Home() {
+export default function Home({ categories = [], services = [] }) {
     return (
         <PublicLayout>
             <Head title="Главная" />
@@ -122,12 +114,29 @@ export default function Home() {
                     </div>
                     <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {categories.map((category) => (
-                            <div key={category} className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-                                <p className="text-base font-semibold text-slate-950">{category}</p>
-                                <p className="mt-2 text-sm text-slate-600">Готовые услуги и индивидуальные задания в одном направлении.</p>
-                            </div>
+                            <Link key={category.slug} href={category.url} className="rounded-lg border border-slate-200 bg-slate-50 p-5 hover:border-blue-200 hover:bg-blue-50">
+                                <p className="text-base font-semibold text-slate-950">{category.name}</p>
+                                <p className="mt-2 text-sm leading-6 text-slate-600">{category.description}</p>
+                            </Link>
                         ))}
                     </div>
+                </div>
+            </section>
+
+            <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                    <div>
+                        <p className="text-sm font-semibold uppercase text-blue-700">Популярные услуги</p>
+                        <h2 className="mt-2 text-3xl font-semibold text-slate-950">Примеры опубликованных услуг</h2>
+                    </div>
+                    <Link href="/catalog" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
+                        Смотреть все услуги
+                    </Link>
+                </div>
+                <div className="mt-8 grid gap-4 lg:grid-cols-3">
+                    {services.map((service) => (
+                        <ServiceCard key={service.id} service={service} />
+                    ))}
                 </div>
             </section>
 

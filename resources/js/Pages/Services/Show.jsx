@@ -1,0 +1,94 @@
+import { Head, Link } from '@inertiajs/react';
+import PublicLayout from '../../Layouts/PublicLayout';
+
+const currency = new Intl.NumberFormat('ru-RU');
+
+export default function Show({ service }) {
+    return (
+        <PublicLayout>
+            <Head title={service.title} />
+
+            <section className="border-b border-slate-200 bg-white">
+                <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
+                    <div>
+                        <Link href={service.category.url} className="text-sm font-semibold text-blue-700 hover:text-blue-800">
+                            {service.category.name}
+                        </Link>
+                        <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-normal text-slate-950">
+                            {service.title}
+                        </h1>
+                        <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{service.short_description}</p>
+                    </div>
+
+                    <aside className="rounded-lg border border-slate-200 bg-slate-50 p-6 shadow-sm">
+                        <p className="text-sm text-slate-500">Цена от</p>
+                        <p className="mt-1 text-3xl font-semibold text-slate-950">{currency.format(service.price_from)} ₽</p>
+                        <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+                            <div className="rounded-md bg-white p-3">
+                                <p className="text-slate-500">Срок</p>
+                                <p className="mt-1 font-semibold text-slate-950">{service.delivery_days} дн.</p>
+                            </div>
+                            <div className="rounded-md bg-white p-3">
+                                <p className="text-slate-500">Отзывы</p>
+                                <p className="mt-1 font-semibold text-slate-950">{service.reviews_count}</p>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            className="mt-6 w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                            Заказать услугу
+                        </button>
+                        <p className="mt-3 text-xs leading-5 text-slate-500">
+                            Заказ пока не создается: это публичная карточка MVP без платежного шлюза.
+                        </p>
+                    </aside>
+                </div>
+            </section>
+
+            <section className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">
+                <div className="space-y-8">
+                    <div>
+                        <p className="text-sm font-semibold uppercase text-blue-700">Описание</p>
+                        <p className="mt-4 whitespace-pre-line text-base leading-8 text-slate-700">{service.description}</p>
+                    </div>
+
+                    <div>
+                        <p className="text-sm font-semibold uppercase text-blue-700">Пакеты услуги</p>
+                        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+                            {service.packages.map((pack) => (
+                                <article key={pack.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                                    <h2 className="text-lg font-semibold text-slate-950">{pack.name}</h2>
+                                    <p className="mt-3 text-sm leading-6 text-slate-600">{pack.description}</p>
+                                    <p className="mt-5 text-2xl font-semibold text-slate-950">{currency.format(pack.price)} ₽</p>
+                                    <div className="mt-4 space-y-2 text-sm text-slate-600">
+                                        <p>Срок: {pack.delivery_days} дн.</p>
+                                        <p>Правки: {pack.revisions_count}</p>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <aside className="space-y-4">
+                    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <p className="text-sm font-semibold text-slate-500">Исполнитель</p>
+                        <p className="mt-2 text-xl font-semibold text-slate-950">{service.performer.name}</p>
+                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                            Проверенный локальный демо-исполнитель с опубликованными услугами в каталоге.
+                        </p>
+                    </div>
+                    <div className="rounded-lg border border-blue-100 bg-blue-50 p-5">
+                        <p className="text-sm font-semibold uppercase text-blue-700">Блок доверия</p>
+                        <div className="mt-4 space-y-3 text-sm text-blue-900">
+                            <p>Рейтинг: {service.rating ?? '5.00'} / 5</p>
+                            <p>Выполнено заказов: {service.orders_count}</p>
+                            <p>Обсуждение и файлы должны оставаться внутри Таскоры.</p>
+                        </div>
+                    </div>
+                </aside>
+            </section>
+        </PublicLayout>
+    );
+}
