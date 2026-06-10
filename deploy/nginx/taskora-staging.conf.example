@@ -1,0 +1,51 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name staging.xn--80aa3aqkdf.xn--p1ai;
+    root /var/www/taskora/public;
+    index index.php index.html;
+
+    client_max_body_size 25M;
+
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Robots-Tag "noindex, nofollow" always;
+
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+
+    location = /robots.txt {
+        access_log off;
+        log_not_found off;
+    }
+
+    location ~ ^/storage/(orders|order-files|order_files|private|app)(/|$) {
+        deny all;
+        return 404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    location ~* (^|/)(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|vite\.config\.js)$ {
+        deny all;
+    }
+}
