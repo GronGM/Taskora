@@ -2,10 +2,10 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
 const cards = [
-    { title: 'Мои услуги', href: '/performer/services' },
-    { title: 'Доступные задания' },
-    { title: 'Мои отклики' },
-    { title: 'Мои заказы' },
+    { title: 'Мои заказы', href: '/performer/orders', description: 'Выполняйте заказы и отправляйте работу на проверку.' },
+    { title: 'Мои услуги', href: '/performer/services', description: 'Создавайте услуги и отправляйте их на модерацию.' },
+    { title: 'Доступные задания', href: '/tasks', description: 'Ищите опубликованные задания заказчиков.' },
+    { title: 'Мои отклики', href: '/performer/offers', description: 'Следите за предложениями по заданиям.' },
 ];
 
 export default function Performer() {
@@ -19,7 +19,7 @@ export default function Performer() {
                     {cards.map((card) => (
                         <article key={card.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                             <h2 className="text-lg font-semibold text-slate-950">{card.title}</h2>
-                            <p className="mt-3 text-sm leading-6 text-slate-600">Раздел будет реализован на следующих этапах MVP.</p>
+                            <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
                             {card.href && (
                                 <Link href={card.href} className="mt-5 inline-flex text-sm font-semibold text-blue-700 hover:text-blue-800">
                                     Открыть

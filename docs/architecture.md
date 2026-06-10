@@ -148,7 +148,8 @@ ModuleName/
 | `TaskOffer` | отклик исполнителя на задание |
 | `TaskFile` | файл, прикрепленный к заданию |
 | `Order` | заказ из услуги или выбранного отклика |
-| `PaymentRecord` | локальная платежная запись без шлюза |
+| `OrderSubmission` | сдача работы исполнителем на проверку |
+| `PaymentRecord` | будущая платежная запись без шлюза |
 | `OrderMessage` | сообщение в чате заказа |
 | `FileAttachment` | файл пользователя |
 | `Review` | отзыв по завершенному заказу |
@@ -202,7 +203,7 @@ ModuleName/
 - `user_id` — исполнитель;
 - `message`;
 - `price`, `delivery_days`;
-- `status`: `submitted`, `withdrawn`, `rejected`.
+- `status`: `submitted`, `accepted`, `withdrawn`, `rejected`.
 
 `task_files`:
 
@@ -210,6 +211,28 @@ ModuleName/
 - `user_id`;
 - `original_name`, `path`;
 - `mime_type`, `size`.
+
+`orders`:
+
+- `customer_id` — заказчик;
+- `performer_id` — исполнитель;
+- `category_id`;
+- `service_id`, если заказ создан из услуги;
+- `task_id` и `task_offer_id`, если заказ создан из отклика;
+- `source_type`: `service`, `task_offer`;
+- `title`, `description`;
+- `price`, `delivery_days`;
+- `platform_fee_percent`, `platform_fee_amount`, `performer_amount`;
+- `status`: `awaiting_payment`, `in_progress`, `submitted_for_review`, `revision_requested`, `completed`, `disputed`, `canceled`;
+- `payment_status`: `unpaid`, `held`, `released`, `refunded`, `canceled`;
+- `started_at`, `submitted_at`, `completed_at`, `canceled_at`.
+
+`order_submissions`:
+
+- `order_id`;
+- `user_id` — исполнитель;
+- `message`;
+- `status`: `submitted`, `accepted`, `revision_requested`.
 
 Связи:
 
@@ -230,8 +253,22 @@ ModuleName/
 - `Task hasMany TaskFiles`
 - `TaskOffer belongsTo Task`
 - `TaskOffer belongsTo User as performer`
+- `TaskOffer hasOne Order`
 - `TaskFile belongsTo Task`
 - `TaskFile belongsTo User`
+- `User hasMany customerOrders`
+- `User hasMany performerOrders`
+- `Service hasMany Orders`
+- `Task hasMany Orders`
+- `Order belongsTo customer User`
+- `Order belongsTo performer User`
+- `Order belongsTo Category`
+- `Order belongsTo Service`
+- `Order belongsTo Task`
+- `Order belongsTo TaskOffer`
+- `Order hasMany OrderSubmissions`
+- `OrderSubmission belongsTo Order`
+- `OrderSubmission belongsTo User`
 
 Публичные маршруты:
 
@@ -265,6 +302,7 @@ ModuleName/
 | `PUT/PATCH` | `/customer/tasks/{task}` | обновление своего задания | `TaskPolicy::update` |
 | `POST` | `/customer/tasks/{task}/publish` | публикация черновика | `TaskPolicy::publish` |
 | `POST` | `/customer/tasks/{task}/archive` | архивирование задания | `TaskPolicy::archive` |
+| `POST` | `/customer/task-offers/{offer}/accept` | выбор отклика и создание заказа | `role:customer` и проверка владения заданием |
 | `POST` | `/customer/task-offers/{offer}/reject` | отклонение отклика | `TaskOfferPolicy::reject` |
 
 Исполнитель работает с откликами через защищенные маршруты с middleware `auth` и `role:performer`.
@@ -284,7 +322,8 @@ ModuleName/
 - исполнитель может отправить только один отклик на опубликованное задание;
 - заказчик и гость не могут отправить отклик;
 - исполнитель может отозвать только свой отклик со статусом `submitted`;
-- заказчик видит отклики только на свои задания и может отклонить отклик.
+- заказчик видит отклики только на свои задания, может отклонить отклик или выбрать исполнителя;
+- выбор отклика создает заказ, закрывает задание и отклоняет остальные отправленные отклики.
 
 Поток задания:
 
@@ -294,7 +333,8 @@ ModuleName/
 4. Исполнитель отправляет отклик с сообщением, ценой и сроком.
 5. `ContactGuard` проверяет `message` отклика до сохранения.
 6. Заказчик открывает свое задание в кабинете и видит список откликов.
-7. Заказчик может отклонить отклик; выбор отклика и создание заказа запланированы следующим этапом.
+7. Заказчик выбирает подходящий отклик.
+8. Система создает заказ, закрывает задание, помечает выбранный отклик как `accepted`, а остальные отправленные отклики как `rejected`.
 
 ## Управление Услугами Исполнителя
 
@@ -353,13 +393,13 @@ ModuleName/
 3. Услуга сохраняется как `draft` или получает статус модерации `pending_review`.
 4. Модератор одобряет или отклоняет услугу.
 5. Заказчик открывает карточку услуги.
-6. Заказчик выбирает опции, заполняет детали и создает заказ.
-7. Создается `PaymentRecord` со статусом `unpaid` или `pending`.
-8. После имитации оплаты статус заказа становится `paid`, затем `in_progress`.
-9. Исполнитель работает в заказе через чат и файлы.
-10. Исполнитель отправляет результат: `submitted_for_review`.
-11. Заказчик принимает работу, запрашивает правки или открывает спор.
-12. После приемки заказ становится `completed`.
+6. Заказчик выбирает пакет услуги и создает `Order` со статусом `awaiting_payment`.
+7. В заказе фиксируются цена, срок, комиссия платформы и сумма исполнителю.
+8. Локальная заглушка оплаты переводит `payment_status` в `held`, а заказ — в `in_progress`.
+9. Исполнитель отправляет результат через `OrderSubmission`.
+10. Заказ получает статус `submitted_for_review`.
+11. Заказчик принимает работу или запрашивает доработку.
+12. После приемки заказ становится `completed`, а `payment_status` — `released`.
 
 ## Поток Заказа Из Индивидуального Задания
 
@@ -369,28 +409,33 @@ ModuleName/
 4. Исполнители отправляют отклики с ценой, сроком и сообщением.
 5. Отклик проверяется антиуводом контактов.
 6. Заказчик выбирает отклик.
-7. Создается `Order`, связанный с `Task` и `Offer`.
-8. Создается `PaymentRecord` без реального платежного шлюза.
-9. Дальше заказ идет по общему статусному процессу.
+7. Создается `Order`, связанный с `Task` и `TaskOffer`.
+8. Выбранный отклик получает статус `accepted`, остальные отправленные отклики по заданию переводятся в `rejected`.
+9. Задание получает статус `closed`.
+10. Дальше заказ идет по общему статусному процессу с локальной заглушкой оплаты.
 
 ## Статусы Заказа
 
 ```text
-draft
-published
-offer_selected
 awaiting_payment
-paid
 in_progress
 submitted_for_review
 revision_requested
 disputed
 completed
 canceled
-refunded
 ```
 
-Переходы статусов должны выполняться через отдельные action-классы, например `StartOrder`, `SubmitOrderResult`, `RequestRevision`, `CompleteOrder`, `OpenDispute`. Контроллер не должен напрямую присваивать произвольный статус.
+Текущие MVP-переходы:
+
+- `awaiting_payment` → `in_progress` через локальную заглушку оплаты;
+- `in_progress` → `submitted_for_review` после сдачи работы исполнителем;
+- `submitted_for_review` → `completed` после приемки заказчиком;
+- `submitted_for_review` → `revision_requested` после запроса доработки;
+- `revision_requested` → `submitted_for_review` после повторной сдачи;
+- `awaiting_payment` → `canceled` при отмене до оплаты.
+
+Дальше статусные переходы стоит вынести в отдельные action-классы, чтобы контроллеры не росли.
 
 ## Заглушка Платежей
 
@@ -402,21 +447,20 @@ refunded
 - процент комиссии платформы;
 - сумму комиссии;
 - сумму исполнителю;
-- статус оплаты.
+- статус оплаты;
+- локальную заглушку удержания и выпуска средств.
 
 Статусы оплаты:
 
 ```text
 unpaid
-pending
-paid
 held
 released
 refunded
 canceled
 ```
 
-Для разработки достаточно админского или тестового действия "пометить как оплачено".
+Для разработки используется действие "Оплатить (заглушка)": оно не списывает деньги, а только переводит заказ в работу и помечает оплату как `held`.
 
 ## Модерация
 

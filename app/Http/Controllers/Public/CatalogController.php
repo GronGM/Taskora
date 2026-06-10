@@ -95,6 +95,7 @@ class CatalogController extends Controller
                     'delivery_days' => $package->delivery_days,
                     'revisions_count' => $package->revisions_count,
                 ]),
+                'order_url' => route('services.order.store', $service),
             ],
         ]);
     }

@@ -2,16 +2,20 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Customer\CustomerOrderController;
 use App\Http\Controllers\Customer\CustomerTaskController;
 use App\Http\Controllers\Customer\CustomerTaskOfferController;
+use App\Http\Controllers\Customer\CustomerTaskOfferAcceptController;
 use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
 use App\Http\Controllers\Moderator\ModerationFlagController;
 use App\Http\Controllers\Moderator\ModeratorServiceController;
+use App\Http\Controllers\Performer\PerformerOrderController;
 use App\Http\Controllers\Performer\PerformerServiceController;
 use App\Http\Controllers\Performer\TaskOfferController;
 use App\Http\Controllers\Public\CatalogController;
 use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\ServiceOrderController;
 use App\Http\Controllers\Public\TaskBoardController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +47,12 @@ Route::middleware('auth')->group(function (): void {
         ->name('customer.dashboard');
 
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function (): void {
+        Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/mark-paid', [CustomerOrderController::class, 'markPaid'])->name('orders.mark-paid');
+        Route::post('/orders/{order}/request-revision', [CustomerOrderController::class, 'requestRevision'])->name('orders.request-revision');
+        Route::post('/orders/{order}/complete', [CustomerOrderController::class, 'complete'])->name('orders.complete');
+        Route::post('/orders/{order}/cancel', [CustomerOrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('/tasks', [CustomerTaskController::class, 'index'])->name('tasks.index');
         Route::get('/tasks/create', [CustomerTaskController::class, 'create'])->name('tasks.create');
         Route::post('/tasks', [CustomerTaskController::class, 'store'])->name('tasks.store');
@@ -51,6 +61,7 @@ Route::middleware('auth')->group(function (): void {
         Route::match(['put', 'patch'], '/tasks/{task}', [CustomerTaskController::class, 'update'])->name('tasks.update');
         Route::post('/tasks/{task}/publish', [CustomerTaskController::class, 'publish'])->name('tasks.publish');
         Route::post('/tasks/{task}/archive', [CustomerTaskController::class, 'archive'])->name('tasks.archive');
+        Route::post('/task-offers/{offer}/accept', CustomerTaskOfferAcceptController::class)->name('task-offers.accept');
         Route::post('/task-offers/{offer}/reject', [CustomerTaskOfferController::class, 'reject'])->name('task-offers.reject');
     });
 
@@ -59,6 +70,10 @@ Route::middleware('auth')->group(function (): void {
         ->name('performer.dashboard');
 
     Route::middleware('role:performer')->prefix('performer')->name('performer.')->group(function (): void {
+        Route::get('/orders', [PerformerOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [PerformerOrderController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/submit-work', [PerformerOrderController::class, 'submitWork'])->name('orders.submit-work');
+        Route::post('/orders/{order}/cancel', [PerformerOrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('/services', [PerformerServiceController::class, 'index'])->name('services.index');
         Route::get('/services/create', [PerformerServiceController::class, 'create'])->name('services.create');
         Route::post('/services', [PerformerServiceController::class, 'store'])->name('services.store');
@@ -73,6 +88,10 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/tasks/{task}/offers', [TaskOfferController::class, 'store'])
         ->middleware('role:performer')
         ->name('tasks.offers.store');
+
+    Route::post('/services/{service:slug}/order', [ServiceOrderController::class, 'store'])
+        ->middleware('role:customer')
+        ->name('services.order.store');
 
     Route::get('/moderator/dashboard', [RoleDashboardController::class, 'moderator'])
         ->middleware('role:moderator')

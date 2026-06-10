@@ -83,4 +83,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(TaskOffer::class);
     }
+
+    public function customerOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    public function performerOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'performer_id');
+    }
 }

@@ -80,6 +80,11 @@ class Service extends Model
         return $this->hasMany(ServicePackage::class)->orderBy('sort_order')->orderBy('price');
     }
 
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_PUBLISHED);

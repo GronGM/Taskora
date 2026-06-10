@@ -14,6 +14,7 @@ const offerClasses = {
     submitted: 'bg-emerald-50 text-emerald-700',
     withdrawn: 'bg-slate-100 text-slate-700',
     rejected: 'bg-red-50 text-red-700',
+    accepted: 'bg-blue-50 text-blue-700',
 };
 
 export default function Show({ task, statusLabels, offerStatusLabels }) {
@@ -74,7 +75,7 @@ export default function Show({ task, statusLabels, offerStatusLabels }) {
                         <p className="text-sm font-semibold uppercase text-blue-700">Отклики</p>
                         <p className="mt-2 text-3xl font-semibold text-slate-950">{task.offers_count}</p>
                         <p className="mt-3 text-sm leading-6 text-slate-600">
-                            Здесь появляются предложения исполнителей. Выбор отклика и создание заказа будут добавлены следующим этапом.
+                            Здесь появляются предложения исполнителей. Подходящий отклик можно выбрать, чтобы создать заказ.
                         </p>
                     </aside>
                 </div>
@@ -106,15 +107,25 @@ export default function Show({ task, statusLabels, offerStatusLabels }) {
                                                 <p>Отправлен: <span className="font-semibold text-slate-950">{offer.created_at}</span></p>
                                             </div>
                                         </div>
-                                        {offer.status === 'submitted' && (
-                                            <Link
-                                                href={offer.reject_url}
-                                                method="post"
-                                                as="button"
-                                                className="rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
-                                            >
-                                                Отклонить
-                                            </Link>
+                                        {offer.status === 'submitted' && task.status !== 'closed' && task.status !== 'archived' && (
+                                            <div className="flex flex-wrap gap-2">
+                                                <Link
+                                                    href={offer.accept_url}
+                                                    method="post"
+                                                    as="button"
+                                                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                                >
+                                                    Выбрать исполнителя
+                                                </Link>
+                                                <Link
+                                                    href={offer.reject_url}
+                                                    method="post"
+                                                    as="button"
+                                                    className="rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
+                                                >
+                                                    Отклонить
+                                                </Link>
+                                            </div>
                                         )}
                                     </div>
                                 </article>

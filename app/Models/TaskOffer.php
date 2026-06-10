@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['task_id', 'user_id', 'message', 'price', 'delivery_days', 'status'])]
 class TaskOffer extends Model
@@ -20,6 +21,8 @@ class TaskOffer extends Model
     public const STATUS_WITHDRAWN = 'withdrawn';
 
     public const STATUS_REJECTED = 'rejected';
+
+    public const STATUS_ACCEPTED = 'accepted';
 
     /**
      * @return array<string, string>
@@ -40,6 +43,11 @@ class TaskOffer extends Model
     public function performer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function order(): HasOne
+    {
+        return $this->hasOne(Order::class);
     }
 
     public function scopeSubmitted(Builder $query): Builder

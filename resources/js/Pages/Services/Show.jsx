@@ -33,14 +33,25 @@ export default function Show({ service }) {
                                 <p className="mt-1 font-semibold text-slate-950">{service.reviews_count}</p>
                             </div>
                         </div>
-                        <button
-                            type="button"
-                            className="mt-6 w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-                        >
-                            Заказать услугу
-                        </button>
+                        {service.packages.length === 0 ? (
+                            <Link
+                                href={service.order_url}
+                                method="post"
+                                as="button"
+                                className="mt-6 w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                            >
+                                Заказать услугу
+                            </Link>
+                        ) : (
+                            <a
+                                href="#service-packages"
+                                className="mt-6 inline-flex w-full justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                            >
+                                Выбрать пакет
+                            </a>
+                        )}
                         <p className="mt-3 text-xs leading-5 text-slate-500">
-                            Заказ пока не создается: это публичная карточка MVP без платежного шлюза.
+                            Оплата пока работает как локальная заглушка без реального платежного шлюза.
                         </p>
                     </aside>
                 </div>
@@ -53,7 +64,7 @@ export default function Show({ service }) {
                         <p className="mt-4 whitespace-pre-line text-base leading-8 text-slate-700">{service.description}</p>
                     </div>
 
-                    <div>
+                    <div id="service-packages">
                         <p className="text-sm font-semibold uppercase text-blue-700">Пакеты услуги</p>
                         <div className="mt-5 grid gap-4 lg:grid-cols-3">
                             {service.packages.map((pack) => (
@@ -65,6 +76,15 @@ export default function Show({ service }) {
                                         <p>Срок: {pack.delivery_days} дн.</p>
                                         <p>Правки: {pack.revisions_count}</p>
                                     </div>
+                                    <Link
+                                        href={service.order_url}
+                                        method="post"
+                                        data={{ package_id: pack.id }}
+                                        as="button"
+                                        className="mt-5 w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                    >
+                                        Заказать пакет
+                                    </Link>
                                 </article>
                             ))}
                         </div>

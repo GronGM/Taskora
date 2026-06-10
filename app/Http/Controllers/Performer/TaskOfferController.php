@@ -90,6 +90,7 @@ class TaskOfferController extends Controller
             TaskOffer::STATUS_SUBMITTED => 'Отправлен',
             TaskOffer::STATUS_WITHDRAWN => 'Отозван',
             TaskOffer::STATUS_REJECTED => 'Отклонен',
+            TaskOffer::STATUS_ACCEPTED => 'Принят',
         ];
     }
 }

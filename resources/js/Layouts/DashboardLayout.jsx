@@ -35,12 +35,20 @@ export default function DashboardLayout({ children }) {
                             Кабинет
                         </Link>
                         {user?.role === 'customer' && (
-                            <Link
-                                href="/customer/tasks"
-                                className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
-                            >
-                                Мои задания
-                            </Link>
+                            <>
+                                <Link
+                                    href="/customer/tasks"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
+                                >
+                                    Мои задания
+                                </Link>
+                                <Link
+                                    href="/customer/orders"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 lg:inline-flex"
+                                >
+                                    Мои заказы
+                                </Link>
+                            </>
                         )}
                         {user?.role === 'performer' && (
                             <>
@@ -55,6 +63,12 @@ export default function DashboardLayout({ children }) {
                                     className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 lg:inline-flex"
                                 >
                                     Мои отклики
+                                </Link>
+                                <Link
+                                    href="/performer/orders"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 lg:inline-flex"
+                                >
+                                    Мои заказы
                                 </Link>
                             </>
                         )}

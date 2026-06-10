@@ -46,6 +46,11 @@ class Category extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
     protected function catalogUrl(): Attribute
     {
         return Attribute::get(fn (): string => "/catalog/{$this->slug}");

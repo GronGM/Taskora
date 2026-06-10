@@ -182,6 +182,7 @@ class CustomerTaskController extends Controller
                     'performer' => [
                         'name' => $offer->performer?->name,
                     ],
+                    'accept_url' => route('customer.task-offers.accept', $offer),
                     'reject_url' => route('customer.task-offers.reject', $offer),
                 ])
                 ->values(),
@@ -256,6 +257,7 @@ class CustomerTaskController extends Controller
             TaskOffer::STATUS_SUBMITTED => 'Отправлен',
             TaskOffer::STATUS_WITHDRAWN => 'Отозван',
             TaskOffer::STATUS_REJECTED => 'Отклонен',
+            TaskOffer::STATUS_ACCEPTED => 'Принят',
         ];
     }
 }
