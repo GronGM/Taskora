@@ -736,6 +736,12 @@ TASKORA_PAYMENTS_MODE=stub
 | `GET` | `/admin/beta-feedback/{feedback}` | карточка beta-отзыва |
 | `POST` | `/admin/beta-feedback/{feedback}/status` | смена статуса beta-отзыва |
 
+## Закрытое beta-тестирование
+
+Staging-версия доступна по адресу `https://staging.таскора.рф` и закрыта общим beta-паролем. Beta-пароль не хранится в репозитории, README или документации; его нужно передавать тестировщикам отдельно через личный канал.
+
+Короткая инструкция для друзей лежит в [docs/beta-friends-message.md](docs/beta-friends-message.md). Реальные платежи, выплаты и платежные провайдеры на beta/staging не подключены: все оплаты работают только как заглушка. Обратная связь собирается через `/beta-feedback/create`.
+
 Для production нужно явно выставить:
 
 ```dotenv
@@ -760,6 +766,7 @@ Scheduler в production должен запускаться через cron:
 - [Локальная среда](docs/environment.md)
 - [Закрытое тестирование](docs/testing-access.md)
 - [Beta checklist](docs/beta-testing-checklist.md)
+- [Инструкция для друзей](docs/beta-friends-message.md)
 - [Production checklist](docs/production-checklist.md)
 
 ## Следующий Шаг
