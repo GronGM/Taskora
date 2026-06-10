@@ -64,6 +64,9 @@ class HandleInertiaRequests extends Middleware
                 'message' => BetaAccess::BANNER_TEXT,
                 'debug_warning' => BetaAccess::debugWarning(),
             ],
+            'flash' => [
+                'success' => fn (): ?string => $request->session()->get('success'),
+            ],
         ];
     }
 }

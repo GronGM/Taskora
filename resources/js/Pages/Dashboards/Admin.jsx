@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
 const cards = [
+    { title: 'Beta-отзывы', href: '/admin/beta-feedback', description: 'Смотреть обращения друзей и первых тестировщиков, менять статусы и фиксировать проблемы MVP.' },
     { title: 'Финансовая сводка', href: '/admin/finance', description: 'Проверить payment operations, escrow и будущие webhook-события.' },
     { title: 'Пользователи', description: 'Раздел будет реализован на следующих этапах MVP.' },
     { title: 'Категории', description: 'Раздел будет реализован на следующих этапах MVP.' },

@@ -66,6 +66,11 @@ class BetaAccess
         return self::enabled() || in_array(config('app.env'), ['local', 'staging'], true);
     }
 
+    public static function betaToolingAvailable(): bool
+    {
+        return self::shouldShowTestModeBanner();
+    }
+
     public static function shouldNoIndex(): bool
     {
         return self::enabled() || config('app.env') !== 'production';

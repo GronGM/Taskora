@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminBetaFeedbackController;
 use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BetaAccessController;
+use App\Http\Controllers\BetaFeedbackController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 use App\Http\Controllers\Customer\CustomerReviewController;
@@ -28,6 +30,7 @@ use App\Http\Controllers\Performer\PerformerProfileController;
 use App\Http\Controllers\Performer\PerformerServiceController;
 use App\Http\Controllers\Performer\TaskOfferController;
 use App\Http\Controllers\Public\CatalogController;
+use App\Http\Controllers\Public\BetaTestingController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\ServiceOrderController;
 use App\Http\Controllers\Public\TaskBoardController;
@@ -47,6 +50,12 @@ Route::get('/beta-access', [BetaAccessController::class, 'show'])->name('beta-ac
 Route::post('/beta-access', [BetaAccessController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('beta-access.store');
+
+Route::get('/beta-testing', BetaTestingController::class)->name('beta-testing');
+Route::get('/beta-feedback/create', [BetaFeedbackController::class, 'create'])->name('beta-feedback.create');
+Route::post('/beta-feedback', [BetaFeedbackController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('beta-feedback.store');
 
 Route::get('/', HomeController::class)->name('home');
 
@@ -225,5 +234,8 @@ Route::middleware('auth')->group(function (): void {
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/finance', AdminFinanceController::class)->name('finance.index');
+        Route::get('/beta-feedback', [AdminBetaFeedbackController::class, 'index'])->name('beta-feedback.index');
+        Route::get('/beta-feedback/{feedback}', [AdminBetaFeedbackController::class, 'show'])->name('beta-feedback.show');
+        Route::post('/beta-feedback/{feedback}/status', [AdminBetaFeedbackController::class, 'updateStatus'])->name('beta-feedback.status');
     });
 });

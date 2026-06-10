@@ -162,4 +162,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(PayoutRequest::class, 'performer_id');
     }
+
+    public function betaFeedback(): HasMany
+    {
+        return $this->hasMany(BetaFeedback::class);
+    }
 }
