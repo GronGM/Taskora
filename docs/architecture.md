@@ -149,9 +149,11 @@ ModuleName/
 | `TaskFile` | файл, прикрепленный к заданию |
 | `Order` | заказ из услуги или выбранного отклика |
 | `OrderSubmission` | сдача работы исполнителем на проверку |
+| `OrderMessage` | сообщение участника в рабочей области заказа |
+| `OrderFile` | приватный файл заказа |
+| `OrderEvent` | системное событие заказа |
 | `PaymentRecord` | будущая платежная запись без шлюза |
-| `OrderMessage` | сообщение в чате заказа |
-| `FileAttachment` | файл пользователя |
+| `FileAttachment` | будущий общий файл пользователя вне заказа |
 | `Review` | отзыв по завершенному заказу |
 | `Dispute` | спор по заказу |
 | `ModerationFlag` | срабатывание модерации |
@@ -234,6 +236,31 @@ ModuleName/
 - `message`;
 - `status`: `submitted`, `accepted`, `revision_requested`.
 
+`order_messages`:
+
+- `order_id`;
+- `user_id` — участник заказа;
+- `body`;
+- `type`: `user_message`, `system_message`.
+
+`order_files`:
+
+- `order_id`;
+- `user_id` — участник заказа;
+- `original_name`, `stored_name`;
+- `path`;
+- `disk`: по умолчанию `local`;
+- `mime_type`, `size`;
+- `status`: `available`, `hidden`, `deleted`;
+- `moderation_status`: `clean`, `flagged`, `pending_review`.
+
+`order_events`:
+
+- `order_id`;
+- `user_id` nullable;
+- `type`;
+- `payload` json nullable.
+
 Связи:
 
 - `Category hasMany Services`
@@ -267,8 +294,17 @@ ModuleName/
 - `Order belongsTo Task`
 - `Order belongsTo TaskOffer`
 - `Order hasMany OrderSubmissions`
+- `Order hasMany OrderMessages`
+- `Order hasMany OrderFiles`
+- `Order hasMany OrderEvents`
 - `OrderSubmission belongsTo Order`
 - `OrderSubmission belongsTo User`
+- `OrderMessage belongsTo Order`
+- `OrderMessage belongsTo User`
+- `OrderFile belongsTo Order`
+- `OrderFile belongsTo User`
+- `OrderEvent belongsTo Order`
+- `OrderEvent belongsTo User nullable`
 
 Публичные маршруты:
 
@@ -414,6 +450,62 @@ ModuleName/
 9. Задание получает статус `closed`.
 10. Дальше заказ идет по общему статусному процессу с локальной заглушкой оплаты.
 
+## Рабочая Область Заказа
+
+Доступ к рабочей области заказа имеют только:
+
+- `customer`, если он является владельцем заказа;
+- `performer`, если он является исполнителем заказа.
+
+`moderator` и `admin` не получают доступ к workspace в текущем MVP. Их будущий доступ должен идти через отдельный модуль споров и арбитража, а не через обычные маршруты участника заказа.
+
+Маршруты заказчика:
+
+| Метод | Маршрут | Назначение | Доступ |
+|---|---|---|---|
+| `GET` | `/customer/orders/{order}/workspace` | рабочая область заказа | участник-заказчик |
+| `POST` | `/customer/orders/{order}/messages` | отправка сообщения | участник-заказчик |
+| `POST` | `/customer/orders/{order}/files` | загрузка файла | участник-заказчик |
+| `GET` | `/customer/orders/{order}/files/{file}/download` | приватное скачивание файла | участник-заказчик |
+
+Маршруты исполнителя:
+
+| Метод | Маршрут | Назначение | Доступ |
+|---|---|---|---|
+| `GET` | `/performer/orders/{order}/workspace` | рабочая область заказа | участник-исполнитель |
+| `POST` | `/performer/orders/{order}/messages` | отправка сообщения | участник-исполнитель |
+| `POST` | `/performer/orders/{order}/files` | загрузка файла | участник-исполнитель |
+| `GET` | `/performer/orders/{order}/files/{file}/download` | приватное скачивание файла | участник-исполнитель |
+
+Поток сообщений:
+
+1. Участник заказа открывает workspace.
+2. `OrderPolicy::viewWorkspace` проверяет участие в заказе.
+3. При отправке сообщения request валидирует непустой текст и лимит 4000 символов.
+4. `ContactGuard` проверяет текст до сохранения.
+5. Если контакт найден, `OrderMessage` не создается, создаются `ModerationFlag` и `OrderEvent` с типом `contact_blocked`.
+6. Если нарушений нет, создается `OrderMessage` с типом `user_message`.
+7. Создается `OrderEvent` с типом `message_sent`.
+
+Поток файлов:
+
+1. Участник заказа выбирает файл в workspace.
+2. Request валидирует размер до 20 MB и разрешенные расширения: `pdf`, `doc`, `docx`, `xls`, `xlsx`, `ppt`, `pptx`, `txt`, `csv`, `png`, `jpg`, `jpeg`, `webp`, `zip`.
+3. `rar` не разрешен в MVP из-за нестабильной MIME-валидации без дополнительных зависимостей.
+4. `ContactGuard` проверяет `original_name`.
+5. Для `txt` и `csv` дополнительно проверяется текстовое содержимое.
+6. Для `docx`, `pdf`, `xlsx`, `pptx` и изображений полноценный парсинг содержимого и OCR не выполняются без внешних зависимостей.
+7. Если найден контакт, файл не сохраняется, создаются `ModerationFlag` и `OrderEvent` с типом `contact_blocked`.
+8. Если нарушений нет, файл сохраняется на приватном `local` disk в `storage/app/private`.
+9. Создается `OrderFile` и `OrderEvent` с типом `file_uploaded`.
+10. Скачивание идет только через controller route после проверки участника заказа; прямые ссылки из storage не выдаются.
+
+TODO для будущих этапов:
+
+- проверка содержимого `docx`, `pdf`, `xlsx`, `pptx`;
+- OCR изображений;
+- ручная очередь модерации файлов с `moderation_status = pending_review`.
+
 ## Статусы Заказа
 
 ```text
@@ -428,14 +520,36 @@ canceled
 
 Текущие MVP-переходы:
 
-- `awaiting_payment` → `in_progress` через локальную заглушку оплаты;
-- `in_progress` → `submitted_for_review` после сдачи работы исполнителем;
-- `submitted_for_review` → `completed` после приемки заказчиком;
-- `submitted_for_review` → `revision_requested` после запроса доработки;
-- `revision_requested` → `submitted_for_review` после повторной сдачи;
-- `awaiting_payment` → `canceled` при отмене до оплаты.
+- `awaiting_payment` → `in_progress` через локальную заглушку оплаты, событие `payment_stub_paid`;
+- `in_progress` → `submitted_for_review` после сдачи работы исполнителем, событие `work_submitted`;
+- `submitted_for_review` → `completed` после приемки заказчиком, событие `order_completed`;
+- `submitted_for_review` → `revision_requested` после запроса доработки, событие `revision_requested`;
+- `revision_requested` → `submitted_for_review` после повторной сдачи, событие `work_submitted`;
+- `awaiting_payment` → `canceled` при отмене до оплаты, событие `order_canceled`.
+
+При создании заказа из услуги или выбранного отклика пишется событие `order_created`.
 
 Дальше статусные переходы стоит вынести в отдельные action-классы, чтобы контроллеры не росли.
+
+## События Заказа
+
+`OrderEventLogger` пишет события в `order_events`.
+
+Текущие типы событий:
+
+```text
+order_created
+payment_stub_paid
+work_submitted
+revision_requested
+order_completed
+order_canceled
+message_sent
+file_uploaded
+contact_blocked
+```
+
+События отображаются в workspace как история заказа. Старые тестовые данные не мигрируются, но новые действия пишут события сразу.
 
 ## Заглушка Платежей
 

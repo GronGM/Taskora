@@ -93,4 +93,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'performer_id');
     }
+
+    public function orderMessages(): HasMany
+    {
+        return $this->hasMany(OrderMessage::class);
+    }
+
+    public function orderFiles(): HasMany
+    {
+        return $this->hasMany(OrderFile::class);
+    }
+
+    public function orderEvents(): HasMany
+    {
+        return $this->hasMany(OrderEvent::class);
+    }
 }

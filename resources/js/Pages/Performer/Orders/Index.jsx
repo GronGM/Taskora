@@ -24,7 +24,7 @@ export default function Index({ orders, statusLabels }) {
                         <p className="text-sm font-semibold uppercase text-blue-700">Исполнитель</p>
                         <h1 className="mt-2 text-4xl font-semibold tracking-normal text-slate-950">Мои заказы</h1>
                         <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
-                            Рабочие заказы из услуг и выбранных откликов. Чат и файлы будут добавлены следующим этапом.
+                            Рабочие заказы из услуг и выбранных откликов. Обсуждение, файлы и история доступны внутри рабочей области.
                         </p>
                     </div>
                     <Link href="/performer/services" className="rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
@@ -54,9 +54,14 @@ export default function Index({ orders, statusLabels }) {
                                             <p>Тип: <span className="font-semibold text-slate-950">{order.source_label}</span></p>
                                         </div>
                                     </div>
-                                    <Link href={order.show_url} className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">
-                                        Открыть
-                                    </Link>
+                                    <div className="flex flex-wrap gap-3">
+                                        <Link href={order.workspace_url} className="rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+                                            Открыть рабочую область
+                                        </Link>
+                                        <Link href={order.show_url} className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">
+                                            Карточка
+                                        </Link>
+                                    </div>
                                 </div>
                             </article>
                         ))}

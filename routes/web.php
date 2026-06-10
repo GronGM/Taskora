@@ -10,6 +10,9 @@ use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
 use App\Http\Controllers\Moderator\ModerationFlagController;
 use App\Http\Controllers\Moderator\ModeratorServiceController;
+use App\Http\Controllers\Order\OrderFileController;
+use App\Http\Controllers\Order\OrderMessageController;
+use App\Http\Controllers\Order\OrderWorkspaceController;
 use App\Http\Controllers\Performer\PerformerOrderController;
 use App\Http\Controllers\Performer\PerformerServiceController;
 use App\Http\Controllers\Performer\TaskOfferController;
@@ -49,10 +52,14 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function (): void {
         Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/workspace', OrderWorkspaceController::class)->name('orders.workspace');
         Route::post('/orders/{order}/mark-paid', [CustomerOrderController::class, 'markPaid'])->name('orders.mark-paid');
         Route::post('/orders/{order}/request-revision', [CustomerOrderController::class, 'requestRevision'])->name('orders.request-revision');
         Route::post('/orders/{order}/complete', [CustomerOrderController::class, 'complete'])->name('orders.complete');
         Route::post('/orders/{order}/cancel', [CustomerOrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{order}/messages', [OrderMessageController::class, 'store'])->name('orders.messages.store');
+        Route::post('/orders/{order}/files', [OrderFileController::class, 'store'])->name('orders.files.store');
+        Route::get('/orders/{order}/files/{file}/download', [OrderFileController::class, 'download'])->name('orders.files.download');
         Route::get('/tasks', [CustomerTaskController::class, 'index'])->name('tasks.index');
         Route::get('/tasks/create', [CustomerTaskController::class, 'create'])->name('tasks.create');
         Route::post('/tasks', [CustomerTaskController::class, 'store'])->name('tasks.store');
@@ -72,8 +79,12 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:performer')->prefix('performer')->name('performer.')->group(function (): void {
         Route::get('/orders', [PerformerOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [PerformerOrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/workspace', OrderWorkspaceController::class)->name('orders.workspace');
         Route::post('/orders/{order}/submit-work', [PerformerOrderController::class, 'submitWork'])->name('orders.submit-work');
         Route::post('/orders/{order}/cancel', [PerformerOrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{order}/messages', [OrderMessageController::class, 'store'])->name('orders.messages.store');
+        Route::post('/orders/{order}/files', [OrderFileController::class, 'store'])->name('orders.files.store');
+        Route::get('/orders/{order}/files/{file}/download', [OrderFileController::class, 'download'])->name('orders.files.download');
         Route::get('/services', [PerformerServiceController::class, 'index'])->name('services.index');
         Route::get('/services/create', [PerformerServiceController::class, 'create'])->name('services.create');
         Route::post('/services', [PerformerServiceController::class, 'store'])->name('services.store');

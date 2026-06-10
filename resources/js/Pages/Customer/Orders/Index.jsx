@@ -54,9 +54,14 @@ export default function Index({ orders, statusLabels }) {
                                             <p>Тип: <span className="font-semibold text-slate-950">{order.source_label}</span></p>
                                         </div>
                                     </div>
-                                    <Link href={order.show_url} className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">
-                                        Открыть
-                                    </Link>
+                                    <div className="flex flex-wrap gap-3">
+                                        <Link href={order.workspace_url} className="rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+                                            Открыть рабочую область
+                                        </Link>
+                                        <Link href={order.show_url} className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">
+                                            Карточка
+                                        </Link>
+                                    </div>
                                 </div>
                             </article>
                         ))}

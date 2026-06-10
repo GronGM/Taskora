@@ -39,9 +39,14 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                         <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-normal text-slate-950">{order.title}</h1>
                         <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-7 text-slate-600">{order.description}</p>
                     </div>
-                    <Link href="/performer/orders" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50">
-                        К заказам
-                    </Link>
+                    <div className="flex flex-wrap gap-3">
+                        <Link href={order.workspace_url} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+                            Открыть рабочую область
+                        </Link>
+                        <Link href="/performer/orders" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+                            К заказам
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_420px]">
@@ -61,6 +66,9 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
 
                     <aside className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                         <p className="text-sm font-semibold uppercase text-blue-700">Действия</p>
+                        <Link href={order.workspace_url} className="mt-5 block w-full rounded-md bg-slate-950 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-slate-800">
+                            Открыть рабочую область
+                        </Link>
                         {['in_progress', 'revision_requested'].includes(order.status) ? (
                             <form onSubmit={submit} className="mt-5 space-y-4">
                                 <div>

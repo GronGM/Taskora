@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Performer\SubmitWorkRequest;
 use App\Models\Order;
 use App\Models\OrderSubmission;
+use App\Services\Orders\OrderEventLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -45,10 +46,10 @@ class PerformerOrderController extends Controller
         ]);
     }
 
-    public function submitWork(SubmitWorkRequest $request, Order $order): RedirectResponse
+    public function submitWork(SubmitWorkRequest $request, Order $order, OrderEventLogger $events): RedirectResponse
     {
-        DB::transaction(function () use ($request, $order): void {
-            $order->submissions()->create([
+        DB::transaction(function () use ($request, $order, $events): void {
+            $submission = $order->submissions()->create([
                 'user_id' => $request->user()->id,
                 'message' => $request->validated('message'),
                 'status' => OrderSubmission::STATUS_SUBMITTED,
@@ -58,6 +59,11 @@ class PerformerOrderController extends Controller
                 'status' => Order::STATUS_SUBMITTED_FOR_REVIEW,
                 'submitted_at' => now(),
             ]);
+
+            $events->workSubmitted($order, $request->user(), [
+                'submission_id' => $submission->id,
+                'status' => Order::STATUS_SUBMITTED_FOR_REVIEW,
+            ]);
         });
 
         return redirect()
@@ -65,16 +71,24 @@ class PerformerOrderController extends Controller
             ->with('success', 'Работа отправлена заказчику на проверку.');
     }
 
-    public function cancel(Order $order): RedirectResponse
+    public function cancel(Order $order, OrderEventLogger $events): RedirectResponse
     {
         Gate::authorize('cancelAsPerformer', $order);
         abort_if($order->submissions()->exists(), 403);
+        $user = request()->user();
 
-        $order->update([
-            'status' => Order::STATUS_CANCELED,
-            'payment_status' => Order::PAYMENT_CANCELED,
-            'canceled_at' => now(),
-        ]);
+        DB::transaction(function () use ($order, $events, $user): void {
+            $order->update([
+                'status' => Order::STATUS_CANCELED,
+                'payment_status' => Order::PAYMENT_CANCELED,
+                'canceled_at' => now(),
+            ]);
+
+            $events->orderCanceled($order, $user, [
+                'canceled_by' => 'performer',
+                'status' => Order::STATUS_CANCELED,
+            ]);
+        });
 
         return redirect()
             ->route('performer.orders.show', $order)
@@ -95,6 +109,7 @@ class PerformerOrderController extends Controller
             'delivery_days' => $order->delivery_days,
             'participant' => $order->customer?->name,
             'show_url' => route('performer.orders.show', $order),
+            'workspace_url' => route('performer.orders.workspace', $order),
         ];
     }
 

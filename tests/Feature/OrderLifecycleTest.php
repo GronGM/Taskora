@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Order;
+use App\Models\OrderEvent;
 use App\Models\OrderSubmission;
 use App\Models\Service;
 use App\Models\ServicePackage;
@@ -30,6 +31,11 @@ class OrderLifecycleTest extends TestCase
         $this->assertSame(Order::STATUS_AWAITING_PAYMENT, $order->status);
         $this->assertSame(Order::PAYMENT_UNPAID, $order->payment_status);
         $this->assertSame($package->price, $order->price);
+        $this->assertDatabaseHas('order_events', [
+            'order_id' => $order->id,
+            'user_id' => $customer->id,
+            'type' => OrderEvent::TYPE_ORDER_CREATED,
+        ]);
     }
 
     public function test_guest_cannot_create_order_from_service(): void
@@ -85,6 +91,11 @@ class OrderLifecycleTest extends TestCase
 
         $response->assertRedirect(route('customer.orders.show', $order));
         $this->assertSame(Order::SOURCE_TASK_OFFER, $order->source_type);
+        $this->assertDatabaseHas('order_events', [
+            'order_id' => $order->id,
+            'user_id' => $customer->id,
+            'type' => OrderEvent::TYPE_ORDER_CREATED,
+        ]);
     }
 
     public function test_cannot_accept_foreign_offer(): void

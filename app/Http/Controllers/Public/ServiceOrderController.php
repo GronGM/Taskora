@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\ServicePackage;
+use App\Services\Orders\OrderEventLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ServiceOrderController extends Controller
 {
-    public function store(Request $request, Service $service): RedirectResponse
+    public function store(Request $request, Service $service, OrderEventLogger $events): RedirectResponse
     {
         abort_unless($request->user()?->isCustomer(), 403);
         abort_unless($service->status === Service::STATUS_PUBLISHED, 404);
@@ -21,13 +22,13 @@ class ServiceOrderController extends Controller
         $service->load(['category', 'packages']);
         $package = $this->selectedPackage($request, $service);
 
-        $order = DB::transaction(function () use ($request, $service, $package): Order {
+        $order = DB::transaction(function () use ($request, $service, $package, $events): Order {
             $price = $package?->price ?? $service->price_from;
             $deliveryDays = $package?->delivery_days ?? $service->delivery_days;
             $feePercent = $this->feePercent();
             $feeAmount = (int) round($price * $feePercent / 100);
 
-            return Order::create([
+            $order = Order::create([
                 'customer_id' => $request->user()->id,
                 'performer_id' => $service->user_id,
                 'category_id' => $service->category_id,
@@ -43,6 +44,14 @@ class ServiceOrderController extends Controller
                 'status' => Order::STATUS_AWAITING_PAYMENT,
                 'payment_status' => Order::PAYMENT_UNPAID,
             ]);
+
+            $events->orderCreated($order, $request->user(), [
+                'source_type' => Order::SOURCE_SERVICE,
+                'service_id' => $service->id,
+                'package_id' => $package?->id,
+            ]);
+
+            return $order;
         });
 
         return redirect()

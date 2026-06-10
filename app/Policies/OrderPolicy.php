@@ -27,6 +27,26 @@ class OrderPolicy
         return $user->isPerformer() && $order->performer_id === $user->id;
     }
 
+    public function viewWorkspace(User $user, Order $order): bool
+    {
+        return $this->viewAsCustomer($user, $order) || $this->viewAsPerformer($user, $order);
+    }
+
+    public function sendMessage(User $user, Order $order): bool
+    {
+        return $this->viewWorkspace($user, $order);
+    }
+
+    public function uploadFile(User $user, Order $order): bool
+    {
+        return $this->viewWorkspace($user, $order);
+    }
+
+    public function downloadFile(User $user, Order $order): bool
+    {
+        return $this->viewWorkspace($user, $order);
+    }
+
     public function markPaid(User $user, Order $order): bool
     {
         return $this->viewAsCustomer($user, $order)

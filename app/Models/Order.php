@@ -116,4 +116,19 @@ class Order extends Model
     {
         return $this->hasMany(OrderSubmission::class)->latest();
     }
+
+    public function orderMessages(): HasMany
+    {
+        return $this->hasMany(OrderMessage::class)->oldest();
+    }
+
+    public function orderFiles(): HasMany
+    {
+        return $this->hasMany(OrderFile::class)->latest();
+    }
+
+    public function orderEvents(): HasMany
+    {
+        return $this->hasMany(OrderEvent::class)->oldest();
+    }
 }

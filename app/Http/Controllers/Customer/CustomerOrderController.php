@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderSubmission;
+use App\Services\Orders\OrderEventLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -44,31 +45,44 @@ class CustomerOrderController extends Controller
         ]);
     }
 
-    public function markPaid(Order $order): RedirectResponse
+    public function markPaid(Order $order, OrderEventLogger $events): RedirectResponse
     {
         Gate::authorize('markPaid', $order);
+        $user = request()->user();
 
-        $order->update([
-            'payment_status' => Order::PAYMENT_HELD,
-            'status' => Order::STATUS_IN_PROGRESS,
-            'started_at' => now(),
-        ]);
+        DB::transaction(function () use ($order, $events, $user): void {
+            $order->update([
+                'payment_status' => Order::PAYMENT_HELD,
+                'status' => Order::STATUS_IN_PROGRESS,
+                'started_at' => now(),
+            ]);
+
+            $events->paymentStubPaid($order, $user, [
+                'payment_status' => Order::PAYMENT_HELD,
+                'status' => Order::STATUS_IN_PROGRESS,
+            ]);
+        });
 
         return redirect()
             ->route('customer.orders.show', $order)
             ->with('success', 'Оплата отмечена локальной заглушкой. Заказ перешел в работу.');
     }
 
-    public function requestRevision(Order $order): RedirectResponse
+    public function requestRevision(Order $order, OrderEventLogger $events): RedirectResponse
     {
         Gate::authorize('requestRevision', $order);
+        $user = request()->user();
 
-        DB::transaction(function () use ($order): void {
+        DB::transaction(function () use ($order, $events, $user): void {
             $order->submissions()->latest()->first()?->update([
                 'status' => OrderSubmission::STATUS_REVISION_REQUESTED,
             ]);
 
             $order->update([
+                'status' => Order::STATUS_REVISION_REQUESTED,
+            ]);
+
+            $events->revisionRequested($order, $user, [
                 'status' => Order::STATUS_REVISION_REQUESTED,
             ]);
         });
@@ -78,11 +92,12 @@ class CustomerOrderController extends Controller
             ->with('success', 'Запрошена доработка результата.');
     }
 
-    public function complete(Order $order): RedirectResponse
+    public function complete(Order $order, OrderEventLogger $events): RedirectResponse
     {
         Gate::authorize('complete', $order);
+        $user = request()->user();
 
-        DB::transaction(function () use ($order): void {
+        DB::transaction(function () use ($order, $events, $user): void {
             $order->submissions()->latest()->first()?->update([
                 'status' => OrderSubmission::STATUS_ACCEPTED,
             ]);
@@ -92,6 +107,11 @@ class CustomerOrderController extends Controller
                 'payment_status' => Order::PAYMENT_RELEASED,
                 'completed_at' => now(),
             ]);
+
+            $events->orderCompleted($order, $user, [
+                'status' => Order::STATUS_COMPLETED,
+                'payment_status' => Order::PAYMENT_RELEASED,
+            ]);
         });
 
         return redirect()
@@ -99,15 +119,23 @@ class CustomerOrderController extends Controller
             ->with('success', 'Работа принята, заказ завершен.');
     }
 
-    public function cancel(Order $order): RedirectResponse
+    public function cancel(Order $order, OrderEventLogger $events): RedirectResponse
     {
         Gate::authorize('cancelAsCustomer', $order);
+        $user = request()->user();
 
-        $order->update([
-            'status' => Order::STATUS_CANCELED,
-            'payment_status' => Order::PAYMENT_CANCELED,
-            'canceled_at' => now(),
-        ]);
+        DB::transaction(function () use ($order, $events, $user): void {
+            $order->update([
+                'status' => Order::STATUS_CANCELED,
+                'payment_status' => Order::PAYMENT_CANCELED,
+                'canceled_at' => now(),
+            ]);
+
+            $events->orderCanceled($order, $user, [
+                'canceled_by' => 'customer',
+                'status' => Order::STATUS_CANCELED,
+            ]);
+        });
 
         return redirect()
             ->route('customer.orders.show', $order)
@@ -128,6 +156,7 @@ class CustomerOrderController extends Controller
             'delivery_days' => $order->delivery_days,
             'participant' => $role === 'customer' ? $order->performer?->name : $order->customer?->name,
             'show_url' => route("{$role}.orders.show", $order),
+            'workspace_url' => route("{$role}.orders.workspace", $order),
         ];
     }
 
