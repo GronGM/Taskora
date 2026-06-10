@@ -16,16 +16,23 @@ export default function DashboardLayout({ children }) {
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
             <header className="border-b border-slate-200 bg-white">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="flex items-center gap-3" aria-label="Таскора">
-                        <span className="grid h-10 w-10 place-items-center rounded-md bg-blue-600" aria-hidden="true">
-                            <span className="h-4 w-4 rounded-sm bg-white" />
-                        </span>
-                        <span className="text-xl font-semibold tracking-normal">Таскора</span>
-                    </Link>
+                <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between gap-4">
+                        <Link href="/" className="flex items-center gap-3" aria-label="Таскора">
+                            <span className="grid h-10 w-10 place-items-center rounded-md bg-blue-600" aria-hidden="true">
+                                <span className="h-4 w-4 rounded-sm bg-white" />
+                            </span>
+                            <span className="text-xl font-semibold tracking-normal">Таскора</span>
+                        </Link>
 
-                    <div className="flex items-center gap-3">
-                        <div className="hidden text-right sm:block">
+                        <div className="text-right sm:hidden">
+                            <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
+                            <p className="text-xs text-slate-500">{roleLabels[user?.role] ?? 'Пользователь'}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                        <div className="hidden text-right md:block">
                             <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
                             <p className="text-xs text-slate-500">{roleLabels[user?.role] ?? 'Пользователь'}</p>
                         </div>

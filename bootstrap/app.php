@@ -1,12 +1,14 @@
 <?php
 
+use App\Console\Commands\ReleaseDueOrdersCommand;
+use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use App\Console\Commands\ReleaseDueOrdersCommand;
-use App\Http\Middleware\EnsureUserHasRole;
-use App\Http\Middleware\HandleInertiaRequests;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -33,4 +35,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request): Response {
+            if ($request->expectsJson()) {
+                return $response;
+            }
+
+            if (! in_array($response->getStatusCode(), [403, 404, 429, 500, 503], true)) {
+                return $response;
+            }
+
+            return Inertia::render('Error', [
+                'status' => $response->getStatusCode(),
+            ])->toResponse($request)->setStatusCode($response->getStatusCode());
+        });
     })->create();

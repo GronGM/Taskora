@@ -4,8 +4,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 use App\Http\Controllers\Customer\CustomerTaskController;
-use App\Http\Controllers\Customer\CustomerTaskOfferController;
 use App\Http\Controllers\Customer\CustomerTaskOfferAcceptController;
+use App\Http\Controllers\Customer\CustomerTaskOfferController;
 use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
 use App\Http\Controllers\Moderator\ModerationFlagController;
@@ -48,9 +48,15 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
-    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->middleware('throttle:taskora-notifications')
+        ->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])
+        ->middleware('throttle:taskora-notifications')
+        ->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])
+        ->middleware('throttle:taskora-notifications')
+        ->name('notifications.read-all');
 
     Route::get('/customer/dashboard', [RoleDashboardController::class, 'customer'])
         ->middleware('role:customer')
@@ -61,19 +67,29 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
         Route::get('/orders/{order}/workspace', OrderWorkspaceController::class)->name('orders.workspace');
         Route::get('/orders/{order}/disputes/create', [DisputeController::class, 'create'])->name('orders.disputes.create');
-        Route::post('/orders/{order}/disputes', [DisputeController::class, 'store'])->name('orders.disputes.store');
+        Route::post('/orders/{order}/disputes', [DisputeController::class, 'store'])
+            ->middleware('throttle:taskora-create')
+            ->name('orders.disputes.store');
         Route::post('/orders/{order}/mark-paid', [CustomerOrderController::class, 'markPaid'])->name('orders.mark-paid');
         Route::post('/orders/{order}/request-revision', [CustomerOrderController::class, 'requestRevision'])->name('orders.request-revision');
         Route::post('/orders/{order}/complete', [CustomerOrderController::class, 'complete'])->name('orders.complete');
         Route::post('/orders/{order}/cancel', [CustomerOrderController::class, 'cancel'])->name('orders.cancel');
-        Route::post('/orders/{order}/messages', [OrderMessageController::class, 'store'])->name('orders.messages.store');
-        Route::post('/orders/{order}/files', [OrderFileController::class, 'store'])->name('orders.files.store');
+        Route::post('/orders/{order}/messages', [OrderMessageController::class, 'store'])
+            ->middleware('throttle:taskora-order-messages')
+            ->name('orders.messages.store');
+        Route::post('/orders/{order}/files', [OrderFileController::class, 'store'])
+            ->middleware('throttle:taskora-order-files')
+            ->name('orders.files.store');
         Route::get('/orders/{order}/files/{file}/download', [OrderFileController::class, 'download'])->name('orders.files.download');
         Route::get('/disputes/{dispute}', [DisputeController::class, 'show'])->name('disputes.show');
-        Route::post('/disputes/{dispute}/messages', [DisputeMessageController::class, 'store'])->name('disputes.messages.store');
+        Route::post('/disputes/{dispute}/messages', [DisputeMessageController::class, 'store'])
+            ->middleware('throttle:taskora-order-messages')
+            ->name('disputes.messages.store');
         Route::get('/tasks', [CustomerTaskController::class, 'index'])->name('tasks.index');
         Route::get('/tasks/create', [CustomerTaskController::class, 'create'])->name('tasks.create');
-        Route::post('/tasks', [CustomerTaskController::class, 'store'])->name('tasks.store');
+        Route::post('/tasks', [CustomerTaskController::class, 'store'])
+            ->middleware('throttle:taskora-create')
+            ->name('tasks.store');
         Route::get('/tasks/{task}', [CustomerTaskController::class, 'show'])->name('tasks.show');
         Route::get('/tasks/{task}/edit', [CustomerTaskController::class, 'edit'])->name('tasks.edit');
         Route::match(['put', 'patch'], '/tasks/{task}', [CustomerTaskController::class, 'update'])->name('tasks.update');
@@ -92,27 +108,39 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/orders/{order}', [PerformerOrderController::class, 'show'])->name('orders.show');
         Route::get('/orders/{order}/workspace', OrderWorkspaceController::class)->name('orders.workspace');
         Route::get('/orders/{order}/disputes/create', [DisputeController::class, 'create'])->name('orders.disputes.create');
-        Route::post('/orders/{order}/disputes', [DisputeController::class, 'store'])->name('orders.disputes.store');
+        Route::post('/orders/{order}/disputes', [DisputeController::class, 'store'])
+            ->middleware('throttle:taskora-create')
+            ->name('orders.disputes.store');
         Route::post('/orders/{order}/submit-work', [PerformerOrderController::class, 'submitWork'])->name('orders.submit-work');
         Route::post('/orders/{order}/cancel', [PerformerOrderController::class, 'cancel'])->name('orders.cancel');
-        Route::post('/orders/{order}/messages', [OrderMessageController::class, 'store'])->name('orders.messages.store');
-        Route::post('/orders/{order}/files', [OrderFileController::class, 'store'])->name('orders.files.store');
+        Route::post('/orders/{order}/messages', [OrderMessageController::class, 'store'])
+            ->middleware('throttle:taskora-order-messages')
+            ->name('orders.messages.store');
+        Route::post('/orders/{order}/files', [OrderFileController::class, 'store'])
+            ->middleware('throttle:taskora-order-files')
+            ->name('orders.files.store');
         Route::get('/orders/{order}/files/{file}/download', [OrderFileController::class, 'download'])->name('orders.files.download');
         Route::get('/disputes/{dispute}', [DisputeController::class, 'show'])->name('disputes.show');
-        Route::post('/disputes/{dispute}/messages', [DisputeMessageController::class, 'store'])->name('disputes.messages.store');
+        Route::post('/disputes/{dispute}/messages', [DisputeMessageController::class, 'store'])
+            ->middleware('throttle:taskora-order-messages')
+            ->name('disputes.messages.store');
         Route::get('/services', [PerformerServiceController::class, 'index'])->name('services.index');
         Route::get('/services/create', [PerformerServiceController::class, 'create'])->name('services.create');
-        Route::post('/services', [PerformerServiceController::class, 'store'])->name('services.store');
+        Route::post('/services', [PerformerServiceController::class, 'store'])
+            ->middleware('throttle:taskora-create')
+            ->name('services.store');
         Route::get('/services/{service}/edit', [PerformerServiceController::class, 'edit'])->name('services.edit');
         Route::match(['put', 'patch'], '/services/{service}', [PerformerServiceController::class, 'update'])->name('services.update');
-        Route::post('/services/{service}/submit-review', [PerformerServiceController::class, 'submitReview'])->name('services.submit-review');
+        Route::post('/services/{service}/submit-review', [PerformerServiceController::class, 'submitReview'])
+            ->middleware('throttle:taskora-create')
+            ->name('services.submit-review');
         Route::post('/services/{service}/archive', [PerformerServiceController::class, 'archive'])->name('services.archive');
         Route::get('/offers', [TaskOfferController::class, 'index'])->name('offers.index');
         Route::post('/task-offers/{offer}/withdraw', [TaskOfferController::class, 'withdraw'])->name('task-offers.withdraw');
     });
 
     Route::post('/tasks/{task}/offers', [TaskOfferController::class, 'store'])
-        ->middleware('role:performer')
+        ->middleware(['role:performer', 'throttle:taskora-offers'])
         ->name('tasks.offers.store');
 
     Route::post('/services/{service:slug}/order', [ServiceOrderController::class, 'store'])
@@ -134,7 +162,9 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/disputes/{dispute}', [ModeratorDisputeController::class, 'show'])->name('disputes.show');
         Route::post('/disputes/{dispute}/take', [ModeratorDisputeController::class, 'take'])->name('disputes.take');
         Route::post('/disputes/{dispute}/resolve', [ModeratorDisputeController::class, 'resolve'])->name('disputes.resolve');
-        Route::post('/disputes/{dispute}/messages', [DisputeMessageController::class, 'store'])->name('disputes.messages.store');
+        Route::post('/disputes/{dispute}/messages', [DisputeMessageController::class, 'store'])
+            ->middleware('throttle:taskora-order-messages')
+            ->name('disputes.messages.store');
     });
 
     Route::get('/admin/dashboard', [RoleDashboardController::class, 'admin'])
