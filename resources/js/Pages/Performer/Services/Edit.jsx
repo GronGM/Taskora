@@ -46,7 +46,18 @@ export default function Edit({ service, categories, statusLabels }) {
                                     Изменение важных полей вернет услугу на модерацию.
                                 </span>
                             )}
+                            {service.status === 'pending_review' && (
+                                <span className="text-sm text-slate-600">
+                                    Услуга уже на проверке. Редактирование откроется после решения модератора.
+                                </span>
+                            )}
                         </div>
+                        {service.status === 'rejected' && service.rejection_reason && (
+                            <div className="mt-5 rounded-lg border border-red-200 bg-red-50 p-4">
+                                <p className="text-sm font-semibold text-red-800">Причина отклонения</p>
+                                <p className="mt-2 text-sm leading-6 text-red-700">{service.rejection_reason}</p>
+                            </div>
+                        )}
                     </div>
                     <Link
                         href="/performer/services"
@@ -56,7 +67,13 @@ export default function Edit({ service, categories, statusLabels }) {
                     </Link>
                 </div>
 
-                <ServiceForm form={form} categories={categories} onSubmit={submit} submitLabel="Сохранить изменения">
+                <ServiceForm
+                    form={form}
+                    categories={categories}
+                    onSubmit={submit}
+                    submitLabel="Сохранить изменения"
+                    disabled={service.is_locked}
+                >
                     {canSubmitReview(service.status) && (
                         <Link
                             href={service.submit_review_url}

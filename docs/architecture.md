@@ -175,6 +175,7 @@ ModuleName/
 - `status`: `draft`, `pending_review`, `published`, `rejected`, `archived`;
 - `rating`, `reviews_count`, `orders_count`;
 - `is_featured`.
+- `moderated_by`, `moderated_at`, `rejection_reason`.
 
 `service_packages`:
 
@@ -232,6 +233,31 @@ ModuleName/
 - архивная услуга не отправляется на модерацию повторно.
 
 Для валидации используются `StoreServiceRequest`, `UpdateServiceRequest` и `SubmitServiceForReviewRequest`. Текстовые поля проходят через `App\Services\Moderation\ContactGuard` до сохранения.
+
+Услугу со статусом `pending_review` исполнитель может открыть, но не может редактировать до решения модератора. Отклоненная услуга (`rejected`) показывает причину отказа и может быть отредактирована перед повторной отправкой.
+
+## Модерация Услуг
+
+Модераторская очередь доступна ролям `moderator` и `admin`. Модератор не получает доступ к админским настройкам платформы, но может работать с очередью услуг и флагами.
+
+| Метод | Маршрут | Назначение | Доступ |
+|---|---|---|---|
+| `GET` | `/moderator/services` | услуги `pending_review` | `role:moderator,admin` |
+| `GET` | `/moderator/services/{service}` | просмотр услуги на проверке | `ServicePolicy::review` |
+| `POST` | `/moderator/services/{service}/approve` | публикация услуги | `ServicePolicy::approve` |
+| `POST` | `/moderator/services/{service}/reject` | отклонение услуги | `ServicePolicy::reject` |
+| `GET` | `/moderator/moderation-flags` | открытые флаги | `role:moderator,admin` |
+| `POST` | `/moderator/moderation-flags/{flag}/resolve` | обработка флага | `role:moderator,admin` |
+
+Поток модерации:
+
+1. Исполнитель отправляет услугу на модерацию.
+2. Услуга получает статус `pending_review`.
+3. Модератор открывает карточку услуги, видит описание, пакеты, исполнителя и связанные `moderation_flags`.
+4. При одобрении статус меняется на `published`, `rejection_reason` очищается, заполняются `moderated_by` и `moderated_at`.
+5. После публикации услуга становится видимой в публичном каталоге.
+6. При отклонении статус меняется на `rejected`, сохраняется причина отказа, заполняются `moderated_by` и `moderated_at`.
+7. Отклоненная услуга не видна публично, а исполнитель видит причину отказа и может отправить исправленную услугу повторно.
 
 ## Поток Заказа Из Готовой Услуги
 
@@ -323,7 +349,7 @@ canceled
 - `blocked` — явное нарушение, действие не выполняется;
 - `pending_review` — спорный случай, нужна ручная модерация.
 
-Все срабатывания сохраняются в `moderation_flags`. Для услуг фиксируются пользователь, тип сущности, идентификатор сущности, причина, тип совпадения, найденный фрагмент и статус обработки флага.
+Все срабатывания сохраняются в `moderation_flags`. Для услуг фиксируются пользователь, тип сущности, идентификатор сущности, причина, тип совпадения, найденный фрагмент и статус обработки флага. После ручной обработки флага заполняются `resolved_by`, `resolved_at`, а статус меняется на `resolved`. Допустимые статусы флага: `open`, `resolved`, `ignored`.
 
 ## Защита От Передачи Контактов
 

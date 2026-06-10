@@ -1,8 +1,8 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import PublicLayout from '../../Layouts/PublicLayout';
 
 export default function Login() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, processing, errors } = useForm({
         email: '',
         password: '',
         remember: false,
@@ -10,7 +10,17 @@ export default function Login() {
 
     const submit = (event) => {
         event.preventDefault();
-        post('/login');
+
+        const form = event.currentTarget;
+        const email = form.elements.namedItem('email');
+        const password = form.elements.namedItem('password');
+        const remember = form.elements.namedItem('remember');
+
+        router.post('/login', {
+            email: email?.value ?? '',
+            password: password?.value ?? '',
+            remember: remember?.checked ?? false,
+        });
     };
 
     return (
@@ -36,9 +46,11 @@ export default function Login() {
                             </label>
                             <input
                                 id="email"
+                                name="email"
                                 type="email"
                                 value={data.email}
                                 onChange={(event) => setData('email', event.target.value)}
+                                onInput={(event) => setData('email', event.currentTarget.value)}
                                 className="mt-2 w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 autoComplete="email"
                                 required
@@ -52,9 +64,11 @@ export default function Login() {
                             </label>
                             <input
                                 id="password"
+                                name="password"
                                 type="password"
                                 value={data.password}
                                 onChange={(event) => setData('password', event.target.value)}
+                                onInput={(event) => setData('password', event.currentTarget.value)}
                                 className="mt-2 w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 autoComplete="current-password"
                                 required
@@ -64,9 +78,11 @@ export default function Login() {
 
                         <label className="mt-5 flex items-center gap-3 text-sm text-slate-600">
                             <input
+                                name="remember"
                                 type="checkbox"
                                 checked={data.remember}
                                 onChange={(event) => setData('remember', event.target.checked)}
+                                onInput={(event) => setData('remember', event.currentTarget.checked)}
                                 className="h-4 w-4 rounded border-slate-300 text-blue-600"
                             />
                             Запомнить меня

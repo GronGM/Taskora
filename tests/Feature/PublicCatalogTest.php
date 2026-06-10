@@ -76,6 +76,38 @@ class PublicCatalogTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_only_published_services_are_publicly_visible(): void
+    {
+        $performer = User::factory()->create(['role' => User::ROLE_PERFORMER]);
+        $category = Category::factory()->create();
+
+        $published = Service::factory()->for($performer, 'user')->for($category)->create([
+            'title' => 'Публичная услуга',
+            'slug' => 'publichnaya-usluga',
+            'status' => Service::STATUS_PUBLISHED,
+        ]);
+
+        foreach ([
+            Service::STATUS_DRAFT => 'Черновик услуги',
+            Service::STATUS_PENDING_REVIEW => 'Услуга на проверке',
+            Service::STATUS_REJECTED => 'Отклоненная услуга',
+            Service::STATUS_ARCHIVED => 'Архивная услуга',
+        ] as $status => $title) {
+            Service::factory()->for($performer, 'user')->for($category)->create([
+                'title' => $title,
+                'status' => $status,
+            ]);
+        }
+
+        $titles = collect($this->get('/catalog')->assertOk()->inertiaProps('services'))->pluck('title');
+
+        $this->assertTrue($titles->contains($published->title));
+        $this->assertFalse($titles->contains('Черновик услуги'));
+        $this->assertFalse($titles->contains('Услуга на проверке'));
+        $this->assertFalse($titles->contains('Отклоненная услуга'));
+        $this->assertFalse($titles->contains('Архивная услуга'));
+    }
+
     public function test_performer_has_demo_services_after_seeder(): void
     {
         $this->seed();

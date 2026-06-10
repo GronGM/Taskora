@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
+use App\Http\Controllers\Moderator\ModerationFlagController;
+use App\Http\Controllers\Moderator\ModeratorServiceController;
 use App\Http\Controllers\Performer\PerformerServiceController;
 use App\Http\Controllers\Public\CatalogController;
 use App\Http\Controllers\Public\HomeController;
@@ -58,6 +60,15 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/moderator/dashboard', [RoleDashboardController::class, 'moderator'])
         ->middleware('role:moderator')
         ->name('moderator.dashboard');
+
+    Route::middleware('role:moderator,admin')->prefix('moderator')->name('moderator.')->group(function (): void {
+        Route::get('/services', [ModeratorServiceController::class, 'index'])->name('services.index');
+        Route::get('/services/{service}', [ModeratorServiceController::class, 'show'])->name('services.show');
+        Route::post('/services/{service}/approve', [ModeratorServiceController::class, 'approve'])->name('services.approve');
+        Route::post('/services/{service}/reject', [ModeratorServiceController::class, 'reject'])->name('services.reject');
+        Route::get('/moderation-flags', [ModerationFlagController::class, 'index'])->name('moderation-flags.index');
+        Route::post('/moderation-flags/{flag}/resolve', [ModerationFlagController::class, 'resolve'])->name('moderation-flags.resolve');
+    });
 
     Route::get('/admin/dashboard', [RoleDashboardController::class, 'admin'])
         ->middleware('role:admin')

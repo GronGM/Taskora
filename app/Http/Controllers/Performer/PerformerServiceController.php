@@ -72,7 +72,7 @@ class PerformerServiceController extends Controller
 
     public function edit(Service $service): Response
     {
-        Gate::authorize('update', $service);
+        Gate::authorize('view', $service);
 
         $service->load(['category', 'packages']);
 
@@ -96,6 +96,9 @@ class PerformerServiceController extends Controller
 
             if ($importantChanges && $service->status === Service::STATUS_PUBLISHED) {
                 $data['status'] = Service::STATUS_PENDING_REVIEW;
+                $data['rejection_reason'] = null;
+                $data['moderated_by'] = null;
+                $data['moderated_at'] = null;
             }
 
             $service->update($data);
@@ -109,7 +112,12 @@ class PerformerServiceController extends Controller
 
     public function submitReview(SubmitServiceForReviewRequest $request, Service $service): RedirectResponse
     {
-        $service->update(['status' => Service::STATUS_PENDING_REVIEW]);
+        $service->update([
+            'status' => Service::STATUS_PENDING_REVIEW,
+            'rejection_reason' => null,
+            'moderated_by' => null,
+            'moderated_at' => null,
+        ]);
 
         return redirect()
             ->route('performer.services.index')
@@ -216,6 +224,7 @@ class PerformerServiceController extends Controller
             'price_from' => $service->price_from,
             'delivery_days' => $service->delivery_days,
             'packages_count' => $service->packages_count,
+            'rejection_reason' => $service->rejection_reason,
             'edit_url' => route('performer.services.edit', $service),
             'submit_review_url' => route('performer.services.submit-review', $service),
             'archive_url' => route('performer.services.archive', $service),
@@ -234,6 +243,8 @@ class PerformerServiceController extends Controller
             'price_from' => $service->price_from,
             'delivery_days' => $service->delivery_days,
             'status' => $service->status,
+            'rejection_reason' => $service->rejection_reason,
+            'is_locked' => $service->status === Service::STATUS_PENDING_REVIEW,
             'submit_review_url' => route('performer.services.submit-review', $service),
             'archive_url' => route('performer.services.archive', $service),
             'packages' => $service->packages->map(fn (ServicePackage $package): array => [

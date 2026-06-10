@@ -6,10 +6,14 @@ const emptyPackage = {
     revisions_count: 1,
 };
 
-export default function ServiceForm({ form, categories, onSubmit, submitLabel, children }) {
+export default function ServiceForm({ form, categories, onSubmit, submitLabel, children, disabled = false }) {
     const { data, setData, processing, errors } = form;
 
     const updatePackage = (index, field, value) => {
+        if (disabled) {
+            return;
+        }
+
         setData(
             'packages',
             data.packages.map((pack, currentIndex) => (currentIndex === index ? { ...pack, [field]: value } : pack)),
@@ -17,7 +21,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
     };
 
     const addPackage = () => {
-        if (data.packages.length >= 3) {
+        if (disabled || data.packages.length >= 3) {
             return;
         }
 
@@ -25,7 +29,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
     };
 
     const removePackage = (index) => {
-        if (data.packages.length <= 1) {
+        if (disabled || data.packages.length <= 1) {
             return;
         }
 
@@ -36,7 +40,18 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
     };
 
     return (
-        <form onSubmit={onSubmit} className="space-y-8">
+        <form
+            onSubmit={(event) => {
+                if (disabled) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+                onSubmit(event);
+            }}
+            className="space-y-8"
+        >
             <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                 <div>
                     <p className="text-sm font-semibold uppercase text-blue-700">Основное</p>
@@ -48,6 +63,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                         <select
                             id="category_id"
                             name="category_id"
+                            disabled={disabled}
                             value={data.category_id}
                             onChange={(event) => setData('category_id', event.target.value)}
                             className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -66,6 +82,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                             id="title"
                             name="title"
                             type="text"
+                            disabled={disabled}
                             value={data.title}
                             onChange={(event) => setData('title', event.target.value)}
                             className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -76,6 +93,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                         <textarea
                             id="short_description"
                             name="short_description"
+                            disabled={disabled}
                             value={data.short_description}
                             onChange={(event) => setData('short_description', event.target.value)}
                             rows={3}
@@ -87,6 +105,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                         <textarea
                             id="description"
                             name="description"
+                            disabled={disabled}
                             value={data.description ?? ''}
                             onChange={(event) => setData('description', event.target.value)}
                             rows={7}
@@ -100,6 +119,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                             name="price_from"
                             type="number"
                             min="100"
+                            disabled={disabled}
                             value={data.price_from}
                             onChange={(event) => setData('price_from', event.target.value)}
                             className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -112,6 +132,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                             name="delivery_days"
                             type="number"
                             min="1"
+                            disabled={disabled}
                             value={data.delivery_days}
                             onChange={(event) => setData('delivery_days', event.target.value)}
                             className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -130,7 +151,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                     <button
                         type="button"
                         onClick={addPackage}
-                        disabled={data.packages.length >= 3}
+                        disabled={disabled || data.packages.length >= 3}
                         className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         Добавить пакет
@@ -147,7 +168,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                                 <button
                                     type="button"
                                     onClick={() => removePackage(index)}
-                                    disabled={data.packages.length <= 1}
+                                    disabled={disabled || data.packages.length <= 1}
                                     className="rounded-md px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     Удалить пакет
@@ -160,6 +181,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                                         id={`packages_${index}_name`}
                                         name={`packages[${index}][name]`}
                                         type="text"
+                                        disabled={disabled}
                                         value={pack.name}
                                         onChange={(event) => updatePackage(index, 'name', event.target.value)}
                                         className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -172,6 +194,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                                         name={`packages[${index}][price]`}
                                         type="number"
                                         min="100"
+                                        disabled={disabled}
                                         value={pack.price}
                                         onChange={(event) => updatePackage(index, 'price', event.target.value)}
                                         className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -182,6 +205,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                                     <textarea
                                         id={`packages_${index}_description`}
                                         name={`packages[${index}][description]`}
+                                        disabled={disabled}
                                         value={pack.description ?? ''}
                                         onChange={(event) => updatePackage(index, 'description', event.target.value)}
                                         rows={3}
@@ -195,6 +219,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                                         name={`packages[${index}][delivery_days]`}
                                         type="number"
                                         min="1"
+                                        disabled={disabled}
                                         value={pack.delivery_days}
                                         onChange={(event) => updatePackage(index, 'delivery_days', event.target.value)}
                                         className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -207,6 +232,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                                         name={`packages[${index}][revisions_count]`}
                                         type="number"
                                         min="0"
+                                        disabled={disabled}
                                         value={pack.revisions_count}
                                         onChange={(event) => updatePackage(index, 'revisions_count', event.target.value)}
                                         className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -222,7 +248,7 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                 {children}
                 <button
                     type="submit"
-                    disabled={processing}
+                    disabled={processing || disabled}
                     className="rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {submitLabel}

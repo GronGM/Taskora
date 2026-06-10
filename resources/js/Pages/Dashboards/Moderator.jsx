@@ -1,7 +1,28 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
-const cards = ['Флаги модерации', 'Услуги на проверке', 'Задания на проверке', 'Споры'];
+const cards = [
+    {
+        title: 'Услуги на проверке',
+        description: 'Проверка описаний, пакетов и публикация готовых услуг.',
+        href: '/moderator/services',
+    },
+    {
+        title: 'Флаги модерации',
+        description: 'Срабатывания ContactGuard и обработка открытых флагов.',
+        href: '/moderator/moderation-flags',
+    },
+    {
+        title: 'Задания на проверке',
+        description: 'Раздел будет реализован после запуска индивидуальных заданий.',
+        href: null,
+    },
+    {
+        title: 'Споры',
+        description: 'Раздел будет реализован на этапе заказов и рабочих областей.',
+        href: null,
+    },
+];
 
 export default function Moderator() {
     return (
@@ -12,9 +33,17 @@ export default function Moderator() {
                 <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Панель модератора</h1>
                 <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {cards.map((card) => (
-                        <article key={card} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                            <h2 className="text-lg font-semibold text-slate-950">{card}</h2>
-                            <p className="mt-3 text-sm leading-6 text-slate-600">Раздел будет реализован на следующих этапах MVP.</p>
+                        <article key={card.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                            <h2 className="text-lg font-semibold text-slate-950">{card.title}</h2>
+                            <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
+                            {card.href && (
+                                <Link
+                                    href={card.href}
+                                    className="mt-5 inline-flex rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                                >
+                                    Открыть
+                                </Link>
+                            )}
                         </article>
                     ))}
                 </div>

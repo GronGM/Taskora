@@ -24,7 +24,7 @@ class ServicePolicy
 
     public function update(User $user, Service $service): bool
     {
-        return $this->owns($user, $service);
+        return $this->owns($user, $service) && $service->status !== Service::STATUS_PENDING_REVIEW;
     }
 
     public function submitReview(User $user, Service $service): bool
@@ -38,8 +38,33 @@ class ServicePolicy
         return $this->owns($user, $service);
     }
 
+    public function reviewAny(User $user): bool
+    {
+        return $this->canModerate($user);
+    }
+
+    public function review(User $user, Service $service): bool
+    {
+        return $this->canModerate($user) && $service->status === Service::STATUS_PENDING_REVIEW;
+    }
+
+    public function approve(User $user, Service $service): bool
+    {
+        return $this->review($user, $service);
+    }
+
+    public function reject(User $user, Service $service): bool
+    {
+        return $this->review($user, $service);
+    }
+
     private function owns(User $user, Service $service): bool
     {
         return $user->isPerformer() && $service->user_id === $user->id;
+    }
+
+    private function canModerate(User $user): bool
+    {
+        return $user->isModerator() || $user->isAdmin();
     }
 }

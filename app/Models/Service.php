@@ -25,6 +25,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'reviews_count',
     'orders_count',
     'is_featured',
+    'moderated_by',
+    'moderated_at',
+    'rejection_reason',
 ])]
 class Service extends Model
 {
@@ -53,6 +56,7 @@ class Service extends Model
             'reviews_count' => 'integer',
             'orders_count' => 'integer',
             'is_featured' => 'boolean',
+            'moderated_at' => 'datetime',
         ];
     }
 
@@ -64,6 +68,11 @@ class Service extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function moderator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'moderated_by');
     }
 
     public function packages(): HasMany

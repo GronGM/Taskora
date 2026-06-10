@@ -10,6 +10,7 @@ const roleLabels = {
 export default function DashboardLayout({ children }) {
     const { auth } = usePage().props;
     const user = auth?.user;
+    const canReview = user?.role === 'moderator' || user?.role === 'admin';
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -40,6 +41,22 @@ export default function DashboardLayout({ children }) {
                             >
                                 Мои услуги
                             </Link>
+                        )}
+                        {canReview && (
+                            <>
+                                <Link
+                                    href="/moderator/services"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
+                                >
+                                    Модерация услуг
+                                </Link>
+                                <Link
+                                    href="/moderator/moderation-flags"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 lg:inline-flex"
+                                >
+                                    Флаги
+                                </Link>
+                            </>
                         )}
                         <Link
                             href="/logout"

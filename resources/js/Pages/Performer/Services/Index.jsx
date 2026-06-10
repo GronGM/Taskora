@@ -50,6 +50,12 @@ export default function Index({ services, statusLabels }) {
                                             </span>
                                         </div>
                                         <h2 className="mt-4 text-2xl font-semibold text-slate-950">{service.title}</h2>
+                                        {service.status === 'rejected' && service.rejection_reason && (
+                                            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+                                                <p className="text-sm font-semibold text-red-800">Причина отклонения</p>
+                                                <p className="mt-2 text-sm leading-6 text-red-700">{service.rejection_reason}</p>
+                                            </div>
+                                        )}
                                         <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
                                             <p>Цена от: <span className="font-semibold text-slate-950">{currency.format(service.price_from)} ₽</span></p>
                                             <p>Срок: <span className="font-semibold text-slate-950">{service.delivery_days} дн.</span></p>
