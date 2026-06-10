@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import DashboardLayout from '../../../Layouts/DashboardLayout';
 
 const currency = new Intl.NumberFormat('ru-RU');
@@ -14,6 +14,16 @@ const statusClasses = {
 };
 
 export default function Show({ order, statusLabels, paymentStatusLabels }) {
+    const revisionForm = useForm({ revision_comment: '' });
+
+    const submitRevision = (event) => {
+        event.preventDefault();
+        revisionForm.post(order.request_revision_url, {
+            preserveScroll: true,
+            onSuccess: () => revisionForm.reset('revision_comment'),
+        });
+    };
+
     return (
         <DashboardLayout>
             <Head title={order.title} />
@@ -140,9 +150,28 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                                     <Link href={order.complete_url} method="post" as="button" className="w-full rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
                                         Принять работу и разблокировать оплату
                                     </Link>
-                                    <Link href={order.request_revision_url} method="post" as="button" className="w-full rounded-md border border-amber-200 bg-white px-5 py-3 text-sm font-semibold text-amber-700 hover:bg-amber-50">
-                                        Запросить доработку
-                                    </Link>
+                                    <form onSubmit={submitRevision} className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                                        <label htmlFor="revision_comment" className="text-sm font-semibold text-amber-950">
+                                            Опишите, что именно нужно исправить
+                                        </label>
+                                        <textarea
+                                            id="revision_comment"
+                                            name="revision_comment"
+                                            rows={4}
+                                            value={revisionForm.data.revision_comment}
+                                            onChange={(event) => revisionForm.setData('revision_comment', event.target.value)}
+                                            className="mt-2 w-full rounded-md border border-amber-200 bg-white px-4 py-3 text-sm leading-6 text-slate-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                                            placeholder="Например: исправьте структуру первого блока и добавьте недостающие выводы."
+                                        />
+                                        {revisionForm.errors.revision_comment && <p className="mt-2 text-sm text-red-600">{revisionForm.errors.revision_comment}</p>}
+                                        <button
+                                            type="submit"
+                                            disabled={revisionForm.processing}
+                                            className="mt-3 w-full rounded-md border border-amber-300 bg-white px-5 py-3 text-sm font-semibold text-amber-800 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                            Запросить доработку
+                                        </button>
+                                    </form>
                                 </>
                             )}
                             {order.status === 'completed' && !order.review && order.can_review && (

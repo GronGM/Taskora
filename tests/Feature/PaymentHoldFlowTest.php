@@ -220,7 +220,7 @@ class PaymentHoldFlowTest extends TestCase
         [$customer, , $order] = $this->submittedOrder();
 
         $this->actingAs($customer)
-            ->post(route('customer.orders.request-revision', $order));
+            ->post(route('customer.orders.request-revision', $order), $this->revisionPayload());
 
         $this->assertSame(Order::STATUS_REVISION_REQUESTED, $order->refresh()->status);
     }
@@ -230,7 +230,7 @@ class PaymentHoldFlowTest extends TestCase
         [$customer, , $order] = $this->submittedOrder();
 
         $this->actingAs($customer)
-            ->post(route('customer.orders.request-revision', $order));
+            ->post(route('customer.orders.request-revision', $order), $this->revisionPayload());
 
         $order->refresh();
 
@@ -250,7 +250,7 @@ class PaymentHoldFlowTest extends TestCase
         ]);
 
         $this->actingAs($customer)
-            ->post(route('customer.orders.request-revision', $order));
+            ->post(route('customer.orders.request-revision', $order), $this->revisionPayload());
 
         $newSubmittedAt = Carbon::parse('2026-06-12 15:30:00');
         $this->travelTo($newSubmittedAt);
@@ -454,5 +454,15 @@ class PaymentHoldFlowTest extends TestCase
                 'message' => 'Работа готова, проверьте результат.',
             ])
             ->assertRedirect(route('performer.orders.show', $order));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function revisionPayload(): array
+    {
+        return [
+            'revision_comment' => 'Please correct the submitted result and upload the revised files.',
+        ];
     }
 }

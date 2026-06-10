@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Customer\RequestRevisionRequest;
 use App\Models\Dispute;
 use App\Models\Order;
 use App\Models\OrderSubmission;
@@ -74,12 +75,12 @@ class CustomerOrderController extends Controller
             ->with('success', 'Оплата отмечена локальной заглушкой. Заказ перешел в работу.');
     }
 
-    public function requestRevision(Order $order, OrderEventLogger $events): RedirectResponse
+    public function requestRevision(RequestRevisionRequest $request, Order $order, OrderEventLogger $events): RedirectResponse
     {
-        Gate::authorize('requestRevision', $order);
+        $revisionComment = $request->validated('revision_comment');
         $user = request()->user();
 
-        DB::transaction(function () use ($order, $events, $user): void {
+        DB::transaction(function () use ($order, $events, $revisionComment, $user): void {
             $order->submissions()->latest()->first()?->update([
                 'status' => OrderSubmission::STATUS_REVISION_REQUESTED,
             ]);
@@ -93,6 +94,7 @@ class CustomerOrderController extends Controller
 
             $events->revisionRequested($order, $user, [
                 'status' => Order::STATUS_REVISION_REQUESTED,
+                'revision_comment' => $revisionComment,
             ]);
         });
 

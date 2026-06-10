@@ -223,7 +223,9 @@ class OrderWorkspaceController extends Controller
             OrderEvent::TYPE_PAYMENT_STUB_PAID => 'Оплата отмечена локальной заглушкой.',
             OrderEvent::TYPE_WORK_SUBMITTED => 'Исполнитель отправил работу на проверку.',
             OrderEvent::TYPE_REVIEW_HOLD_STARTED => isset($payload['review_hold_until']) ? 'Срок проверки запущен до '.$payload['review_hold_until'].'.' : 'Срок проверки запущен.',
-            OrderEvent::TYPE_REVISION_REQUESTED => 'Заказчик запросил доработку.',
+            OrderEvent::TYPE_REVISION_REQUESTED => filled($payload['revision_comment'] ?? null)
+                ? 'Заказчик запросил доработку: '.$payload['revision_comment']
+                : 'Заказчик запросил доработку.',
             OrderEvent::TYPE_ORDER_COMPLETED => 'Заказ завершен.',
             OrderEvent::TYPE_FUNDS_RELEASED => 'Оплата разблокирована.',
             OrderEvent::TYPE_ORDER_CANCELED => 'Заказ отменен.',

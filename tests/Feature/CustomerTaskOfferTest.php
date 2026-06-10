@@ -67,6 +67,46 @@ class CustomerTaskOfferTest extends TestCase
         ]);
     }
 
+    public function test_task_title_with_timestamp_is_saved(): void
+    {
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        $category = Category::factory()->create();
+        $title = 'Beta QA задание 2026-06-10-16-28-17';
+
+        $this->actingAs($customer)
+            ->post('/customer/tasks', [
+                ...$this->validTaskPayload($category),
+                'title' => $title,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('tasks', [
+            'user_id' => $customer->id,
+            'title' => $title,
+        ]);
+        $this->assertDatabaseCount('moderation_flags', 0);
+    }
+
+    public function test_task_description_with_timestamp_is_saved(): void
+    {
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        $category = Category::factory()->create();
+        $description = 'Нужно проверить результат по сборке 20260610123456 и файлу task-2026-06-10-16-28-17.';
+
+        $this->actingAs($customer)
+            ->post('/customer/tasks', [
+                ...$this->validTaskPayload($category),
+                'description' => $description,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('tasks', [
+            'user_id' => $customer->id,
+            'description' => $description,
+        ]);
+        $this->assertDatabaseCount('moderation_flags', 0);
+    }
+
     public function test_published_task_visible_on_task_board(): void
     {
         $task = Task::factory()->create([
@@ -262,6 +302,33 @@ class CustomerTaskOfferTest extends TestCase
             'title' => 'Подготовить аккуратное тестовое задание',
         ]);
         $this->assertSame(3, ModerationFlag::where('entity_type', Task::class)->count());
+    }
+
+    public function test_real_phone_in_task_title_or_description_is_blocked(): void
+    {
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        $category = Category::factory()->create();
+
+        $this->actingAs($customer)
+            ->from('/customer/tasks/create')
+            ->post('/customer/tasks', [
+                ...$this->validTaskPayload($category),
+                'title' => 'Позвоните +7 999 123-45-67 перед стартом',
+            ])
+            ->assertRedirect('/customer/tasks/create')
+            ->assertSessionHasErrors('title');
+
+        $this->actingAs($customer)
+            ->from('/customer/tasks/create')
+            ->post('/customer/tasks', [
+                ...$this->validTaskPayload($category),
+                'description' => 'Перед началом можно набрать 89991234567 и уточнить детали.',
+            ])
+            ->assertRedirect('/customer/tasks/create')
+            ->assertSessionHasErrors('description');
+
+        $this->assertDatabaseCount('tasks', 0);
+        $this->assertSame(2, ModerationFlag::where('entity_type', Task::class)->where('matched_type', 'phone')->count());
     }
 
     public function test_offer_with_email_phone_or_telegram_is_not_saved(): void

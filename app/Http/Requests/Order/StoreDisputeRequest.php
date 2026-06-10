@@ -27,4 +27,29 @@ class StoreDisputeRequest extends FormRequest
             'description' => ['required', 'string', 'min:10', 'max:4000'],
         ];
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'reason.required' => 'Выберите причину спора.',
+            'reason.in' => 'Выберите причину спора.',
+            'description.required' => 'Опишите проблему.',
+            'description.min' => 'Описание проблемы должно быть не короче :min символов.',
+            'description.max' => 'Описание проблемы не должно превышать :max символов.',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'reason' => 'причина спора',
+            'description' => 'описание проблемы',
+        ];
+    }
 }

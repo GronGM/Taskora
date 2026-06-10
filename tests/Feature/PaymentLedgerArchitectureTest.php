@@ -271,6 +271,51 @@ class PaymentLedgerArchitectureTest extends TestCase
         $this->assertSame('Admin/Finance/Index', $response->inertiaPage()['component']);
     }
 
+    public function test_admin_sees_payment_settings(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.payment-settings.index'))
+            ->assertOk();
+
+        $this->assertSame('Admin/PaymentSettings/Index', $response->inertiaPage()['component']);
+        $this->assertSame('stub', $response->inertiaProps('settings.taskora_payments_mode'));
+        $this->assertStringContainsString('stub-режим', $response->inertiaProps('warning'));
+    }
+
+    public function test_non_admin_users_cannot_see_payment_settings(): void
+    {
+        foreach ([User::ROLE_MODERATOR, User::ROLE_CUSTOMER, User::ROLE_PERFORMER] as $role) {
+            $this->actingAs(User::factory()->create(['role' => $role]))
+                ->get(route('admin.payment-settings.index'))
+                ->assertForbidden();
+        }
+    }
+
+    public function test_guest_is_redirected_from_payment_settings(): void
+    {
+        $this->get(route('admin.payment-settings.index'))
+            ->assertRedirect('/login');
+    }
+
+    public function test_payment_settings_does_not_expose_secret_key_value(): void
+    {
+        config([
+            'payments.yookassa.secret_key' => 'super-secret-test-key',
+            'payments.yookassa.shop_id' => 'demo-shop',
+        ]);
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.payment-settings.index'))
+            ->assertOk();
+
+        $this->assertTrue($response->inertiaProps('settings.yookassa.secret_key_present'));
+        $this->assertTrue($response->inertiaProps('settings.yookassa.shop_id_present'));
+        $this->assertStringNotContainsString('super-secret-test-key', $response->getContent());
+    }
+
     public function test_moderator_customer_and_performer_cannot_see_admin_finance(): void
     {
         foreach ([User::ROLE_MODERATOR, User::ROLE_CUSTOMER, User::ROLE_PERFORMER] as $role) {

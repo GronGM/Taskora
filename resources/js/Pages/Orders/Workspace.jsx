@@ -27,6 +27,7 @@ const eventClasses = {
     dispute_message_sent: 'border-red-200 bg-red-50 text-red-900',
     dispute_under_review: 'border-amber-200 bg-amber-50 text-amber-900',
     dispute_resolved: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    revision_requested: 'border-orange-200 bg-orange-50 text-orange-900',
     revision_requested_by_moderator: 'border-orange-200 bg-orange-50 text-orange-900',
 };
 
@@ -326,6 +327,16 @@ function FileItem({ file }) {
 }
 
 function QuickActions({ role, order }) {
+    const revisionForm = useForm({ revision_comment: '' });
+
+    const submitRevision = (event) => {
+        event.preventDefault();
+        revisionForm.post(order.request_revision_url, {
+            preserveScroll: true,
+            onSuccess: () => revisionForm.reset('revision_comment'),
+        });
+    };
+
     return (
         <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <p className="text-sm font-semibold uppercase text-blue-700">Действия</p>
@@ -346,9 +357,28 @@ function QuickActions({ role, order }) {
                     </div>
                 )}
                 {role === 'customer' && order.can.request_revision && (
-                    <Link href={order.request_revision_url} method="post" as="button" className="w-full rounded-md border border-amber-200 bg-white px-5 py-3 text-sm font-semibold text-amber-700 hover:bg-amber-50">
-                        Запросить доработку
-                    </Link>
+                    <form onSubmit={submitRevision} className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                        <label htmlFor="workspace_revision_comment" className="text-sm font-semibold text-amber-950">
+                            Опишите, что именно нужно исправить
+                        </label>
+                        <textarea
+                            id="workspace_revision_comment"
+                            name="revision_comment"
+                            rows={4}
+                            value={revisionForm.data.revision_comment}
+                            onChange={(event) => revisionForm.setData('revision_comment', event.target.value)}
+                            className="mt-2 w-full rounded-md border border-amber-200 bg-white px-4 py-3 text-sm leading-6 text-slate-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                            placeholder="Например: доработайте второй вариант и приложите исходники."
+                        />
+                        {revisionForm.errors.revision_comment && <p className="mt-2 text-sm text-red-600">{revisionForm.errors.revision_comment}</p>}
+                        <button
+                            type="submit"
+                            disabled={revisionForm.processing}
+                            className="mt-3 w-full rounded-md border border-amber-300 bg-white px-5 py-3 text-sm font-semibold text-amber-800 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Запросить доработку
+                        </button>
+                    </form>
                 )}
                 {role === 'customer' && order.can.review && (
                     <Link href={order.review_create_url} className="block w-full rounded-md bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700">

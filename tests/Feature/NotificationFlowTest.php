@@ -210,7 +210,9 @@ class NotificationFlowTest extends TestCase
         ]);
 
         $this->actingAs($order->customer)
-            ->post(route('customer.orders.request-revision', $order))
+            ->post(route('customer.orders.request-revision', $order), [
+                'revision_comment' => 'Please improve the submitted result and attach updated files.',
+            ])
             ->assertRedirect();
 
         $this->assertNotification($performer, 'order.revision_requested');

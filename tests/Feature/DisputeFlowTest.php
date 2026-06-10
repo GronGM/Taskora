@@ -106,6 +106,52 @@ class DisputeFlowTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_open_dispute_requires_reason_with_russian_message(): void
+    {
+        [$customer, , $order] = $this->orderScenario();
+
+        $this->actingAs($customer)
+            ->from(route('customer.orders.disputes.create', $order))
+            ->post(route('customer.orders.disputes.store', $order), [
+                'description' => 'Описание проблемы достаточно подробное для проверки.',
+            ])
+            ->assertRedirect(route('customer.orders.disputes.create', $order))
+            ->assertSessionHasErrors(['reason' => 'Выберите причину спора.']);
+
+        $this->assertCurrentValidationErrorsDoNotExposeTranslationKeys();
+    }
+
+    public function test_open_dispute_requires_description_with_russian_message(): void
+    {
+        [$customer, , $order] = $this->orderScenario();
+
+        $this->actingAs($customer)
+            ->from(route('customer.orders.disputes.create', $order))
+            ->post(route('customer.orders.disputes.store', $order), [
+                'reason' => Dispute::REASON_POOR_QUALITY,
+            ])
+            ->assertRedirect(route('customer.orders.disputes.create', $order))
+            ->assertSessionHasErrors(['description' => 'Опишите проблему.']);
+
+        $this->assertCurrentValidationErrorsDoNotExposeTranslationKeys();
+    }
+
+    public function test_open_dispute_short_description_has_russian_message(): void
+    {
+        [$customer, , $order] = $this->orderScenario();
+
+        $this->actingAs($customer)
+            ->from(route('customer.orders.disputes.create', $order))
+            ->post(route('customer.orders.disputes.store', $order), [
+                'reason' => Dispute::REASON_POOR_QUALITY,
+                'description' => 'short',
+            ])
+            ->assertRedirect(route('customer.orders.disputes.create', $order))
+            ->assertSessionHasErrors(['description' => 'Описание проблемы должно быть не короче 10 символов.']);
+
+        $this->assertCurrentValidationErrorsDoNotExposeTranslationKeys();
+    }
+
     public function test_opening_dispute_sets_order_status_to_disputed(): void
     {
         [$customer, , $order] = $this->orderScenario();
@@ -555,5 +601,13 @@ class DisputeFlowTest extends TestCase
                 'moderator_comment' => 'Проверил материалы заказа и принял решение.',
             ])
             ->assertRedirect(route('moderator.disputes.show', $dispute));
+    }
+
+    private function assertCurrentValidationErrorsDoNotExposeTranslationKeys(): void
+    {
+        $errors = session('errors')?->getBag('default')->all() ?? [];
+
+        $this->assertNotEmpty($errors);
+        $this->assertStringNotContainsString('validation.', implode(' ', $errors));
     }
 }

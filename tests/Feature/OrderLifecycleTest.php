@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\OrderEvent;
 use App\Models\OrderSubmission;
+use App\Models\ModerationFlag;
 use App\Models\Service;
 use App\Models\ServicePackage;
 use App\Models\Task;
@@ -289,10 +290,46 @@ class OrderLifecycleTest extends TestCase
         [$customer, $order] = $this->submittedOrderForCustomer();
 
         $this->actingAs($customer)
-            ->post(route('customer.orders.request-revision', $order))
+            ->post(route('customer.orders.request-revision', $order), $this->revisionPayload())
             ->assertRedirect(route('customer.orders.show', $order));
 
         $this->assertSame(OrderSubmission::STATUS_REVISION_REQUESTED, $order->submissions()->first()->status);
+    }
+
+    public function test_request_revision_requires_comment(): void
+    {
+        [$customer, $order] = $this->submittedOrderForCustomer();
+
+        $this->actingAs($customer)
+            ->from(route('customer.orders.show', $order))
+            ->post(route('customer.orders.request-revision', $order), [])
+            ->assertRedirect(route('customer.orders.show', $order))
+            ->assertSessionHasErrors(['revision_comment' => 'Опишите, что именно нужно исправить.']);
+
+        $this->assertSame(Order::STATUS_SUBMITTED_FOR_REVIEW, $order->refresh()->status);
+    }
+
+    public function test_request_revision_blocks_contact_in_comment(): void
+    {
+        [$customer, $order] = $this->submittedOrderForCustomer();
+
+        $this->actingAs($customer)
+            ->from(route('customer.orders.show', $order))
+            ->post(route('customer.orders.request-revision', $order), [
+                'revision_comment' => 'Please call +7 999 123-45-67 before revision.',
+            ])
+            ->assertRedirect(route('customer.orders.show', $order))
+            ->assertSessionHasErrors('revision_comment');
+
+        $this->assertSame(Order::STATUS_SUBMITTED_FOR_REVIEW, $order->refresh()->status);
+        $this->assertDatabaseHas('moderation_flags', [
+            'user_id' => $customer->id,
+            'entity_type' => Order::class,
+            'entity_id' => $order->id,
+            'reason' => 'contact_detected_in_revision_comment',
+            'matched_type' => 'phone',
+            'status' => ModerationFlag::STATUS_OPEN,
+        ]);
     }
 
     public function test_request_revision_moves_order_to_revision_requested(): void
@@ -300,7 +337,7 @@ class OrderLifecycleTest extends TestCase
         [$customer, $order] = $this->submittedOrderForCustomer();
 
         $this->actingAs($customer)
-            ->post(route('customer.orders.request-revision', $order));
+            ->post(route('customer.orders.request-revision', $order), $this->revisionPayload());
 
         $this->assertSame(Order::STATUS_REVISION_REQUESTED, $order->refresh()->status);
     }
@@ -421,5 +458,15 @@ class OrderLifecycleTest extends TestCase
         ]);
 
         return [$customer, $order];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function revisionPayload(string $comment = 'Please improve the final section and attach the corrected source file.'): array
+    {
+        return [
+            'revision_comment' => $comment,
+        ];
     }
 }

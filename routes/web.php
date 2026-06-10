@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminBetaFeedbackController;
 use App\Http\Controllers\Admin\AdminFinanceController;
+use App\Http\Controllers\Admin\AdminPaymentSettingsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BetaAccessController;
 use App\Http\Controllers\BetaFeedbackController;
@@ -234,6 +235,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/finance', AdminFinanceController::class)->name('finance.index');
+        Route::get('/payment-settings', AdminPaymentSettingsController::class)->name('payment-settings.index');
         Route::get('/beta-feedback', [AdminBetaFeedbackController::class, 'index'])->name('beta-feedback.index');
         Route::get('/beta-feedback/{feedback}', [AdminBetaFeedbackController::class, 'show'])->name('beta-feedback.show');
         Route::post('/beta-feedback/{feedback}/status', [AdminBetaFeedbackController::class, 'updateStatus'])->name('beta-feedback.status');

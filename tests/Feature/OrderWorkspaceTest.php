@@ -365,16 +365,42 @@ class OrderWorkspaceTest extends TestCase
     public function test_request_revision_creates_revision_requested_event(): void
     {
         [$customer, $performer, $order] = $this->submittedOrderScenario();
+        $comment = 'Please refine the second section and attach the updated file.';
 
         $this->actingAs($customer)
-            ->post(route('customer.orders.request-revision', $order));
+            ->post(route('customer.orders.request-revision', $order), $this->revisionPayload($comment));
 
         $this->assertDatabaseHas('order_events', [
             'order_id' => $order->id,
             'user_id' => $customer->id,
             'type' => OrderEvent::TYPE_REVISION_REQUESTED,
         ]);
+        $event = OrderEvent::query()
+            ->where('order_id', $order->id)
+            ->where('type', OrderEvent::TYPE_REVISION_REQUESTED)
+            ->firstOrFail();
+
+        $this->assertSame($comment, $event->payload['revision_comment']);
         $this->assertSame($performer->id, $order->submissions()->first()->user_id);
+    }
+
+    public function test_performer_workspace_shows_revision_comment(): void
+    {
+        [$customer, $performer, $order] = $this->submittedOrderScenario();
+        $comment = 'Please update the final archive and explain the changes.';
+
+        $this->actingAs($customer)
+            ->post(route('customer.orders.request-revision', $order), $this->revisionPayload($comment));
+
+        $response = $this->actingAs($performer)
+            ->get(route('performer.orders.workspace', $order))
+            ->assertOk();
+
+        $revisionEvent = collect($response->inertiaProps('order.events'))
+            ->firstWhere('type', OrderEvent::TYPE_REVISION_REQUESTED);
+
+        $this->assertNotNull($revisionEvent);
+        $this->assertStringContainsString($comment, $revisionEvent['summary']);
     }
 
     public function test_complete_creates_order_completed_event(): void
@@ -504,5 +530,15 @@ class OrderWorkspaceTest extends TestCase
                 'mime_type' => 'text/plain',
                 'size' => 12,
             ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function revisionPayload(string $comment = 'Please improve the result and attach the updated source file.'): array
+    {
+        return [
+            'revision_comment' => $comment,
+        ];
     }
 }
