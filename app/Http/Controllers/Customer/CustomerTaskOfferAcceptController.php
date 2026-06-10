@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Task;
 use App\Models\TaskOffer;
+use App\Services\Notifications\NotificationService;
 use App\Services\Orders\OrderEventLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,9 +14,9 @@ use Illuminate\Support\Facades\DB;
 
 class CustomerTaskOfferAcceptController extends Controller
 {
-    public function __invoke(Request $request, TaskOffer $offer, OrderEventLogger $events): RedirectResponse
+    public function __invoke(Request $request, TaskOffer $offer, OrderEventLogger $events, NotificationService $notifications): RedirectResponse
     {
-        $offer->load(['task.category', 'order']);
+        $offer->load(['performer', 'task.category', 'order']);
         $task = $offer->task;
 
         abort_unless($request->user()?->isCustomer(), 403);
@@ -24,7 +25,13 @@ class CustomerTaskOfferAcceptController extends Controller
         abort_if($offer->order()->exists(), 403);
         abort_if(in_array($task->status, [Task::STATUS_ARCHIVED, Task::STATUS_CLOSED], true), 403);
 
-        $order = DB::transaction(function () use ($offer, $task, $request, $events): Order {
+        $rejectedOffers = $task->offers()
+            ->with('performer')
+            ->whereKeyNot($offer->id)
+            ->submitted()
+            ->get();
+
+        $order = DB::transaction(function () use ($offer, $task, $request, $events, $rejectedOffers): Order {
             $feePercent = $this->feePercent();
             $feeAmount = (int) round($offer->price * $feePercent / 100);
 
@@ -65,6 +72,41 @@ class CustomerTaskOfferAcceptController extends Controller
 
             return $order;
         });
+
+        $notifications->notifyUser(
+            $offer->performer,
+            'task_offer.accepted',
+            'Отклик выбран',
+            "Заказчик выбрал ваш отклик на задание «{$task->title}».",
+            route('performer.offers.index'),
+            [
+                'actor_id' => $request->user()->id,
+                'icon' => 'offer',
+                'severity' => 'success',
+                'related_type' => TaskOffer::class,
+                'related_id' => $offer->id,
+                'task_id' => $task->id,
+                'order_id' => $order->id,
+            ],
+        );
+
+        foreach ($rejectedOffers as $rejectedOffer) {
+            $notifications->notifyUser(
+                $rejectedOffer->performer,
+                'task_offer.rejected',
+                'Отклик отклонен',
+                "Заказчик выбрал другого исполнителя для задания «{$task->title}».",
+                route('performer.offers.index'),
+                [
+                    'actor_id' => $request->user()->id,
+                    'icon' => 'offer',
+                    'severity' => 'warning',
+                    'related_type' => TaskOffer::class,
+                    'related_id' => $rejectedOffer->id,
+                    'task_id' => $task->id,
+                ],
+            );
+        }
 
         return redirect()
             ->route('customer.orders.show', $order)

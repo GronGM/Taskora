@@ -8,9 +8,10 @@ const roleLabels = {
 };
 
 export default function DashboardLayout({ children }) {
-    const { auth } = usePage().props;
+    const { auth, notifications = {} } = usePage().props;
     const user = auth?.user;
     const canReview = user?.role === 'moderator' || user?.role === 'admin';
+    const unreadCount = notifications?.unread_count ?? 0;
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -33,6 +34,19 @@ export default function DashboardLayout({ children }) {
                             className="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                         >
                             Кабинет
+                        </Link>
+                        <Link
+                            href="/notifications"
+                            className="relative rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                            aria-label={unreadCount > 0 ? `Уведомления: ${unreadCount} непрочитанных` : 'Уведомления'}
+                        >
+                            <span className="hidden sm:inline">Уведомления</span>
+                            <span className="sm:hidden">Увед.</span>
+                            {unreadCount > 0 && (
+                                <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-xs font-semibold text-white">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
                         </Link>
                         {user?.role === 'customer' && (
                             <>

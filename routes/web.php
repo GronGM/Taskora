@@ -11,6 +11,7 @@ use App\Http\Controllers\Dashboard\RoleDashboardController;
 use App\Http\Controllers\Moderator\ModerationFlagController;
 use App\Http\Controllers\Moderator\ModeratorDisputeController;
 use App\Http\Controllers\Moderator\ModeratorServiceController;
+use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Order\DisputeController;
 use App\Http\Controllers\Order\DisputeMessageController;
 use App\Http\Controllers\Order\OrderFileController;
@@ -47,6 +48,9 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 
     Route::get('/customer/dashboard', [RoleDashboardController::class, 'customer'])
         ->middleware('role:customer')

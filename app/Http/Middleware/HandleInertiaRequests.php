@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Notifications\NotificationService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -48,6 +49,15 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
                 'dashboard_url' => $user?->dashboardPath(),
             ],
+            'notifications' => fn (): array => $user
+                ? [
+                    'unread_count' => app(NotificationService::class)->unreadCount($user),
+                    'latest' => app(NotificationService::class)->latestPayload($user),
+                ]
+                : [
+                    'unread_count' => 0,
+                    'latest' => [],
+                ],
         ];
     }
 }

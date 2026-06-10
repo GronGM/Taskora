@@ -7,6 +7,7 @@ use App\Http\Requests\Moderator\RejectServiceRequest;
 use App\Models\ModerationFlag;
 use App\Models\Service;
 use App\Models\ServicePackage;
+use App\Services\Notifications\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -77,7 +78,7 @@ class ModeratorServiceController extends Controller
         ]);
     }
 
-    public function approve(Service $service): RedirectResponse
+    public function approve(Service $service, NotificationService $notifications): RedirectResponse
     {
         Gate::authorize('approve', $service);
 
@@ -87,13 +88,29 @@ class ModeratorServiceController extends Controller
             'moderated_by' => request()->user()->id,
             'moderated_at' => now(),
         ]);
+        $service->load('user');
+
+        $notifications->notifyUser(
+            $service->user,
+            'service.approved',
+            'Услуга одобрена',
+            "Модератор одобрил услугу «{$service->title}». Она опубликована в каталоге.",
+            route('services.show', ['service' => $service->slug]),
+            [
+                'actor_id' => request()->user()->id,
+                'icon' => 'service',
+                'severity' => 'success',
+                'related_type' => Service::class,
+                'related_id' => $service->id,
+            ],
+        );
 
         return redirect()
             ->route('moderator.services.index')
             ->with('success', 'Услуга опубликована.');
     }
 
-    public function reject(RejectServiceRequest $request, Service $service): RedirectResponse
+    public function reject(RejectServiceRequest $request, Service $service, NotificationService $notifications): RedirectResponse
     {
         $service->update([
             'status' => Service::STATUS_REJECTED,
@@ -101,6 +118,22 @@ class ModeratorServiceController extends Controller
             'moderated_by' => $request->user()->id,
             'moderated_at' => now(),
         ]);
+        $service->load('user');
+
+        $notifications->notifyUser(
+            $service->user,
+            'service.rejected',
+            'Услуга отклонена',
+            "Модератор отклонил услугу «{$service->title}». Проверьте комментарий и отправьте услугу повторно.",
+            route('performer.services.edit', $service),
+            [
+                'actor_id' => $request->user()->id,
+                'icon' => 'service',
+                'severity' => 'warning',
+                'related_type' => Service::class,
+                'related_id' => $service->id,
+            ],
+        );
 
         return redirect()
             ->route('moderator.services.index')

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Performer\StoreTaskOfferRequest;
 use App\Models\Task;
 use App\Models\TaskOffer;
+use App\Services\Notifications\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -47,10 +48,10 @@ class TaskOfferController extends Controller
         ]);
     }
 
-    public function store(StoreTaskOfferRequest $request, Task $task): RedirectResponse
+    public function store(StoreTaskOfferRequest $request, Task $task, NotificationService $notifications): RedirectResponse
     {
-        DB::transaction(function () use ($request, $task): void {
-            TaskOffer::create([
+        $offer = DB::transaction(function () use ($request, $task): TaskOffer {
+            $offer = TaskOffer::create([
                 ...$request->offerData(),
                 'task_id' => $task->id,
                 'user_id' => $request->user()->id,
@@ -58,7 +59,26 @@ class TaskOfferController extends Controller
             ]);
 
             $task->increment('offers_count');
+
+            return $offer;
         });
+        $task->load('customer');
+
+        $notifications->notifyUser(
+            $task->customer,
+            'task_offer.created',
+            'Новый отклик на задание',
+            "Исполнитель отправил отклик на задание «{$task->title}».",
+            route('customer.tasks.show', $task),
+            [
+                'actor_id' => $request->user()->id,
+                'icon' => 'offer',
+                'severity' => 'info',
+                'related_type' => TaskOffer::class,
+                'related_id' => $offer->id,
+                'task_id' => $task->id,
+            ],
+        );
 
         return redirect()
             ->route('performer.offers.index')

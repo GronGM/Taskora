@@ -89,7 +89,7 @@ ModuleName/
 | `Reviews` | отзывы после завершения заказа |
 | `Disputes` | споры и решения модерации |
 | `Moderation` | проверки контента, флаги, ручная модерация |
-| `Notifications` | внутренние уведомления и email-события |
+| `Notifications` | внутренние database-уведомления в интерфейсе |
 | `Billing` | заглушка платежей и расчет комиссии |
 | `Admin` | админка и модераторская панель |
 
@@ -284,6 +284,16 @@ ModuleName/
 - `body`;
 - `is_system`.
 
+`notifications`:
+
+- стандартная Laravel database notifications table;
+- `id` uuid;
+- `type` — PHP-класс уведомления;
+- `notifiable_type`, `notifiable_id`;
+- `data` json с полями `type`, `title`, `body`, `url`, `icon`, `severity`, `related_type`, `related_id`, `meta`;
+- `read_at`;
+- `created_at`, `updated_at`.
+
 Связи:
 
 - `Category hasMany Services`
@@ -336,6 +346,7 @@ ModuleName/
 - `Dispute hasMany DisputeMessages`
 - `DisputeMessage belongsTo Dispute`
 - `DisputeMessage belongsTo User`
+- `User hasMany Notifications` через Laravel `Notifiable`
 
 Публичные маршруты:
 
@@ -596,6 +607,43 @@ contact_blocked
 ```
 
 События отображаются в workspace как история заказа. Старые тестовые данные не мигрируются, но новые действия пишут события сразу.
+
+## Внутренние Уведомления
+
+Модуль `Notifications` использует штатный Laravel database channel. В MVP не подключаются email, push, WebSocket, Broadcasting, Reverb или Pusher.
+
+Ключевые классы:
+
+- `App\Notifications\PlatformNotification` — один универсальный notification-класс с `type`, `title`, `body`, `url`, `icon`, `severity`, `related_type`, `related_id` и `meta`;
+- `App\Services\Notifications\NotificationService` — единая точка отправки, дедупликации получателей и подготовки payload для Inertia;
+- `App\Http\Controllers\Notifications\NotificationController` — список уведомлений, отметка одного уведомления и отметка всех уведомлений прочитанными.
+
+Shared props через `HandleInertiaRequests` передают:
+
+- `auth.user`;
+- `notifications.unread_count`;
+- `notifications.latest` — последние 5 уведомлений.
+
+Полный список уведомлений доступен по `/notifications`. Пользователь может читать и помечать только свои уведомления.
+
+События, которые создают уведомления:
+
+- услуга одобрена или отклонена модератором;
+- новый отклик, принятие отклика и отклонение отклика;
+- заказ создан из услуги или отклика;
+- заказ оплачен локальной заглушкой;
+- работа отправлена на проверку;
+- заказчик запросил доработку;
+- заказ завершен или auto-release разблокировал оплату;
+- новое сообщение или файл в рабочей области заказа;
+- спор открыт, взят в работу, получил новое сообщение или был решен.
+
+Правила:
+
+- сообщения и файлы не уведомляют отправителя;
+- уведомления одному и тому же пользователю не дублируются в рамках одного события;
+- moderator/admin получают уведомления только по событиям, которые требуют их внимания: новый спор и сообщения в споре;
+- системные события завершения заказа и auto-release уведомляют обе стороны заказа.
 
 ## Заглушка Платежей
 
