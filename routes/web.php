@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BetaAccessController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 use App\Http\Controllers\Customer\CustomerReviewController;
@@ -30,7 +31,22 @@ use App\Http\Controllers\Public\CatalogController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\ServiceOrderController;
 use App\Http\Controllers\Public\TaskBoardController;
+use App\Support\BetaAccess;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Response;
+
+Route::get('/robots.txt', fn () => Response::make(
+    BetaAccess::shouldNoIndex()
+        ? "User-agent: *\nDisallow: /\n"
+        : "User-agent: *\nAllow: /\n",
+    200,
+    ['Content-Type' => 'text/plain; charset=UTF-8'],
+))->name('robots');
+
+Route::get('/beta-access', [BetaAccessController::class, 'show'])->name('beta-access.show');
+Route::post('/beta-access', [BetaAccessController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('beta-access.store');
 
 Route::get('/', HomeController::class)->name('home');
 

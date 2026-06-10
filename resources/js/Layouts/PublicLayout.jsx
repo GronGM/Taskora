@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import TestModeBanner from '../Components/TestModeBanner';
 
 const navigation = [
     { label: 'Главная', href: '/' },
@@ -14,6 +15,7 @@ export default function PublicLayout({ children }) {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
+            <TestModeBanner />
             <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
                 <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between gap-4">

@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import TestModeBanner from '../Components/TestModeBanner';
 
 const roleLabels = {
     customer: 'Заказчик',
@@ -15,6 +16,7 @@ export default function DashboardLayout({ children }) {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
+            <TestModeBanner />
             <header className="border-b border-slate-200 bg-white">
                 <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between gap-4">

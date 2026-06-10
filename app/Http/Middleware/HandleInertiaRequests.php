@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\Notifications\NotificationService;
+use App\Support\BetaAccess;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -58,6 +59,11 @@ class HandleInertiaRequests extends Middleware
                     'unread_count' => 0,
                     'latest' => [],
                 ],
+            'testMode' => [
+                'enabled' => BetaAccess::shouldShowTestModeBanner(),
+                'message' => BetaAccess::BANNER_TEXT,
+                'debug_warning' => BetaAccess::debugWarning(),
+            ],
         ];
     }
 }

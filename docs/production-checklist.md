@@ -10,6 +10,9 @@
 - Сгенерировать и сохранить production `APP_KEY`.
 - Проверить `APP_LOCALE=ru`, `APP_FALLBACK_LOCALE=ru`.
 - Не переносить локальные demo-аккаунты и demo-контент в production.
+- Для закрытого beta/staging-доступа использовать `BETA_ACCESS_ENABLED=true` и временный пароль из `.env`.
+- Не показывать тестовую ссылку другим людям при `APP_DEBUG=true`.
+- Для beta/staging проверить `noindex,nofollow` и `/robots.txt` с `Disallow: /`.
 
 ## Database
 
@@ -94,6 +97,8 @@
 - Пройти `composer validate --strict`.
 - Проверить `php artisan route:list --except-vendor`.
 - Проверить `php artisan schedule:list`.
+- Отключить `BETA_ACCESS_ENABLED` перед настоящим production launch или заменить его production-авторизацией.
+- Проверить, что production `/robots.txt` не запрещает индексацию, если публичный запуск действительно разрешен.
 - Проверить основные публичные страницы и кабинеты на 360, 390, 768 и 1280 px.
 - Проверить публичные профили исполнителей, бейдж «Проверен», скрытие email, портфолио и разделение публичных/приватных файлов.
 - Проверить `/performer/finance` и `/admin/finance` как read-only страницы внутреннего ledger.

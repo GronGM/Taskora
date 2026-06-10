@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\ReleaseDueOrdersCommand;
+use App\Http\Middleware\EnsureBetaAccess;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
+            EnsureBetaAccess::class,
             HandleInertiaRequests::class,
         ]);
 
