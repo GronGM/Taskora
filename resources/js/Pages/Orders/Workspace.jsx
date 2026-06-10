@@ -21,7 +21,13 @@ const eventClasses = {
     review_hold_started: 'border-purple-200 bg-purple-50 text-purple-900',
     order_completed: 'border-emerald-200 bg-emerald-50 text-emerald-900',
     funds_released: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    funds_refunded: 'border-red-200 bg-red-50 text-red-900',
     order_canceled: 'border-slate-300 bg-slate-100 text-slate-800',
+    dispute_opened: 'border-red-200 bg-red-50 text-red-900',
+    dispute_message_sent: 'border-red-200 bg-red-50 text-red-900',
+    dispute_under_review: 'border-amber-200 bg-amber-50 text-amber-900',
+    dispute_resolved: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    revision_requested_by_moderator: 'border-orange-200 bg-orange-50 text-orange-900',
 };
 
 export default function Workspace({ role, order, statusLabels, paymentStatusLabels }) {
@@ -106,6 +112,16 @@ export default function Workspace({ role, order, statusLabels, paymentStatusLabe
                     {role === 'performer' && order.status === 'submitted_for_review' && (
                         <Notice tone="purple">
                             Работа отправлена на проверку. Если заказчик не запросит доработку или спор до {order.review_hold_until}, оплата будет разблокирована автоматически.
+                        </Notice>
+                    )}
+                    {order.status === 'disputed' && (
+                        <Notice tone="red">
+                            По заказу открыт спор. Автоматическая разблокировка оплаты остановлена до решения модератора.
+                            {order.active_dispute_url && (
+                                <Link href={order.active_dispute_url} className="ml-2 underline">
+                                    Открыть спор
+                                </Link>
+                            )}
                         </Notice>
                     )}
                     {order.status === 'completed' && order.release_reason === 'auto_release' && (
@@ -322,10 +338,15 @@ function QuickActions({ role, order }) {
                         Запросить доработку
                     </Link>
                 )}
-                {role === 'customer' && order.status === 'submitted_for_review' && (
-                    <button type="button" disabled className="w-full cursor-not-allowed rounded-md border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-500">
+                {order.can.open_dispute && (
+                    <Link href={order.open_dispute_url} className="block w-full rounded-md border border-red-200 bg-white px-5 py-3 text-center text-sm font-semibold text-red-700 hover:bg-red-50">
                         Открыть спор
-                    </button>
+                    </Link>
+                )}
+                {order.status === 'disputed' && order.active_dispute_url && (
+                    <Link href={order.active_dispute_url} className="block w-full rounded-md bg-red-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-red-700">
+                        Открыть спор
+                    </Link>
                 )}
                 {role === 'customer' && order.can.cancel_as_customer && (
                     <Link href={order.cancel_url} method="post" as="button" className="w-full rounded-md border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50">
@@ -376,10 +397,10 @@ function EmptyState({ title, text }) {
 
 function hasActions(role, order) {
     if (role === 'customer') {
-        return order.can.mark_paid || order.can.complete || order.can.request_revision || order.can.cancel_as_customer;
+        return order.can.mark_paid || order.can.complete || order.can.request_revision || order.can.cancel_as_customer || order.can.open_dispute || order.active_dispute_url;
     }
 
-    return order.can.submit_work || order.can.cancel_as_performer;
+    return order.can.submit_work || order.can.cancel_as_performer || order.can.open_dispute || order.active_dispute_url;
 }
 
 function formatBytes(size) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dispute;
 use App\Models\Order;
 use App\Models\OrderSubmission;
 use App\Services\Orders\OrderEventLogger;
@@ -20,7 +21,7 @@ class CustomerOrderController extends Controller
 
         $orders = request()->user()
             ->customerOrders()
-            ->with(['performer', 'service', 'task'])
+            ->with(['performer', 'service', 'task', 'activeDispute'])
             ->latest()
             ->get()
             ->map(fn (Order $order): array => $this->orderCard($order, 'customer'));
@@ -36,7 +37,7 @@ class CustomerOrderController extends Controller
     {
         Gate::authorize('viewAsCustomer', $order);
 
-        $order->load(['performer', 'category', 'service', 'task', 'taskOffer', 'submissions.user']);
+        $order->load(['performer', 'category', 'service', 'task', 'taskOffer', 'submissions.user', 'activeDispute']);
 
         return Inertia::render('Customer/Orders/Show', [
             'order' => $this->orderDetail($order, 'customer'),
@@ -173,6 +174,9 @@ class CustomerOrderController extends Controller
             'participant' => $role === 'customer' ? $order->performer?->name : $order->customer?->name,
             'show_url' => route("{$role}.orders.show", $order),
             'workspace_url' => route("{$role}.orders.workspace", $order),
+            'open_dispute_url' => route("{$role}.orders.disputes.create", $order),
+            'active_dispute_url' => $order->activeDispute ? route("{$role}.disputes.show", $order->activeDispute) : null,
+            'can_open_dispute' => Gate::allows('create', [Dispute::class, $order]),
         ];
     }
 
@@ -218,6 +222,7 @@ class CustomerOrderController extends Controller
         return match ($releaseReason) {
             Order::RELEASE_CUSTOMER_EARLY_ACCEPT => 'Досрочно принято заказчиком',
             Order::RELEASE_AUTO => 'Автоматически после срока проверки',
+            Order::RELEASE_DISPUTE_TO_PERFORMER => 'Решение спора в пользу исполнителя',
             default => null,
         };
     }

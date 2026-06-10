@@ -264,6 +264,26 @@ ModuleName/
 - `type`;
 - `payload` json nullable.
 
+`disputes`:
+
+- `order_id`;
+- `opened_by` — пользователь, открывший спор;
+- `resolved_by` nullable — модератор или администратор, принявший решение;
+- `status`: `open`, `under_review`, `resolved`, `canceled`;
+- `reason`: `work_not_delivered`, `poor_quality`, `missed_deadline`, `requirements_mismatch`, `customer_unresponsive`, `performer_unresponsive`, `other`;
+- `description`;
+- `previous_order_status`, `previous_payment_status`;
+- `resolution`: `release_to_performer`, `refund_to_customer`, `return_to_revision`;
+- `moderator_comment`;
+- `resolved_at`, `canceled_at`.
+
+`dispute_messages`:
+
+- `dispute_id`;
+- `user_id`;
+- `body`;
+- `is_system`.
+
 Связи:
 
 - `Category hasMany Services`
@@ -300,6 +320,8 @@ ModuleName/
 - `Order hasMany OrderMessages`
 - `Order hasMany OrderFiles`
 - `Order hasMany OrderEvents`
+- `Order hasMany Disputes`
+- `Order hasOne activeDispute`
 - `OrderSubmission belongsTo Order`
 - `OrderSubmission belongsTo User`
 - `OrderMessage belongsTo Order`
@@ -308,6 +330,12 @@ ModuleName/
 - `OrderFile belongsTo User`
 - `OrderEvent belongsTo Order`
 - `OrderEvent belongsTo User nullable`
+- `Dispute belongsTo Order`
+- `Dispute belongsTo openedBy User`
+- `Dispute belongsTo resolvedBy User nullable`
+- `Dispute hasMany DisputeMessages`
+- `DisputeMessage belongsTo Dispute`
+- `DisputeMessage belongsTo User`
 
 Публичные маршруты:
 
@@ -527,8 +555,12 @@ canceled
 - `in_progress` → `submitted_for_review` после сдачи работы исполнителем, события `work_submitted` и `review_hold_started`;
 - `submitted_for_review` → `completed` после досрочной приемки заказчиком, события `order_completed` и `funds_released`, `release_reason = customer_early_accept`;
 - `submitted_for_review` → `completed` по команде `orders:release-due`, если истек `review_hold_until`, события `order_completed` и `funds_released`, `release_reason = auto_release`;
+- `in_progress`/`submitted_for_review`/`revision_requested` → `disputed` при открытии спора участником заказа, событие `dispute_opened`;
 - `submitted_for_review` → `revision_requested` после запроса доработки, событие `revision_requested`, поля `review_hold_started_at`, `review_hold_until` и `auto_release_at` очищаются;
 - `revision_requested` → `submitted_for_review` после повторной сдачи, события `work_submitted` и `review_hold_started`, срок проверки запускается заново;
+- `disputed` → `completed` по решению `release_to_performer`, события `dispute_resolved` и `funds_released`, `release_reason = dispute_release_to_performer`;
+- `disputed` → `canceled` по решению `refund_to_customer`, события `dispute_resolved` и `funds_refunded`;
+- `disputed` → `revision_requested` по решению `return_to_revision`, события `dispute_resolved` и `revision_requested_by_moderator`;
 - `awaiting_payment` → `canceled` при отмене до оплаты, событие `order_canceled`.
 
 При создании заказа из услуги или выбранного отклика пишется событие `order_created`.
@@ -552,6 +584,12 @@ revision_requested
 order_completed
 funds_released
 order_canceled
+dispute_opened
+dispute_message_sent
+dispute_under_review
+dispute_resolved
+funds_refunded
+revision_requested_by_moderator
 message_sent
 file_uploaded
 contact_blocked
@@ -591,6 +629,31 @@ canceled
 - на следующем этапе открыть спор, который должен останавливать автоматическую разблокировку.
 
 Команда `php artisan orders:release-due` автоматически завершает только due-заказы `submitted_for_review` с `payment_status = held` и истекшим `review_hold_until`. Для таких заказов заполняются `completed_at`, `released_at`, `release_reason = auto_release`, а в `order_events` пишутся `order_completed` и `funds_released`.
+
+## Споры И Арбитраж
+
+Спор открывается только по оплаченному заказу с `payment_status = held` и статусом `in_progress`, `submitted_for_review` или `revision_requested`. Открыть спор могут только участники заказа: заказчик-владелец или исполнитель. Гость, чужой пользователь, модератор или администратор не открывают спор от имени участника.
+
+Поток открытия:
+
+1. Policy проверяет участие пользователя в заказе, допустимый статус, удержанную оплату и отсутствие активного спора.
+2. Создается `dispute` со статусом `open`, причиной, описанием и предыдущими статусами заказа/оплаты.
+3. `orders.status` меняется на `disputed`, `payment_status` остается `held`.
+4. `review_hold_until` и `auto_release_at` очищаются, поэтому `orders:release-due` не сможет разблокировать оплату.
+5. Создаются `order_event` с типом `dispute_opened` и системное `dispute_message`.
+
+Сообщения в споре доступны участникам заказа, модератору и администратору. Текст проверяется через `ContactGuard`; при нарушении сообщение не сохраняется, создается `moderation_flag` и `order_event` `contact_blocked`. При успешной отправке создается `dispute_message` и `order_event` `dispute_message_sent`.
+
+Модераторский поток:
+
+1. Модератор или администратор открывает `/moderator/disputes`.
+2. `POST /moderator/disputes/{dispute}/take` переводит спор из `open` в `under_review`, пишет системное сообщение и событие `dispute_under_review`.
+3. `POST /moderator/disputes/{dispute}/resolve` принимает решение с обязательным комментарием.
+4. `release_to_performer` завершает заказ, переводит оплату в `released`, ставит `release_reason = dispute_release_to_performer`.
+5. `refund_to_customer` отменяет заказ и переводит оплату в `refunded`.
+6. `return_to_revision` возвращает заказ в `revision_requested`, оплата остается `held`, срок проверки будет запущен заново при повторной сдаче.
+
+TODO после MVP: частичный возврат, частичная выплата исполнителю и распределение комиссии при `partial_split`.
 
 ## Модерация
 

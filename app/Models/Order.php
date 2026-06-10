@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'customer_id',
@@ -80,6 +81,8 @@ class Order extends Model
 
     public const RELEASE_AUTO = 'auto_release';
 
+    public const RELEASE_DISPUTE_TO_PERFORMER = 'dispute_release_to_performer';
+
     /**
      * @return array<string, string>
      */
@@ -151,5 +154,17 @@ class Order extends Model
     public function orderEvents(): HasMany
     {
         return $this->hasMany(OrderEvent::class)->oldest();
+    }
+
+    public function disputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class)->latest();
+    }
+
+    public function activeDispute(): HasOne
+    {
+        return $this->hasOne(Dispute::class)
+            ->whereIn('status', Dispute::activeStatuses())
+            ->latestOfMany();
     }
 }

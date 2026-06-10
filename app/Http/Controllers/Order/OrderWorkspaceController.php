@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Order;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dispute;
 use App\Models\Order;
 use App\Models\OrderEvent;
 use App\Models\OrderFile;
@@ -25,6 +26,7 @@ class OrderWorkspaceController extends Controller
             'orderMessages.user',
             'orderFiles.user',
             'orderEvents.user',
+            'activeDispute',
         ]);
 
         $role = $request->user()->isCustomer() ? 'customer' : 'performer';
@@ -69,6 +71,8 @@ class OrderWorkspaceController extends Controller
             'back_url' => route("{$role}.orders.index"),
             'show_url' => route("{$role}.orders.show", $order),
             'workspace_url' => route("{$role}.orders.workspace", $order),
+            'open_dispute_url' => route("{$role}.orders.disputes.create", $order),
+            'active_dispute_url' => $order->activeDispute ? route("{$role}.disputes.show", $order->activeDispute) : null,
             'message_url' => route("{$role}.orders.messages.store", $order),
             'file_url' => route("{$role}.orders.files.store", $order),
             'mark_paid_url' => $role === 'customer' ? route('customer.orders.mark-paid', $order) : null,
@@ -89,6 +93,7 @@ class OrderWorkspaceController extends Controller
                 'cancel_as_customer' => Gate::allows('cancelAsCustomer', $order),
                 'submit_work' => Gate::allows('submitWork', $order),
                 'cancel_as_performer' => Gate::allows('cancelAsPerformer', $order),
+                'open_dispute' => Gate::allows('create', [Dispute::class, $order]),
             ],
         ];
     }
@@ -198,6 +203,12 @@ class OrderWorkspaceController extends Controller
             OrderEvent::TYPE_ORDER_COMPLETED => 'Заказ завершен.',
             OrderEvent::TYPE_FUNDS_RELEASED => 'Оплата разблокирована.',
             OrderEvent::TYPE_ORDER_CANCELED => 'Заказ отменен.',
+            OrderEvent::TYPE_DISPUTE_OPENED => 'Открыт спор по заказу.',
+            OrderEvent::TYPE_DISPUTE_MESSAGE_SENT => 'Новое сообщение в споре.',
+            OrderEvent::TYPE_DISPUTE_UNDER_REVIEW => 'Спор взят в работу модератором.',
+            OrderEvent::TYPE_DISPUTE_RESOLVED => 'Спор решен модератором.',
+            OrderEvent::TYPE_FUNDS_REFUNDED => 'Средства возвращены заказчику.',
+            OrderEvent::TYPE_REVISION_REQUESTED_BY_MODERATOR => 'Модератор вернул заказ на доработку.',
             OrderEvent::TYPE_ORDER_CREATED => 'Заказ создан.',
             default => null,
         };
@@ -208,6 +219,7 @@ class OrderWorkspaceController extends Controller
         return match ($releaseReason) {
             Order::RELEASE_CUSTOMER_EARLY_ACCEPT => 'Досрочно принято заказчиком',
             Order::RELEASE_AUTO => 'Автоматически после срока проверки',
+            Order::RELEASE_DISPUTE_TO_PERFORMER => 'Решение спора в пользу исполнителя',
             default => null,
         };
     }
@@ -256,6 +268,12 @@ class OrderWorkspaceController extends Controller
             OrderEvent::TYPE_ORDER_COMPLETED => 'Заказ завершен',
             OrderEvent::TYPE_FUNDS_RELEASED => 'Оплата разблокирована',
             OrderEvent::TYPE_ORDER_CANCELED => 'Заказ отменен',
+            OrderEvent::TYPE_DISPUTE_OPENED => 'Спор открыт',
+            OrderEvent::TYPE_DISPUTE_MESSAGE_SENT => 'Сообщение в споре',
+            OrderEvent::TYPE_DISPUTE_UNDER_REVIEW => 'Спор на рассмотрении',
+            OrderEvent::TYPE_DISPUTE_RESOLVED => 'Спор решен',
+            OrderEvent::TYPE_FUNDS_REFUNDED => 'Средства возвращены',
+            OrderEvent::TYPE_REVISION_REQUESTED_BY_MODERATOR => 'Доработка по решению модератора',
             OrderEvent::TYPE_MESSAGE_SENT => 'Сообщение отправлено',
             OrderEvent::TYPE_FILE_UPLOADED => 'Файл загружен',
             OrderEvent::TYPE_CONTACT_BLOCKED => 'Контакт заблокирован',

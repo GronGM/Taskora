@@ -162,6 +162,20 @@ php artisan orders:release-due
 
 В production ее нужно поставить в scheduler/cron, например запускать каждые несколько минут. Команда завершает только заказы `submitted_for_review` с `payment_status = held` и истекшим `review_hold_until`; спорные, отмененные и уже завершенные заказы не изменяются.
 
+## Споры И Арбитраж
+
+Спор можно открыть только по оплаченному заказу в статусах `in_progress`, `submitted_for_review` или `revision_requested`. Спор переводит заказ в `disputed`, оставляет `payment_status = held` и очищает `review_hold_until`/`auto_release_at`, чтобы автоматическая разблокировка оплаты не сработала до решения модератора.
+
+Открыть спор могут только участники заказа: заказчик-владелец или исполнитель. Гости, чужие пользователи, модераторы и администраторы не открывают спор от имени участника. После `completed` и `payment_status = released` спор в MVP не открывается; пост-гарантийный спор оставлен как будущий TODO.
+
+Модератор или администратор видит очередь `/moderator/disputes`, может взять спор в работу и принять одно из решений:
+
+- `release_to_performer` — заказ завершается, оплата разблокируется исполнителю, `release_reason = dispute_release_to_performer`;
+- `refund_to_customer` — заказ отменяется, статус оплаты становится `refunded`;
+- `return_to_revision` — заказ возвращается в `revision_requested`, оплата остается удержанной.
+
+Сообщения в споре проходят через ContactGuard. При обнаружении email, телефона, Telegram или другого контакта сообщение не сохраняется, создается `moderation_flag` и событие `contact_blocked`.
+
 ## Проверки
 
 ```bash
@@ -221,6 +235,10 @@ composer validate --strict
 | `GET` | `/customer/orders` | список заказов заказчика |
 | `GET` | `/customer/orders/{order}` | карточка заказа заказчика |
 | `GET` | `/customer/orders/{order}/workspace` | рабочая область заказа |
+| `GET` | `/customer/orders/{order}/disputes/create` | форма открытия спора |
+| `POST` | `/customer/orders/{order}/disputes` | открытие спора |
+| `GET` | `/customer/disputes/{dispute}` | карточка спора заказчика |
+| `POST` | `/customer/disputes/{dispute}/messages` | сообщение в споре |
 | `POST` | `/customer/orders/{order}/mark-paid` | локальная заглушка оплаты |
 | `POST` | `/customer/orders/{order}/request-revision` | запрос доработки |
 | `POST` | `/customer/orders/{order}/complete` | приемка работы и разблокировка оплаты |
@@ -250,6 +268,10 @@ composer validate --strict
 | `GET` | `/performer/orders` | список заказов исполнителя |
 | `GET` | `/performer/orders/{order}` | карточка заказа исполнителя |
 | `GET` | `/performer/orders/{order}/workspace` | рабочая область заказа |
+| `GET` | `/performer/orders/{order}/disputes/create` | форма открытия спора |
+| `POST` | `/performer/orders/{order}/disputes` | открытие спора |
+| `GET` | `/performer/disputes/{dispute}` | карточка спора исполнителя |
+| `POST` | `/performer/disputes/{dispute}/messages` | сообщение в споре |
 | `POST` | `/performer/orders/{order}/submit-work` | отправка работы на проверку |
 | `POST` | `/performer/orders/{order}/cancel` | отказ от неоплаченного заказа до старта работы |
 | `POST` | `/performer/orders/{order}/messages` | отправка сообщения в чате заказа |
@@ -303,7 +325,7 @@ composer validate --strict
 |---|---|
 | `unpaid` | Не оплачен |
 | `held` | Оплата удерживается |
-| `released` | Выплачено исполнителю |
+| `released` | Оплата разблокирована |
 | `refunded` | Возврат |
 | `canceled` | Отменена |
 
@@ -373,6 +395,11 @@ composer validate --strict
 | `POST` | `/moderator/services/{service}/reject` | отклонение услуги с причиной |
 | `GET` | `/moderator/moderation-flags` | список открытых флагов модерации |
 | `POST` | `/moderator/moderation-flags/{flag}/resolve` | отметка флага как обработанного |
+| `GET` | `/moderator/disputes` | очередь споров и арбитража |
+| `GET` | `/moderator/disputes/{dispute}` | карточка спора |
+| `POST` | `/moderator/disputes/{dispute}/take` | взять спор в работу |
+| `POST` | `/moderator/disputes/{dispute}/messages` | сообщение модератора в споре |
+| `POST` | `/moderator/disputes/{dispute}/resolve` | решение спора |
 
 Сценарий проверки:
 
@@ -382,6 +409,18 @@ composer validate --strict
 4. Открыть `/moderator/services`, проверить услугу и опубликовать ее.
 5. Убедиться, что опубликованная услуга появилась в `/catalog`.
 6. Создать еще одну услугу, отклонить ее с причиной и проверить, что исполнитель видит причину в `/performer/services`.
+
+Сценарий проверки спора:
+
+1. Войти как `customer@taskora.local` / `password`.
+2. Открыть оплаченный заказ в статусе `in_progress`, `submitted_for_review` или `revision_requested`.
+3. Нажать «Открыть спор», выбрать причину и описать проблему.
+4. Проверить, что заказ стал `disputed`, а автоматическая разблокировка оплаты остановлена.
+5. Войти как `moderator@taskora.local` / `password`.
+6. Открыть `/moderator/disputes`, открыть спор и нажать «Взять спор в работу».
+7. Написать сообщение модератора.
+8. Выбрать решение: разблокировать оплату исполнителю, вернуть средства заказчику или вернуть заказ на доработку.
+9. Проверить итоговый статус заказа и оплаты на странице заказа.
 
 ## Локальные Demo-Данные Каталога
 

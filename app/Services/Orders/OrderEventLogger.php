@@ -87,6 +87,54 @@ class OrderEventLogger
     /**
      * @param  array<string, mixed>  $payload
      */
+    public function disputeOpened(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        return $this->log($order, $user, OrderEvent::TYPE_DISPUTE_OPENED, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function disputeMessageSent(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        return $this->log($order, $user, OrderEvent::TYPE_DISPUTE_MESSAGE_SENT, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function disputeUnderReview(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        return $this->log($order, $user, OrderEvent::TYPE_DISPUTE_UNDER_REVIEW, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function disputeResolved(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        return $this->log($order, $user, OrderEvent::TYPE_DISPUTE_RESOLVED, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function fundsRefunded(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        return $this->log($order, $user, OrderEvent::TYPE_FUNDS_REFUNDED, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function revisionRequestedByModerator(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        return $this->log($order, $user, OrderEvent::TYPE_REVISION_REQUESTED_BY_MODERATOR, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function messageSent(Order $order, ?User $user, array $payload = []): OrderEvent
     {
         return $this->log($order, $user, OrderEvent::TYPE_MESSAGE_SENT, $payload);

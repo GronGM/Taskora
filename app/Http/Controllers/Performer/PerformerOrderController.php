@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Performer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Performer\SubmitWorkRequest;
+use App\Models\Dispute;
 use App\Models\Order;
 use App\Models\OrderSubmission;
 use App\Services\Orders\OrderEventLogger;
@@ -21,7 +22,7 @@ class PerformerOrderController extends Controller
 
         $orders = request()->user()
             ->performerOrders()
-            ->with(['customer', 'service', 'task'])
+            ->with(['customer', 'service', 'task', 'activeDispute'])
             ->latest()
             ->get()
             ->map(fn (Order $order): array => $this->orderCard($order));
@@ -37,7 +38,7 @@ class PerformerOrderController extends Controller
     {
         Gate::authorize('viewAsPerformer', $order);
 
-        $order->load(['customer', 'category', 'service', 'task', 'taskOffer', 'submissions.user']);
+        $order->load(['customer', 'category', 'service', 'task', 'taskOffer', 'submissions.user', 'activeDispute']);
 
         return Inertia::render('Performer/Orders/Show', [
             'order' => $this->orderDetail($order),
@@ -126,6 +127,9 @@ class PerformerOrderController extends Controller
             'participant' => $order->customer?->name,
             'show_url' => route('performer.orders.show', $order),
             'workspace_url' => route('performer.orders.workspace', $order),
+            'open_dispute_url' => route('performer.orders.disputes.create', $order),
+            'active_dispute_url' => $order->activeDispute ? route('performer.disputes.show', $order->activeDispute) : null,
+            'can_open_dispute' => Gate::allows('create', [Dispute::class, $order]),
         ];
     }
 
@@ -164,6 +168,7 @@ class PerformerOrderController extends Controller
         return match ($releaseReason) {
             Order::RELEASE_CUSTOMER_EARLY_ACCEPT => 'Досрочно принято заказчиком',
             Order::RELEASE_AUTO => 'Автоматически после срока проверки',
+            Order::RELEASE_DISPUTE_TO_PERFORMER => 'Решение спора в пользу исполнителя',
             default => null,
         };
     }

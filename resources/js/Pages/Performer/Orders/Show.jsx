@@ -97,8 +97,19 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                             <p className="mt-5 text-sm leading-6 text-slate-600">
                                 {order.status === 'awaiting_payment' && 'Ожидайте, пока заказчик отметит оплату через локальную заглушку.'}
                                 {order.status === 'submitted_for_review' && `Работа отправлена на проверку. Если заказчик не запросит доработку или спор до ${order.review_hold_until}, оплата будет разблокирована автоматически.`}
+                                {order.status === 'disputed' && 'По заказу открыт спор. Автоматическая разблокировка оплаты остановлена до решения модератора.'}
                                 {['completed', 'canceled'].includes(order.status) && 'Для завершенного или отмененного заказа доступны только просмотр и история.'}
                             </p>
+                        )}
+                        {order.can_open_dispute && (
+                            <Link href={order.open_dispute_url} className="mt-4 block w-full rounded-md border border-red-200 bg-white px-5 py-3 text-center text-sm font-semibold text-red-700 hover:bg-red-50">
+                                Открыть спор
+                            </Link>
+                        )}
+                        {order.status === 'disputed' && order.active_dispute_url && (
+                            <Link href={order.active_dispute_url} className="mt-4 block w-full rounded-md bg-red-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-red-700">
+                                Открыть спор
+                            </Link>
                         )}
                     </aside>
                 </div>

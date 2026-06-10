@@ -23,6 +23,7 @@ class ReleaseDueOrdersCommand extends Command
             ->where('payment_status', Order::PAYMENT_HELD)
             ->whereNotNull('review_hold_until')
             ->where('review_hold_until', '<=', $now)
+            ->whereDoesntHave('activeDispute')
             ->orderBy('id')
             ->chunkById(100, function ($orders) use (&$released, $events): void {
                 foreach ($orders as $order) {

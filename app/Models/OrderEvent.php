@@ -30,6 +30,18 @@ class OrderEvent extends Model
 
     public const TYPE_ORDER_CANCELED = 'order_canceled';
 
+    public const TYPE_DISPUTE_OPENED = 'dispute_opened';
+
+    public const TYPE_DISPUTE_MESSAGE_SENT = 'dispute_message_sent';
+
+    public const TYPE_DISPUTE_UNDER_REVIEW = 'dispute_under_review';
+
+    public const TYPE_DISPUTE_RESOLVED = 'dispute_resolved';
+
+    public const TYPE_FUNDS_REFUNDED = 'funds_refunded';
+
+    public const TYPE_REVISION_REQUESTED_BY_MODERATOR = 'revision_requested_by_moderator';
+
     public const TYPE_MESSAGE_SENT = 'message_sent';
 
     public const TYPE_FILE_UPLOADED = 'file_uploaded';

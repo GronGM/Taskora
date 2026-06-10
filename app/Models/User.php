@@ -108,4 +108,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(OrderEvent::class);
     }
+
+    public function openedDisputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class, 'opened_by');
+    }
+
+    public function resolvedDisputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class, 'resolved_by');
+    }
+
+    public function disputeMessages(): HasMany
+    {
+        return $this->hasMany(DisputeMessage::class);
+    }
 }
