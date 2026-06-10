@@ -92,6 +92,7 @@
 
 ## Before Public Launch
 
+- Проверить зеленый GitHub Actions CI перед деплоем.
 - Пройти `php artisan test`.
 - Пройти `npm run build`.
 - Пройти `composer validate --strict`.

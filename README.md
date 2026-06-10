@@ -231,6 +231,24 @@ Payload уведомления хранится в `data` JSON и содержи
 
 Сервис `NotificationService` не отправляет уведомление пользователю-инициатору для пользовательских сообщений и дедуплицирует получателей в рамках одного события. Системные события завершения заказа и auto-release уведомляют обе стороны заказа.
 
+## CI / GitHub Actions
+
+В репозитории настроен workflow `Taskora CI` в `.github/workflows/ci.yml`. Он запускается автоматически на `push` и `pull_request` в ветку `main`, а также вручную через `workflow_dispatch`.
+
+CI использует Ubuntu runner, PHP 8.4, Node 24 и SQLite. PostgreSQL service, реальные платежи, внешние сервисы, AI, email, push и WebSocket в CI не подключаются. Платежный режим остается безопасным: `TASKORA_PAYMENTS_MODE=stub`, `PAYMENT_PROVIDER=stub`, `PAYMENT_PROVIDER_MODE=stub`.
+
+Проверки CI:
+
+- `composer install`;
+- `npm ci`;
+- подготовка `.env`, `APP_KEY` и `database/database.sqlite`;
+- `composer validate --strict`;
+- `npm audit`;
+- `npm run build`;
+- `php artisan migrate:fresh --seed --env=testing --force`;
+- `php artisan test`;
+- `git diff --check`.
+
 ## Проверки
 
 ```bash
