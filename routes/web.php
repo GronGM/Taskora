@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\CustomerOrderController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Order\OrderFileController;
 use App\Http\Controllers\Order\OrderMessageController;
 use App\Http\Controllers\Order\OrderWorkspaceController;
 use App\Http\Controllers\Performer\PerformerOrderController;
+use App\Http\Controllers\Performer\PerformerFinanceController;
 use App\Http\Controllers\Performer\PerformerPortfolioController;
 use App\Http\Controllers\Performer\PerformerProfileController;
 use App\Http\Controllers\Performer\PerformerServiceController;
@@ -116,6 +118,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('performer.dashboard');
 
     Route::middleware('role:performer')->prefix('performer')->name('performer.')->group(function (): void {
+        Route::get('/finance', PerformerFinanceController::class)->name('finance.index');
         Route::get('/profile', [PerformerProfileController::class, 'show'])->name('profile.show');
         Route::patch('/profile', [PerformerProfileController::class, 'update'])->name('profile.update');
         Route::post('/profile/avatar', [PerformerProfileController::class, 'uploadAvatar'])->name('profile.avatar');
@@ -203,4 +206,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/admin/dashboard', [RoleDashboardController::class, 'admin'])
         ->middleware('role:admin')
         ->name('admin.dashboard');
+
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('/finance', AdminFinanceController::class)->name('finance.index');
+    });
 });

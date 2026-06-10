@@ -118,16 +118,82 @@
 - canceled_at
 - timestamps
 
-### payment_records
+### payment_operations
 
 - id
 - order_id
-- amount
-- platform_fee_percent
-- platform_fee_amount
-- performer_amount
+- user_id nullable
+- provider
+- provider_operation_id nullable
+- type
 - status
+- amount
+- currency
+- idempotency_key nullable unique
+- description nullable
+- payload json nullable
+- succeeded_at nullable
+- failed_at nullable
+- canceled_at nullable
 - timestamps
+
+Типы: `payment_hold`, `release_to_performer`, `refund_to_customer`, `platform_fee_capture`, `platform_fee_reverse`, `payout_stub`, `webhook_received`.
+
+Статусы: `pending`, `succeeded`, `failed`, `canceled`.
+
+### ledger_entries
+
+- id
+- payment_operation_id nullable
+- order_id nullable
+- user_id nullable
+- account
+- direction
+- amount
+- currency
+- description nullable
+- reference_type nullable
+- reference_id nullable
+- posted_at nullable
+- timestamps
+
+Счета: `customer_payment`, `escrow`, `performer_pending`, `performer_available`, `platform_fee`, `customer_refund`.
+
+Направления: `debit`, `credit`.
+
+Ledger-записи не редактируются после создания. Исправления должны оформляться новыми корректирующими записями.
+
+### provider_webhook_events
+
+- id
+- provider
+- event_id nullable
+- event_type
+- status
+- payload json nullable
+- processed_at nullable
+- error_message nullable
+- timestamps
+
+Таблица готовит будущую интеграцию провайдера. Реальный webhook endpoint пока не подключен.
+
+### payout_requests
+
+- id
+- performer_id
+- amount
+- currency
+- status
+- requested_at nullable
+- reviewed_by nullable
+- reviewed_at nullable
+- paid_at nullable
+- rejection_reason nullable
+- timestamps
+
+Статусы: `draft`, `pending_review`, `approved`, `rejected`, `paid`, `canceled`.
+
+Банковские реквизиты, паспортные данные, ИНН, СНИЛС и KYC-документы в текущей схеме не хранятся.
 
 ### order_messages
 
@@ -205,8 +271,25 @@
 - Модератор видит только данные, нужные для модерации.
 - Администратор управляет настройками платформы и имеет доступ к более широким операционным данным.
 
+## Связи Платежной Архитектуры
+
+- `Order hasMany PaymentOperation`
+- `Order hasMany LedgerEntry`
+- `PaymentOperation belongsTo Order`
+- `PaymentOperation belongsTo User nullable`
+- `PaymentOperation hasMany LedgerEntry`
+- `LedgerEntry belongsTo PaymentOperation nullable`
+- `LedgerEntry belongsTo Order nullable`
+- `LedgerEntry belongsTo User nullable`
+- `User hasMany PaymentOperations`
+- `User hasMany LedgerEntries`
+- `User hasMany PayoutRequests as performer`
+- `PayoutRequest belongsTo performer User`
+- `PayoutRequest belongsTo reviewedBy User nullable`
+
 ## Примечания
 
 - Фрагменты модерации хранить осторожно. Если достаточно хэша найденного контакта, не сохранять полный контакт.
 - Добавить индексы для публичных фильтров: категория, статус, статус модерации, цена, срок, рейтинг и даты.
 - Использовать soft delete только там, где восстановление действительно является продуктовым требованием.
+- Платежный ledger предназначен для внутренней истории stub-операций. Перед production-платежами нужны провайдер, webhooks, фискализация, правила возвратов и юридическая проверка.

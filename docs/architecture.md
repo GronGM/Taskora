@@ -90,7 +90,7 @@ ModuleName/
 | `Disputes` | споры и решения модерации |
 | `Moderation` | проверки контента, флаги, ручная модерация |
 | `Notifications` | внутренние database-уведомления в интерфейсе |
-| `Billing` | заглушка платежей и расчет комиссии |
+| `Billing` | заглушка платежей, ledger, комиссии, возвраты и будущие webhook-контракты |
 | `Admin` | админка и модераторская панель |
 
 ## Основные Роли
@@ -155,7 +155,10 @@ ModuleName/
 | `OrderMessage` | сообщение участника в рабочей области заказа |
 | `OrderFile` | приватный файл заказа |
 | `OrderEvent` | системное событие заказа |
-| `PaymentRecord` | будущая платежная запись без шлюза |
+| `PaymentOperation` | внутренняя платежная операция без реального шлюза |
+| `LedgerEntry` | неизменяемая запись движения средств во внутреннем ledger |
+| `ProviderWebhookEvent` | заготовка хранения будущих webhook-событий провайдера |
+| `PayoutRequest` | заготовка заявки на вывод средств без банковских реквизитов |
 | `FileAttachment` | будущий общий файл пользователя вне заказа |
 | `Review` | отзыв по завершенному заказу |
 | `Dispute` | спор по заказу |
@@ -692,6 +695,36 @@ Shared props через `HandleInertiaRequests` передают:
 ## Заглушка Платежей
 
 Реальный платежный шлюз не подключается.
+
+Текущая платежная архитектура отделяет lifecycle заказа от финансовой истории:
+
+- `orders.status` отвечает за процесс работы: `awaiting_payment`, `in_progress`, `submitted_for_review`, `revision_requested`, `completed`, `disputed`, `canceled`;
+- `orders.payment_status` отвечает за состояние оплаты: `unpaid`, `held`, `released`, `refunded`, `canceled`;
+- `payment_operations` фиксирует внутренние операции `payment_hold`, `release_to_performer`, `refund_to_customer`, `platform_fee_capture`, `platform_fee_reverse`, `payout_stub`, `webhook_received`;
+- `ledger_entries` хранит неизменяемую историю по счетам `customer_payment`, `escrow`, `performer_pending`, `performer_available`, `platform_fee`, `customer_refund`;
+- `provider_webhook_events` готовит таблицу для будущего провайдера, но endpoint пока не подключен;
+- `payout_requests` готовит будущие заявки на вывод без реквизитов, KYC и реальных выплат.
+
+`PaymentLedgerService` — единая точка записи финансовых событий. Методы сервиса идемпотентны через `idempotency_key`, поэтому повторный вызов для одного заказа не создает дубли `payment_operations` и `ledger_entries`.
+
+Потоки:
+
+- `mark-paid` создает `payment_hold`: `customer_payment` debit на сумму заказа, `escrow` credit на сумму заказа, `performer_pending` credit на сумму исполнителя, `platform_fee` credit на комиссию;
+- досрочная приемка заказчиком, `orders:release-due` и решение спора `release_to_performer` создают `release_to_performer`, закрывают `escrow` и переносят сумму из `performer_pending` в `performer_available`;
+- решение спора `refund_to_customer` создает `refund_to_customer`, отражает `customer_refund`, закрывает ожидающую сумму исполнителя и сторнирует комиссию через `platform_fee_reverse`;
+- отмена неоплаченного заказа в `awaiting_payment/unpaid` не создает платежных операций.
+
+Будущие provider events будут маппиться так:
+
+| Provider event | Внутренняя операция |
+|---|---|
+| `payment.succeeded` | `payment_hold` |
+| `payment.waiting_for_capture` | `webhook_received` |
+| `payment.canceled` | `webhook_received` |
+| `refund.succeeded` | `refund_to_customer` |
+| `payout.succeeded` | `payout_stub` |
+
+Реальные платежи, выплаты, фискализация, частичные возвраты и банковские реквизиты не входят в текущую архитектуру.
 
 `Billing` в MVP хранит:
 

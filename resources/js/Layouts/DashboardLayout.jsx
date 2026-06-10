@@ -109,7 +109,21 @@ export default function DashboardLayout({ children }) {
                                 >
                                     Мои заказы
                                 </Link>
+                                <Link
+                                    href="/performer/finance"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 xl:inline-flex"
+                                >
+                                    Финансы
+                                </Link>
                             </>
+                        )}
+                        {user?.role === 'admin' && (
+                            <Link
+                                href="/admin/finance"
+                                className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
+                            >
+                                Финансы
+                            </Link>
                         )}
                         {canReview && (
                             <>

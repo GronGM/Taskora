@@ -172,4 +172,14 @@ class Order extends Model
     {
         return $this->hasOne(Review::class);
     }
+
+    public function paymentOperations(): HasMany
+    {
+        return $this->hasMany(PaymentOperation::class);
+    }
+
+    public function ledgerEntries(): HasMany
+    {
+        return $this->hasMany(LedgerEntry::class);
+    }
 }

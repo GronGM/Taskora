@@ -147,4 +147,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(DisputeMessage::class);
     }
+
+    public function paymentOperations(): HasMany
+    {
+        return $this->hasMany(PaymentOperation::class);
+    }
+
+    public function ledgerEntries(): HasMany
+    {
+        return $this->hasMany(LedgerEntry::class);
+    }
+
+    public function payoutRequests(): HasMany
+    {
+        return $this->hasMany(PayoutRequest::class, 'performer_id');
+    }
 }

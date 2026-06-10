@@ -5,6 +5,7 @@ const cards = [
     { title: 'Профиль исполнителя', href: '/performer/profile', description: 'Заполните публичную витрину, специализации и отправьте профиль на проверку.' },
     { title: 'Портфолио', href: '/performer/portfolio', description: 'Покажите примеры работ и материалы, которые можно публиковать в профиле.' },
     { title: 'Мои заказы', href: '/performer/orders', description: 'Выполняйте заказы и отправляйте работу на проверку.' },
+    { title: 'Финансы', href: '/performer/finance', description: 'Следите за удержанными и разблокированными суммами во внутреннем ledger.' },
     { title: 'Мои услуги', href: '/performer/services', description: 'Создавайте услуги и отправляйте их на модерацию.' },
     { title: 'Доступные задания', href: '/tasks', description: 'Ищите опубликованные задания заказчиков.' },
     { title: 'Мои отклики', href: '/performer/offers', description: 'Следите за предложениями по заданиям.' },

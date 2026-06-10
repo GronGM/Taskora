@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderSubmission;
 use App\Models\Review;
 use App\Services\Orders\OrderEventLogger;
+use App\Services\Payments\PaymentLedgerService;
 use App\Services\Reviews\ReviewAggregateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -48,17 +49,19 @@ class CustomerOrderController extends Controller
         ]);
     }
 
-    public function markPaid(Order $order, OrderEventLogger $events): RedirectResponse
+    public function markPaid(Order $order, OrderEventLogger $events, PaymentLedgerService $ledger): RedirectResponse
     {
         Gate::authorize('markPaid', $order);
         $user = request()->user();
 
-        DB::transaction(function () use ($order, $events, $user): void {
+        DB::transaction(function () use ($order, $events, $ledger, $user): void {
             $order->update([
                 'payment_status' => Order::PAYMENT_HELD,
                 'status' => Order::STATUS_IN_PROGRESS,
                 'started_at' => now(),
             ]);
+
+            $ledger->recordStubHold($order, $user);
 
             $events->paymentStubPaid($order, $user, [
                 'payment_status' => Order::PAYMENT_HELD,
@@ -98,12 +101,17 @@ class CustomerOrderController extends Controller
             ->with('success', 'Запрошена доработка результата.');
     }
 
-    public function complete(Order $order, OrderEventLogger $events, ReviewAggregateService $aggregates): RedirectResponse
+    public function complete(
+        Order $order,
+        OrderEventLogger $events,
+        ReviewAggregateService $aggregates,
+        PaymentLedgerService $ledger,
+    ): RedirectResponse
     {
         Gate::authorize('complete', $order);
         $user = request()->user();
 
-        DB::transaction(function () use ($order, $events, $user, $aggregates): void {
+        DB::transaction(function () use ($order, $events, $user, $aggregates, $ledger): void {
             $releasedAt = now();
 
             $order->submissions()->latest()->first()?->update([
@@ -127,6 +135,8 @@ class CustomerOrderController extends Controller
                 'release_reason' => Order::RELEASE_CUSTOMER_EARLY_ACCEPT,
                 'released_at' => $releasedAt->toISOString(),
             ]);
+
+            $ledger->recordReleaseToPerformer($order, Order::RELEASE_CUSTOMER_EARLY_ACCEPT);
 
             $aggregates->recalculateForOrder($order);
         });
