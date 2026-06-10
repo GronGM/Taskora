@@ -73,4 +73,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Service::class);
     }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function taskOffers(): HasMany
+    {
+        return $this->hasMany(TaskOffer::class);
+    }
 }

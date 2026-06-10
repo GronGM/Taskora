@@ -145,7 +145,8 @@ ModuleName/
 | `Service` | готовая услуга |
 | `ServicePackage` | пакет услуги с ценой, сроком и количеством правок |
 | `Task` | индивидуальное задание |
-| `Offer` | отклик исполнителя на задание |
+| `TaskOffer` | отклик исполнителя на задание |
+| `TaskFile` | файл, прикрепленный к заданию |
 | `Order` | заказ из услуги или выбранного отклика |
 | `PaymentRecord` | локальная платежная запись без шлюза |
 | `OrderMessage` | сообщение в чате заказа |
@@ -185,6 +186,31 @@ ModuleName/
 - `revisions_count`;
 - `sort_order`.
 
+`tasks`:
+
+- `user_id` — заказчик;
+- `category_id`;
+- `title`, уникальный `slug`, `description`;
+- `budget_min`, `budget_max`;
+- `deadline_at`;
+- `status`: `draft`, `published`, `closed`, `archived`;
+- `offers_count`, `views_count`.
+
+`task_offers`:
+
+- `task_id`;
+- `user_id` — исполнитель;
+- `message`;
+- `price`, `delivery_days`;
+- `status`: `submitted`, `withdrawn`, `rejected`.
+
+`task_files`:
+
+- `task_id`;
+- `user_id`;
+- `original_name`, `path`;
+- `mime_type`, `size`.
+
 Связи:
 
 - `Category hasMany Services`
@@ -195,6 +221,17 @@ ModuleName/
 - `Service hasMany ServicePackages`
 - `ServicePackage belongsTo Service`
 - `User hasMany Services`
+- `User hasMany Tasks`
+- `User hasMany TaskOffers`
+- `Category hasMany Tasks`
+- `Task belongsTo User as customer`
+- `Task belongsTo Category`
+- `Task hasMany TaskOffers`
+- `Task hasMany TaskFiles`
+- `TaskOffer belongsTo Task`
+- `TaskOffer belongsTo User as performer`
+- `TaskFile belongsTo Task`
+- `TaskFile belongsTo User`
 
 Публичные маршруты:
 
@@ -205,9 +242,59 @@ ModuleName/
 | `GET` | `/catalog?category={slug}` | фильтр каталога по категории | guest |
 | `GET` | `/catalog/{category:slug}` | страница категории | guest |
 | `GET` | `/services/{service:slug}` | страница опубликованной услуги | guest |
+| `GET` | `/tasks` | биржа опубликованных заданий | guest |
+| `GET` | `/tasks?category={slug}` | фильтр заданий по категории | guest |
+| `GET` | `/tasks/{task:slug}` | страница опубликованного задания | guest |
 | `GET` | `/performers` | публичная витрина исполнителей | guest |
 
 Публично отображаются только услуги со статусом `published`. Черновики, услуги на модерации, архивные и отклоненные услуги не должны попадать в каталог и карточки услуг.
+
+Публично отображаются только задания со статусом `published`. Черновики, закрытые и архивные задания возвращают `404` на прямой публичной ссылке и не попадают в `/tasks`.
+
+## Индивидуальные Задания И Отклики
+
+Заказчик управляет только своими заданиями через защищенные маршруты с middleware `auth` и `role:customer`.
+
+| Метод | Маршрут | Назначение | Защита |
+|---|---|---|---|
+| `GET` | `/customer/tasks` | список своих заданий | `TaskPolicy::viewAny` |
+| `GET` | `/customer/tasks/create` | форма создания задания | `TaskPolicy::create` |
+| `POST` | `/customer/tasks` | создание черновика или публикация | `TaskPolicy::create` |
+| `GET` | `/customer/tasks/{task}` | просмотр своего задания и откликов | `TaskPolicy::view` |
+| `GET` | `/customer/tasks/{task}/edit` | редактирование своего задания | `TaskPolicy::update` |
+| `PUT/PATCH` | `/customer/tasks/{task}` | обновление своего задания | `TaskPolicy::update` |
+| `POST` | `/customer/tasks/{task}/publish` | публикация черновика | `TaskPolicy::publish` |
+| `POST` | `/customer/tasks/{task}/archive` | архивирование задания | `TaskPolicy::archive` |
+| `POST` | `/customer/task-offers/{offer}/reject` | отклонение отклика | `TaskOfferPolicy::reject` |
+
+Исполнитель работает с откликами через защищенные маршруты с middleware `auth` и `role:performer`.
+
+| Метод | Маршрут | Назначение | Защита |
+|---|---|---|---|
+| `POST` | `/tasks/{task}/offers` | отправка отклика на опубликованное задание | `TaskOfferPolicy::create` |
+| `GET` | `/performer/offers` | список своих откликов | `TaskOfferPolicy::viewAny` |
+| `POST` | `/performer/task-offers/{offer}/withdraw` | отзыв своего отклика | `TaskOfferPolicy::withdraw` |
+
+Правила:
+
+- чужие задания недоступны заказчику и возвращают `403`;
+- новое задание сохраняется как `draft`, если заказчик не нажал публикацию;
+- публикация переводит только свой черновик в `published`;
+- архивное задание не показывается публично;
+- исполнитель может отправить только один отклик на опубликованное задание;
+- заказчик и гость не могут отправить отклик;
+- исполнитель может отозвать только свой отклик со статусом `submitted`;
+- заказчик видит отклики только на свои задания и может отклонить отклик.
+
+Поток задания:
+
+1. Заказчик создает черновик задания или сразу публикует его.
+2. `ContactGuard` проверяет `title` и `description` до сохранения.
+3. Опубликованное задание появляется на `/tasks` и в публичной карточке `/tasks/{task:slug}`.
+4. Исполнитель отправляет отклик с сообщением, ценой и сроком.
+5. `ContactGuard` проверяет `message` отклика до сохранения.
+6. Заказчик открывает свое задание в кабинете и видит список откликов.
+7. Заказчик может отклонить отклик; выбор отклика и создание заказа запланированы следующим этапом.
 
 ## Управление Услугами Исполнителя
 
@@ -349,7 +436,7 @@ canceled
 - `blocked` — явное нарушение, действие не выполняется;
 - `pending_review` — спорный случай, нужна ручная модерация.
 
-Все срабатывания сохраняются в `moderation_flags`. Для услуг фиксируются пользователь, тип сущности, идентификатор сущности, причина, тип совпадения, найденный фрагмент и статус обработки флага. После ручной обработки флага заполняются `resolved_by`, `resolved_at`, а статус меняется на `resolved`. Допустимые статусы флага: `open`, `resolved`, `ignored`.
+Все срабатывания сохраняются в `moderation_flags`. Для услуг, заданий и откликов фиксируются пользователь, тип сущности, идентификатор сущности, причина, тип совпадения, найденный фрагмент и статус обработки флага. После ручной обработки флага заполняются `resolved_by`, `resolved_at`, а статус меняется на `resolved`. Допустимые статусы флага: `open`, `resolved`, `ignored`.
 
 ## Защита От Передачи Контактов
 

@@ -2,14 +2,17 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Customer\CustomerTaskController;
+use App\Http\Controllers\Customer\CustomerTaskOfferController;
 use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
 use App\Http\Controllers\Moderator\ModerationFlagController;
 use App\Http\Controllers\Moderator\ModeratorServiceController;
 use App\Http\Controllers\Performer\PerformerServiceController;
+use App\Http\Controllers\Performer\TaskOfferController;
 use App\Http\Controllers\Public\CatalogController;
 use App\Http\Controllers\Public\HomeController;
-use Inertia\Inertia;
+use App\Http\Controllers\Public\TaskBoardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -18,12 +21,8 @@ Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/catalog/{category:slug}', [CatalogController::class, 'category'])->name('catalog.category');
 Route::get('/services/{service:slug}', [CatalogController::class, 'service'])->name('services.show');
 
-Route::get('/tasks', function () {
-    return Inertia::render('Placeholder', [
-        'title' => 'Задания',
-        'description' => 'Здесь заказчики смогут публиковать индивидуальные задания, а исполнители — отправлять отклики.',
-    ]);
-})->name('tasks');
+Route::get('/tasks', [TaskBoardController::class, 'index'])->name('tasks');
+Route::get('/tasks/{task:slug}', [TaskBoardController::class, 'show'])->name('tasks.show');
 
 Route::get('/performers', [CatalogController::class, 'performers'])->name('performers');
 
@@ -43,6 +42,18 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('role:customer')
         ->name('customer.dashboard');
 
+    Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function (): void {
+        Route::get('/tasks', [CustomerTaskController::class, 'index'])->name('tasks.index');
+        Route::get('/tasks/create', [CustomerTaskController::class, 'create'])->name('tasks.create');
+        Route::post('/tasks', [CustomerTaskController::class, 'store'])->name('tasks.store');
+        Route::get('/tasks/{task}', [CustomerTaskController::class, 'show'])->name('tasks.show');
+        Route::get('/tasks/{task}/edit', [CustomerTaskController::class, 'edit'])->name('tasks.edit');
+        Route::match(['put', 'patch'], '/tasks/{task}', [CustomerTaskController::class, 'update'])->name('tasks.update');
+        Route::post('/tasks/{task}/publish', [CustomerTaskController::class, 'publish'])->name('tasks.publish');
+        Route::post('/tasks/{task}/archive', [CustomerTaskController::class, 'archive'])->name('tasks.archive');
+        Route::post('/task-offers/{offer}/reject', [CustomerTaskOfferController::class, 'reject'])->name('task-offers.reject');
+    });
+
     Route::get('/performer/dashboard', [RoleDashboardController::class, 'performer'])
         ->middleware('role:performer')
         ->name('performer.dashboard');
@@ -55,7 +66,13 @@ Route::middleware('auth')->group(function (): void {
         Route::match(['put', 'patch'], '/services/{service}', [PerformerServiceController::class, 'update'])->name('services.update');
         Route::post('/services/{service}/submit-review', [PerformerServiceController::class, 'submitReview'])->name('services.submit-review');
         Route::post('/services/{service}/archive', [PerformerServiceController::class, 'archive'])->name('services.archive');
+        Route::get('/offers', [TaskOfferController::class, 'index'])->name('offers.index');
+        Route::post('/task-offers/{offer}/withdraw', [TaskOfferController::class, 'withdraw'])->name('task-offers.withdraw');
     });
+
+    Route::post('/tasks/{task}/offers', [TaskOfferController::class, 'store'])
+        ->middleware('role:performer')
+        ->name('tasks.offers.store');
 
     Route::get('/moderator/dashboard', [RoleDashboardController::class, 'moderator'])
         ->middleware('role:moderator')

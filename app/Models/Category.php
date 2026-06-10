@@ -41,6 +41,11 @@ class Category extends Model
         return $this->hasMany(Service::class);
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
     protected function catalogUrl(): Attribute
     {
         return Attribute::get(fn (): string => "/catalog/{$this->slug}");

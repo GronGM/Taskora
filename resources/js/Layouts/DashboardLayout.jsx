@@ -34,13 +34,29 @@ export default function DashboardLayout({ children }) {
                         >
                             Кабинет
                         </Link>
-                        {user?.role === 'performer' && (
+                        {user?.role === 'customer' && (
                             <Link
-                                href="/performer/services"
+                                href="/customer/tasks"
                                 className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
                             >
-                                Мои услуги
+                                Мои задания
                             </Link>
+                        )}
+                        {user?.role === 'performer' && (
+                            <>
+                                <Link
+                                    href="/performer/services"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
+                                >
+                                    Мои услуги
+                                </Link>
+                                <Link
+                                    href="/performer/offers"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 lg:inline-flex"
+                                >
+                                    Мои отклики
+                                </Link>
+                            </>
                         )}
                         {canReview && (
                             <>
