@@ -82,6 +82,7 @@ class OrderPolicy
     public function cancelAsPerformer(User $user, Order $order): bool
     {
         return $this->viewAsPerformer($user, $order)
-            && in_array($order->status, [Order::STATUS_AWAITING_PAYMENT, Order::STATUS_IN_PROGRESS], true);
+            && $order->status === Order::STATUS_AWAITING_PAYMENT
+            && $order->payment_status === Order::PAYMENT_UNPAID;
     }
 }

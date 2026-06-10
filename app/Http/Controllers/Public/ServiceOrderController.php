@@ -21,8 +21,9 @@ class ServiceOrderController extends Controller
 
         $service->load(['category', 'packages']);
         $package = $this->selectedPackage($request, $service);
+        $reviewHoldDays = $this->reviewHoldDays($request);
 
-        $order = DB::transaction(function () use ($request, $service, $package, $events): Order {
+        $order = DB::transaction(function () use ($request, $service, $package, $events, $reviewHoldDays): Order {
             $price = $package?->price ?? $service->price_from;
             $deliveryDays = $package?->delivery_days ?? $service->delivery_days;
             $feePercent = $this->feePercent();
@@ -43,6 +44,7 @@ class ServiceOrderController extends Controller
                 'performer_amount' => $price - $feeAmount,
                 'status' => Order::STATUS_AWAITING_PAYMENT,
                 'payment_status' => Order::PAYMENT_UNPAID,
+                'review_hold_days' => $reviewHoldDays,
             ]);
 
             $events->orderCreated($order, $request->user(), [
@@ -77,5 +79,20 @@ class ServiceOrderController extends Controller
     private function feePercent(): float
     {
         return (float) env('TASKORA_PLATFORM_FEE_PERCENT', 15);
+    }
+
+    private function reviewHoldDays(Request $request): int
+    {
+        // TODO: Add customer-facing review period selection in the service order flow.
+        $request->validate([
+            'review_hold_days' => [
+                'nullable',
+                'integer',
+                'min:'.Order::REVIEW_HOLD_MIN_DAYS,
+                'max:'.Order::REVIEW_HOLD_MAX_DAYS,
+            ],
+        ]);
+
+        return (int) ($request->integer('review_hold_days') ?: Order::REVIEW_HOLD_DEFAULT_DAYS);
     }
 }

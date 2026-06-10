@@ -227,6 +227,9 @@ ModuleName/
 - `platform_fee_percent`, `platform_fee_amount`, `performer_amount`;
 - `status`: `awaiting_payment`, `in_progress`, `submitted_for_review`, `revision_requested`, `completed`, `disputed`, `canceled`;
 - `payment_status`: `unpaid`, `held`, `released`, `refunded`, `canceled`;
+- `review_hold_days`: срок проверки, дефолт 10 дней, допустимый диапазон 5-40 дней;
+- `review_hold_started_at`, `review_hold_until`, `auto_release_at`;
+- `released_at`, `release_reason`: `customer_early_accept` или `auto_release`;
 - `started_at`, `submitted_at`, `completed_at`, `canceled_at`.
 
 `order_submissions`:
@@ -521,13 +524,16 @@ canceled
 Текущие MVP-переходы:
 
 - `awaiting_payment` → `in_progress` через локальную заглушку оплаты, событие `payment_stub_paid`;
-- `in_progress` → `submitted_for_review` после сдачи работы исполнителем, событие `work_submitted`;
-- `submitted_for_review` → `completed` после приемки заказчиком, событие `order_completed`;
-- `submitted_for_review` → `revision_requested` после запроса доработки, событие `revision_requested`;
-- `revision_requested` → `submitted_for_review` после повторной сдачи, событие `work_submitted`;
+- `in_progress` → `submitted_for_review` после сдачи работы исполнителем, события `work_submitted` и `review_hold_started`;
+- `submitted_for_review` → `completed` после досрочной приемки заказчиком, события `order_completed` и `funds_released`, `release_reason = customer_early_accept`;
+- `submitted_for_review` → `completed` по команде `orders:release-due`, если истек `review_hold_until`, события `order_completed` и `funds_released`, `release_reason = auto_release`;
+- `submitted_for_review` → `revision_requested` после запроса доработки, событие `revision_requested`, поля `review_hold_started_at`, `review_hold_until` и `auto_release_at` очищаются;
+- `revision_requested` → `submitted_for_review` после повторной сдачи, события `work_submitted` и `review_hold_started`, срок проверки запускается заново;
 - `awaiting_payment` → `canceled` при отмене до оплаты, событие `order_canceled`.
 
 При создании заказа из услуги или выбранного отклика пишется событие `order_created`.
+
+Исполнитель может отменить заказ напрямую только в состоянии `awaiting_payment` при `payment_status = unpaid`. После оплаты прямой отказ исполнителя запрещен; будущая отмена должна идти через спор или модератора.
 
 Дальше статусные переходы стоит вынести в отдельные action-классы, чтобы контроллеры не росли.
 
@@ -541,8 +547,10 @@ canceled
 order_created
 payment_stub_paid
 work_submitted
+review_hold_started
 revision_requested
 order_completed
+funds_released
 order_canceled
 message_sent
 file_uploaded
@@ -575,6 +583,14 @@ canceled
 ```
 
 Для разработки используется действие "Оплатить (заглушка)": оно не списывает деньги, а только переводит заказ в работу и помечает оплату как `held`.
+
+После сдачи работы удержание не снимается сразу. Срок проверки хранится в полях `review_hold_started_at`, `review_hold_until` и `auto_release_at`. Заказчик может:
+
+- принять работу досрочно, что переводит оплату в `released` и ставит `release_reason = customer_early_accept`;
+- запросить доработку, что оставляет оплату в `held` и очищает срок проверки до повторной сдачи;
+- на следующем этапе открыть спор, который должен останавливать автоматическую разблокировку.
+
+Команда `php artisan orders:release-due` автоматически завершает только due-заказы `submitted_for_review` с `payment_status = held` и истекшим `review_hold_until`. Для таких заказов заполняются `completed_at`, `released_at`, `release_reason = auto_release`, а в `order_events` пишутся `order_completed` и `funds_released`.
 
 ## Модерация
 

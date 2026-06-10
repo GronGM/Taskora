@@ -80,6 +80,9 @@ class CustomerOrderController extends Controller
 
             $order->update([
                 'status' => Order::STATUS_REVISION_REQUESTED,
+                'review_hold_started_at' => null,
+                'review_hold_until' => null,
+                'auto_release_at' => null,
             ]);
 
             $events->revisionRequested($order, $user, [
@@ -98,6 +101,8 @@ class CustomerOrderController extends Controller
         $user = request()->user();
 
         DB::transaction(function () use ($order, $events, $user): void {
+            $releasedAt = now();
+
             $order->submissions()->latest()->first()?->update([
                 'status' => OrderSubmission::STATUS_ACCEPTED,
             ]);
@@ -105,12 +110,19 @@ class CustomerOrderController extends Controller
             $order->update([
                 'status' => Order::STATUS_COMPLETED,
                 'payment_status' => Order::PAYMENT_RELEASED,
-                'completed_at' => now(),
+                'completed_at' => $releasedAt,
+                'released_at' => $releasedAt,
+                'release_reason' => Order::RELEASE_CUSTOMER_EARLY_ACCEPT,
             ]);
 
             $events->orderCompleted($order, $user, [
                 'status' => Order::STATUS_COMPLETED,
                 'payment_status' => Order::PAYMENT_RELEASED,
+            ]);
+
+            $events->fundsReleased($order, $user, [
+                'release_reason' => Order::RELEASE_CUSTOMER_EARLY_ACCEPT,
+                'released_at' => $releasedAt->toISOString(),
             ]);
         });
 
@@ -151,6 +163,10 @@ class CustomerOrderController extends Controller
             'source_label' => $this->sourceLabel($order),
             'status' => $order->status,
             'payment_status' => $order->payment_status,
+            'review_hold_until' => $order->review_hold_until?->format('d.m.Y H:i'),
+            'released_at' => $order->released_at?->format('d.m.Y H:i'),
+            'release_reason' => $order->release_reason,
+            'release_reason_label' => $this->releaseReasonLabel($order->release_reason),
             'price' => $order->price,
             'performer_amount' => $order->performer_amount,
             'delivery_days' => $order->delivery_days,
@@ -169,6 +185,13 @@ class CustomerOrderController extends Controller
             'platform_fee_amount' => $order->platform_fee_amount,
             'started_at' => $order->started_at?->format('d.m.Y H:i'),
             'submitted_at' => $order->submitted_at?->format('d.m.Y H:i'),
+            'review_hold_days' => $order->review_hold_days,
+            'review_hold_started_at' => $order->review_hold_started_at?->format('d.m.Y H:i'),
+            'review_hold_until' => $order->review_hold_until?->format('d.m.Y H:i'),
+            'auto_release_at' => $order->auto_release_at?->format('d.m.Y H:i'),
+            'released_at' => $order->released_at?->format('d.m.Y H:i'),
+            'release_reason' => $order->release_reason,
+            'release_reason_label' => $this->releaseReasonLabel($order->release_reason),
             'completed_at' => $order->completed_at?->format('d.m.Y H:i'),
             'canceled_at' => $order->canceled_at?->format('d.m.Y H:i'),
             'mark_paid_url' => route('customer.orders.mark-paid', $order),
@@ -188,6 +211,15 @@ class CustomerOrderController extends Controller
     private function sourceLabel(Order $order): string
     {
         return $order->source_type === Order::SOURCE_SERVICE ? 'Услуга' : 'Задание';
+    }
+
+    private function releaseReasonLabel(?string $releaseReason): ?string
+    {
+        return match ($releaseReason) {
+            Order::RELEASE_CUSTOMER_EARLY_ACCEPT => 'Досрочно принято заказчиком',
+            Order::RELEASE_AUTO => 'Автоматически после срока проверки',
+            default => null,
+        };
     }
 
     /**
@@ -214,7 +246,7 @@ class CustomerOrderController extends Controller
         return [
             Order::PAYMENT_UNPAID => 'Не оплачен',
             Order::PAYMENT_HELD => 'Оплата удерживается',
-            Order::PAYMENT_RELEASED => 'Выплачено исполнителю',
+            Order::PAYMENT_RELEASED => 'Оплата разблокирована',
             Order::PAYMENT_REFUNDED => 'Возврат',
             Order::PAYMENT_CANCELED => 'Отменена',
         ];

@@ -26,6 +26,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'performer_amount',
     'status',
     'payment_status',
+    'review_hold_days',
+    'review_hold_started_at',
+    'review_hold_until',
+    'auto_release_at',
+    'released_at',
+    'release_reason',
     'started_at',
     'submitted_at',
     'completed_at',
@@ -64,6 +70,16 @@ class Order extends Model
 
     public const PAYMENT_CANCELED = 'canceled';
 
+    public const REVIEW_HOLD_DEFAULT_DAYS = 10;
+
+    public const REVIEW_HOLD_MIN_DAYS = 5;
+
+    public const REVIEW_HOLD_MAX_DAYS = 40;
+
+    public const RELEASE_CUSTOMER_EARLY_ACCEPT = 'customer_early_accept';
+
+    public const RELEASE_AUTO = 'auto_release';
+
     /**
      * @return array<string, string>
      */
@@ -75,6 +91,11 @@ class Order extends Model
             'platform_fee_percent' => 'decimal:2',
             'platform_fee_amount' => 'integer',
             'performer_amount' => 'integer',
+            'review_hold_days' => 'integer',
+            'review_hold_started_at' => 'datetime',
+            'review_hold_until' => 'datetime',
+            'auto_release_at' => 'datetime',
+            'released_at' => 'datetime',
             'started_at' => 'datetime',
             'submitted_at' => 'datetime',
             'completed_at' => 'datetime',

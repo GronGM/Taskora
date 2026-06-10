@@ -20,9 +20,13 @@ class OrderEvent extends Model
 
     public const TYPE_WORK_SUBMITTED = 'work_submitted';
 
+    public const TYPE_REVIEW_HOLD_STARTED = 'review_hold_started';
+
     public const TYPE_REVISION_REQUESTED = 'revision_requested';
 
     public const TYPE_ORDER_COMPLETED = 'order_completed';
+
+    public const TYPE_FUNDS_RELEASED = 'funds_released';
 
     public const TYPE_ORDER_CANCELED = 'order_canceled';
 

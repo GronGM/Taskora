@@ -61,6 +61,8 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                             <Info label="Срок" value={`${order.delivery_days} дн.`} />
                             <Info label="Статус заказа" value={statusLabels[order.status]} />
                             <Info label="Статус оплаты" value={paymentStatusLabels[order.payment_status]} />
+                            <Info label="Срок проверки" value={order.review_hold_until} />
+                            <Info label="Разблокировка оплаты" value={order.release_reason_label} />
                         </div>
                     </article>
 
@@ -94,7 +96,7 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                         ) : (
                             <p className="mt-5 text-sm leading-6 text-slate-600">
                                 {order.status === 'awaiting_payment' && 'Ожидайте, пока заказчик отметит оплату через локальную заглушку.'}
-                                {order.status === 'submitted_for_review' && 'Работа отправлена, ожидайте проверки заказчиком.'}
+                                {order.status === 'submitted_for_review' && `Работа отправлена на проверку. Если заказчик не запросит доработку или спор до ${order.review_hold_until}, оплата будет разблокирована автоматически.`}
                                 {['completed', 'canceled'].includes(order.status) && 'Для завершенного или отмененного заказа доступны только просмотр и история.'}
                             </p>
                         )}

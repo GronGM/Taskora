@@ -32,6 +32,12 @@ class OrderFactory extends Factory
             'performer_amount' => $price - $feeAmount,
             'status' => Order::STATUS_AWAITING_PAYMENT,
             'payment_status' => Order::PAYMENT_UNPAID,
+            'review_hold_days' => Order::REVIEW_HOLD_DEFAULT_DAYS,
+            'review_hold_started_at' => null,
+            'review_hold_until' => null,
+            'auto_release_at' => null,
+            'released_at' => null,
+            'release_reason' => null,
         ];
     }
 
@@ -46,22 +52,32 @@ class OrderFactory extends Factory
 
     public function submittedForReview(): static
     {
+        $submittedAt = now();
+        $reviewHoldUntil = $submittedAt->copy()->addDays(Order::REVIEW_HOLD_DEFAULT_DAYS);
+
         return $this->state(fn (): array => [
             'status' => Order::STATUS_SUBMITTED_FOR_REVIEW,
             'payment_status' => Order::PAYMENT_HELD,
             'started_at' => now()->subDay(),
-            'submitted_at' => now(),
+            'submitted_at' => $submittedAt,
+            'review_hold_started_at' => $submittedAt,
+            'review_hold_until' => $reviewHoldUntil,
+            'auto_release_at' => $reviewHoldUntil,
         ]);
     }
 
     public function completed(): static
     {
+        $completedAt = now();
+
         return $this->state(fn (): array => [
             'status' => Order::STATUS_COMPLETED,
             'payment_status' => Order::PAYMENT_RELEASED,
             'started_at' => now()->subDays(3),
             'submitted_at' => now()->subDay(),
-            'completed_at' => now(),
+            'completed_at' => $completedAt,
+            'released_at' => $completedAt,
+            'release_reason' => Order::RELEASE_CUSTOMER_EARLY_ACCEPT,
         ]);
     }
 }

@@ -51,6 +51,13 @@ class OrderWorkspaceController extends Controller
             'source_label' => $order->source_type === Order::SOURCE_SERVICE ? 'Услуга' : 'Задание',
             'status' => $order->status,
             'payment_status' => $order->payment_status,
+            'review_hold_days' => $order->review_hold_days,
+            'review_hold_started_at' => $order->review_hold_started_at?->format('d.m.Y H:i'),
+            'review_hold_until' => $order->review_hold_until?->format('d.m.Y H:i'),
+            'auto_release_at' => $order->auto_release_at?->format('d.m.Y H:i'),
+            'released_at' => $order->released_at?->format('d.m.Y H:i'),
+            'release_reason' => $order->release_reason,
+            'release_reason_label' => $this->releaseReasonLabel($order->release_reason),
             'price' => $order->price,
             'performer_amount' => $order->performer_amount,
             'platform_fee_amount' => $order->platform_fee_amount,
@@ -186,10 +193,21 @@ class OrderWorkspaceController extends Controller
             OrderEvent::TYPE_CONTACT_BLOCKED => 'ContactGuard заблокировал контактные данные.',
             OrderEvent::TYPE_PAYMENT_STUB_PAID => 'Оплата отмечена локальной заглушкой.',
             OrderEvent::TYPE_WORK_SUBMITTED => 'Исполнитель отправил работу на проверку.',
+            OrderEvent::TYPE_REVIEW_HOLD_STARTED => isset($payload['review_hold_until']) ? 'Срок проверки запущен до '.$payload['review_hold_until'].'.' : 'Срок проверки запущен.',
             OrderEvent::TYPE_REVISION_REQUESTED => 'Заказчик запросил доработку.',
             OrderEvent::TYPE_ORDER_COMPLETED => 'Заказ завершен.',
+            OrderEvent::TYPE_FUNDS_RELEASED => 'Оплата разблокирована.',
             OrderEvent::TYPE_ORDER_CANCELED => 'Заказ отменен.',
             OrderEvent::TYPE_ORDER_CREATED => 'Заказ создан.',
+            default => null,
+        };
+    }
+
+    private function releaseReasonLabel(?string $releaseReason): ?string
+    {
+        return match ($releaseReason) {
+            Order::RELEASE_CUSTOMER_EARLY_ACCEPT => 'Досрочно принято заказчиком',
+            Order::RELEASE_AUTO => 'Автоматически после срока проверки',
             default => null,
         };
     }
@@ -218,7 +236,7 @@ class OrderWorkspaceController extends Controller
         return [
             Order::PAYMENT_UNPAID => 'Не оплачен',
             Order::PAYMENT_HELD => 'Оплата удерживается',
-            Order::PAYMENT_RELEASED => 'Выплачено исполнителю',
+            Order::PAYMENT_RELEASED => 'Оплата разблокирована',
             Order::PAYMENT_REFUNDED => 'Возврат',
             Order::PAYMENT_CANCELED => 'Отменена',
         ];
@@ -233,8 +251,10 @@ class OrderWorkspaceController extends Controller
             OrderEvent::TYPE_ORDER_CREATED => 'Заказ создан',
             OrderEvent::TYPE_PAYMENT_STUB_PAID => 'Оплата отмечена',
             OrderEvent::TYPE_WORK_SUBMITTED => 'Работа отправлена',
+            OrderEvent::TYPE_REVIEW_HOLD_STARTED => 'Срок проверки запущен',
             OrderEvent::TYPE_REVISION_REQUESTED => 'Запрошена доработка',
             OrderEvent::TYPE_ORDER_COMPLETED => 'Заказ завершен',
+            OrderEvent::TYPE_FUNDS_RELEASED => 'Оплата разблокирована',
             OrderEvent::TYPE_ORDER_CANCELED => 'Заказ отменен',
             OrderEvent::TYPE_MESSAGE_SENT => 'Сообщение отправлено',
             OrderEvent::TYPE_FILE_UPLOADED => 'Файл загружен',

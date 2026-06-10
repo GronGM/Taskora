@@ -47,6 +47,14 @@ class OrderEventLogger
     /**
      * @param  array<string, mixed>  $payload
      */
+    public function reviewHoldStarted(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        return $this->log($order, $user, OrderEvent::TYPE_REVIEW_HOLD_STARTED, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function revisionRequested(Order $order, ?User $user, array $payload = []): OrderEvent
     {
         return $this->log($order, $user, OrderEvent::TYPE_REVISION_REQUESTED, $payload);
@@ -58,6 +66,14 @@ class OrderEventLogger
     public function orderCompleted(Order $order, ?User $user, array $payload = []): OrderEvent
     {
         return $this->log($order, $user, OrderEvent::TYPE_ORDER_COMPLETED, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function fundsReleased(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        return $this->log($order, $user, OrderEvent::TYPE_FUNDS_RELEASED, $payload);
     }
 
     /**

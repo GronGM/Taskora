@@ -49,6 +49,9 @@ class PerformerOrderController extends Controller
     public function submitWork(SubmitWorkRequest $request, Order $order, OrderEventLogger $events): RedirectResponse
     {
         DB::transaction(function () use ($request, $order, $events): void {
+            $submittedAt = now();
+            $reviewHoldUntil = $submittedAt->copy()->addDays((int) $order->review_hold_days);
+
             $submission = $order->submissions()->create([
                 'user_id' => $request->user()->id,
                 'message' => $request->validated('message'),
@@ -57,12 +60,20 @@ class PerformerOrderController extends Controller
 
             $order->update([
                 'status' => Order::STATUS_SUBMITTED_FOR_REVIEW,
-                'submitted_at' => now(),
+                'submitted_at' => $submittedAt,
+                'review_hold_started_at' => $submittedAt,
+                'review_hold_until' => $reviewHoldUntil,
+                'auto_release_at' => $reviewHoldUntil,
             ]);
 
             $events->workSubmitted($order, $request->user(), [
                 'submission_id' => $submission->id,
                 'status' => Order::STATUS_SUBMITTED_FOR_REVIEW,
+            ]);
+
+            $events->reviewHoldStarted($order, $request->user(), [
+                'review_hold_until' => $reviewHoldUntil->toISOString(),
+                'review_hold_days' => $order->review_hold_days,
             ]);
         });
 
@@ -74,6 +85,7 @@ class PerformerOrderController extends Controller
     public function cancel(Order $order, OrderEventLogger $events): RedirectResponse
     {
         Gate::authorize('cancelAsPerformer', $order);
+        // TODO: After payment, performer cancellation should go through dispute or moderator-assisted cancellation.
         abort_if($order->submissions()->exists(), 403);
         $user = request()->user();
 
@@ -104,6 +116,10 @@ class PerformerOrderController extends Controller
             'source_label' => $order->source_type === Order::SOURCE_SERVICE ? 'Услуга' : 'Задание',
             'status' => $order->status,
             'payment_status' => $order->payment_status,
+            'review_hold_until' => $order->review_hold_until?->format('d.m.Y H:i'),
+            'released_at' => $order->released_at?->format('d.m.Y H:i'),
+            'release_reason' => $order->release_reason,
+            'release_reason_label' => $this->releaseReasonLabel($order->release_reason),
             'price' => $order->price,
             'performer_amount' => $order->performer_amount,
             'delivery_days' => $order->delivery_days,
@@ -122,6 +138,13 @@ class PerformerOrderController extends Controller
             'platform_fee_amount' => $order->platform_fee_amount,
             'started_at' => $order->started_at?->format('d.m.Y H:i'),
             'submitted_at' => $order->submitted_at?->format('d.m.Y H:i'),
+            'review_hold_days' => $order->review_hold_days,
+            'review_hold_started_at' => $order->review_hold_started_at?->format('d.m.Y H:i'),
+            'review_hold_until' => $order->review_hold_until?->format('d.m.Y H:i'),
+            'auto_release_at' => $order->auto_release_at?->format('d.m.Y H:i'),
+            'released_at' => $order->released_at?->format('d.m.Y H:i'),
+            'release_reason' => $order->release_reason,
+            'release_reason_label' => $this->releaseReasonLabel($order->release_reason),
             'completed_at' => $order->completed_at?->format('d.m.Y H:i'),
             'canceled_at' => $order->canceled_at?->format('d.m.Y H:i'),
             'submit_work_url' => route('performer.orders.submit-work', $order),
@@ -134,6 +157,15 @@ class PerformerOrderController extends Controller
                 'created_at' => $submission->created_at?->format('d.m.Y H:i'),
             ]),
         ];
+    }
+
+    private function releaseReasonLabel(?string $releaseReason): ?string
+    {
+        return match ($releaseReason) {
+            Order::RELEASE_CUSTOMER_EARLY_ACCEPT => 'Досрочно принято заказчиком',
+            Order::RELEASE_AUTO => 'Автоматически после срока проверки',
+            default => null,
+        };
     }
 
     /**
@@ -160,7 +192,7 @@ class PerformerOrderController extends Controller
         return [
             Order::PAYMENT_UNPAID => 'Не оплачен',
             Order::PAYMENT_HELD => 'Оплата удерживается',
-            Order::PAYMENT_RELEASED => 'Выплачено исполнителю',
+            Order::PAYMENT_RELEASED => 'Оплата разблокирована',
             Order::PAYMENT_REFUNDED => 'Возврат',
             Order::PAYMENT_CANCELED => 'Отменена',
         ];

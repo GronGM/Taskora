@@ -18,7 +18,9 @@ const eventClasses = {
     file_uploaded: 'border-blue-200 bg-blue-50 text-blue-900',
     message_sent: 'border-slate-200 bg-slate-50 text-slate-800',
     payment_stub_paid: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    review_hold_started: 'border-purple-200 bg-purple-50 text-purple-900',
     order_completed: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    funds_released: 'border-emerald-200 bg-emerald-50 text-emerald-900',
     order_canceled: 'border-slate-300 bg-slate-100 text-slate-800',
 };
 
@@ -94,6 +96,26 @@ export default function Workspace({ role, order, statusLabels, paymentStatusLabe
                     {order.status === 'awaiting_payment' && (
                         <Notice tone="red">
                             Заказ еще не оплачен. Передача финальных материалов до оплаты не рекомендуется.
+                        </Notice>
+                    )}
+                    {role === 'customer' && order.status === 'submitted_for_review' && (
+                        <Notice tone="purple">
+                            Работа на проверке до {order.review_hold_until}. Если вы не примете работу и не запросите доработку до этой даты, оплата будет разблокирована автоматически.
+                        </Notice>
+                    )}
+                    {role === 'performer' && order.status === 'submitted_for_review' && (
+                        <Notice tone="purple">
+                            Работа отправлена на проверку. Если заказчик не запросит доработку или спор до {order.review_hold_until}, оплата будет разблокирована автоматически.
+                        </Notice>
+                    )}
+                    {order.status === 'completed' && order.release_reason === 'auto_release' && (
+                        <Notice tone="emerald">
+                            Оплата разблокирована автоматически по окончании срока проверки.
+                        </Notice>
+                    )}
+                    {order.status === 'completed' && order.release_reason === 'customer_early_accept' && (
+                        <Notice tone="emerald">
+                            Оплата разблокирована заказчиком досрочно.
                         </Notice>
                     )}
                 </div>
@@ -185,9 +207,12 @@ function Participant({ title, participant }) {
 }
 
 function Notice({ children, tone }) {
-    const classes = tone === 'red'
-        ? 'border-red-200 bg-red-50 text-red-800'
-        : 'border-amber-200 bg-amber-50 text-amber-900';
+    const classes = {
+        amber: 'border-amber-200 bg-amber-50 text-amber-900',
+        emerald: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+        purple: 'border-purple-200 bg-purple-50 text-purple-900',
+        red: 'border-red-200 bg-red-50 text-red-800',
+    }[tone] ?? 'border-amber-200 bg-amber-50 text-amber-900';
 
     return (
         <div className={`rounded-lg border p-4 text-sm font-semibold ${classes}`}>
@@ -283,14 +308,24 @@ function QuickActions({ role, order }) {
                     </Link>
                 )}
                 {role === 'customer' && order.can.complete && (
-                    <Link href={order.complete_url} method="post" as="button" className="w-full rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
-                        Принять работу
-                    </Link>
+                    <div className="space-y-3">
+                        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">
+                            Нажимайте эту кнопку только если полностью уверены, что работа выполнена качественно. После разблокировки средств спор по оплате может быть ограничен.
+                        </p>
+                        <Link href={order.complete_url} method="post" as="button" className="w-full rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
+                            Принять работу и разблокировать оплату
+                        </Link>
+                    </div>
                 )}
                 {role === 'customer' && order.can.request_revision && (
                     <Link href={order.request_revision_url} method="post" as="button" className="w-full rounded-md border border-amber-200 bg-white px-5 py-3 text-sm font-semibold text-amber-700 hover:bg-amber-50">
                         Запросить доработку
                     </Link>
+                )}
+                {role === 'customer' && order.status === 'submitted_for_review' && (
+                    <button type="button" disabled className="w-full cursor-not-allowed rounded-md border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-500">
+                        Открыть спор
+                    </button>
                 )}
                 {role === 'customer' && order.can.cancel_as_customer && (
                     <Link href={order.cancel_url} method="post" as="button" className="w-full rounded-md border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50">

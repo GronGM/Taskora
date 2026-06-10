@@ -144,6 +144,24 @@ http://127.0.0.1:8000
 npm run dev
 ```
 
+## Удержание Оплаты И Проверка
+
+В MVP реальный платежный шлюз не подключен. Действие "Оплатить (заглушка)" переводит заказ в работу и ставит `payment_status = held`.
+
+Когда исполнитель отправляет работу, заказ переходит в `submitted_for_review`, запускается срок проверки `review_hold_days` с дефолтом 10 дней, заполняются `review_hold_started_at`, `review_hold_until` и `auto_release_at`. Оплата остается удержанной.
+
+Заказчик может принять работу досрочно кнопкой "Принять работу и разблокировать оплату". В этом случае заказ становится `completed`, оплата переходит в `released`, заполняются `released_at` и `release_reason = customer_early_accept`.
+
+Если заказчик запрашивает доработку, заказ переходит в `revision_requested`, оплата остается удержанной, а срок проверки очищается. Повторная сдача работы запускает новый срок проверки.
+
+Для автоматической разблокировки просроченных проверок используется команда:
+
+```bash
+php artisan orders:release-due
+```
+
+В production ее нужно поставить в scheduler/cron, например запускать каждые несколько минут. Команда завершает только заказы `submitted_for_review` с `payment_status = held` и истекшим `review_hold_until`; спорные, отмененные и уже завершенные заказы не изменяются.
+
 ## Проверки
 
 ```bash
@@ -153,6 +171,7 @@ npm audit
 php artisan migrate:fresh --seed
 npm run build
 php artisan route:list --except-vendor
+php artisan orders:release-due
 php artisan test
 composer validate --strict
 ```
@@ -204,7 +223,7 @@ composer validate --strict
 | `GET` | `/customer/orders/{order}/workspace` | рабочая область заказа |
 | `POST` | `/customer/orders/{order}/mark-paid` | локальная заглушка оплаты |
 | `POST` | `/customer/orders/{order}/request-revision` | запрос доработки |
-| `POST` | `/customer/orders/{order}/complete` | приемка работы и завершение заказа |
+| `POST` | `/customer/orders/{order}/complete` | приемка работы и разблокировка оплаты |
 | `POST` | `/customer/orders/{order}/cancel` | отмена неоплаченного заказа |
 | `POST` | `/customer/orders/{order}/messages` | отправка сообщения в чате заказа |
 | `POST` | `/customer/orders/{order}/files` | загрузка файла в заказ |
@@ -232,7 +251,7 @@ composer validate --strict
 | `GET` | `/performer/orders/{order}` | карточка заказа исполнителя |
 | `GET` | `/performer/orders/{order}/workspace` | рабочая область заказа |
 | `POST` | `/performer/orders/{order}/submit-work` | отправка работы на проверку |
-| `POST` | `/performer/orders/{order}/cancel` | отказ от заказа до сдачи работы |
+| `POST` | `/performer/orders/{order}/cancel` | отказ от неоплаченного заказа до старта работы |
 | `POST` | `/performer/orders/{order}/messages` | отправка сообщения в чате заказа |
 | `POST` | `/performer/orders/{order}/files` | загрузка файла в заказ |
 | `GET` | `/performer/orders/{order}/files/{file}/download` | приватное скачивание файла заказа |

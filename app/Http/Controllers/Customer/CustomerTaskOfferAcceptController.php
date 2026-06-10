@@ -44,6 +44,7 @@ class CustomerTaskOfferAcceptController extends Controller
                 'performer_amount' => $offer->price - $feeAmount,
                 'status' => Order::STATUS_AWAITING_PAYMENT,
                 'payment_status' => Order::PAYMENT_UNPAID,
+                'review_hold_days' => Order::REVIEW_HOLD_DEFAULT_DAYS,
             ]);
 
             $offer->update(['status' => TaskOffer::STATUS_ACCEPTED]);

@@ -44,6 +44,26 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                     <p className="text-sm font-semibold text-amber-900">Это локальная заглушка оплаты. Реальный платежный шлюз будет подключен позже.</p>
                 </div>
 
+                {order.status === 'submitted_for_review' && (
+                    <div className="mt-4 rounded-lg border border-purple-200 bg-purple-50 p-5">
+                        <p className="text-sm font-semibold text-purple-900">
+                            Работа на проверке до {order.review_hold_until}. Если вы не примете работу и не запросите доработку до этой даты, оплата будет разблокирована автоматически.
+                        </p>
+                    </div>
+                )}
+
+                {order.status === 'completed' && order.release_reason === 'auto_release' && (
+                    <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-5">
+                        <p className="text-sm font-semibold text-emerald-900">Оплата разблокирована автоматически по окончании срока проверки.</p>
+                    </div>
+                )}
+
+                {order.status === 'completed' && order.release_reason === 'customer_early_accept' && (
+                    <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-5">
+                        <p className="text-sm font-semibold text-emerald-900">Оплата разблокирована заказчиком досрочно.</p>
+                    </div>
+                )}
+
                 <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
                     <article className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                         <h2 className="text-2xl font-semibold text-slate-950">Детали заказа</h2>
@@ -56,6 +76,8 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                             <Info label="Срок" value={`${order.delivery_days} дн.`} />
                             <Info label="Статус заказа" value={statusLabels[order.status]} />
                             <Info label="Статус оплаты" value={paymentStatusLabels[order.payment_status]} />
+                            <Info label="Срок проверки" value={order.review_hold_until} />
+                            <Info label="Разблокировка оплаты" value={order.release_reason_label} />
                         </div>
                     </article>
 
@@ -77,12 +99,18 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                             )}
                             {order.status === 'submitted_for_review' && (
                                 <>
+                                    <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">
+                                        Нажимайте эту кнопку только если полностью уверены, что работа выполнена качественно. После разблокировки средств спор по оплате может быть ограничен.
+                                    </p>
                                     <Link href={order.complete_url} method="post" as="button" className="w-full rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
-                                        Принять работу
+                                        Принять работу и разблокировать оплату
                                     </Link>
                                     <Link href={order.request_revision_url} method="post" as="button" className="w-full rounded-md border border-amber-200 bg-white px-5 py-3 text-sm font-semibold text-amber-700 hover:bg-amber-50">
                                         Запросить доработку
                                     </Link>
+                                    <button type="button" disabled className="w-full cursor-not-allowed rounded-md border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-500">
+                                        Открыть спор
+                                    </button>
                                 </>
                             )}
                             {['in_progress', 'revision_requested', 'completed', 'canceled'].includes(order.status) && (
