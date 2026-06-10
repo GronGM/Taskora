@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Order;
 use App\Services\Orders\OrderEventLogger;
+use App\Services\Reviews\ReviewAggregateService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +14,7 @@ class ReleaseDueOrdersCommand extends Command
 
     protected $description = 'Release held funds for submitted orders whose review period has ended.';
 
-    public function handle(OrderEventLogger $events): int
+    public function handle(OrderEventLogger $events, ReviewAggregateService $aggregates): int
     {
         $released = 0;
         $now = now();
@@ -25,9 +26,9 @@ class ReleaseDueOrdersCommand extends Command
             ->where('review_hold_until', '<=', $now)
             ->whereDoesntHave('activeDispute')
             ->orderBy('id')
-            ->chunkById(100, function ($orders) use (&$released, $events): void {
+            ->chunkById(100, function ($orders) use (&$released, $events, $aggregates): void {
                 foreach ($orders as $order) {
-                    DB::transaction(function () use ($order, &$released, $events): void {
+                    DB::transaction(function () use ($order, &$released, $events, $aggregates): void {
                         $releasedAt = now();
 
                         $order->update([
@@ -48,6 +49,8 @@ class ReleaseDueOrdersCommand extends Command
                             'release_reason' => Order::RELEASE_AUTO,
                             'released_at' => $releasedAt->toISOString(),
                         ]);
+
+                        $aggregates->recalculateForOrder($order);
 
                         $released++;
                     });

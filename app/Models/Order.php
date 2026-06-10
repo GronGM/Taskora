@@ -167,4 +167,9 @@ class Order extends Model
             ->whereIn('status', Dispute::activeStatuses())
             ->latestOfMany();
     }
+
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
+    }
 }

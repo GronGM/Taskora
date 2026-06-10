@@ -4,6 +4,7 @@ namespace App\Services\Orders;
 
 use App\Models\Order;
 use App\Models\OrderEvent;
+use App\Models\Review;
 use App\Models\User;
 use App\Services\Notifications\NotificationService;
 
@@ -145,6 +146,8 @@ class OrderEventLogger
                 $this->orderMeta($order, null, 'order', 'success'),
             );
         }
+
+        $this->notifyCustomerReviewRequested($order);
 
         return $event;
     }
@@ -397,6 +400,35 @@ class OrderEventLogger
         return $user->isPerformer()
             ? route('performer.disputes.show', ['dispute' => $disputeId])
             : route('customer.disputes.show', ['dispute' => $disputeId]);
+    }
+
+    private function notifyCustomerReviewRequested(Order $order): void
+    {
+        $order->loadMissing(['customer', 'review']);
+
+        if (
+            ! $order->customer instanceof User
+            || $order->review !== null
+            || $order->status !== Order::STATUS_COMPLETED
+            || $order->payment_status !== Order::PAYMENT_RELEASED
+        ) {
+            return;
+        }
+
+        $this->notifications->notifyUser(
+            $order->customer,
+            'order.review_requested',
+            'Заказ завершен — оставьте отзыв исполнителю',
+            "Расскажите о результате по заказу «{$order->title}». Отзыв помогает заказчикам выбирать исполнителей в Таскоре.",
+            route('customer.orders.review.create', $order),
+            [
+                'icon' => 'review',
+                'severity' => 'success',
+                'related_type' => Review::class,
+                'related_id' => $order->id,
+                'order_id' => $order->id,
+            ],
+        );
     }
 
     /**

@@ -103,6 +103,8 @@ ModuleName/
 
 В текущем MVP используется одна основная роль в поле `users.role`. Новые публичные регистрации получают роль `customer` или `performer`; роли `moderator` и `admin` нельзя выбрать на публичной регистрации.
 
+Для публичного доверия у исполнителя хранятся производные поля `performer_rating`, `performer_reviews_count` и `performer_completed_orders_count`. Они не редактируются вручную и пересчитываются из отзывов и завершенных заказов через `ReviewAggregateService`.
+
 Модель `User` содержит методы:
 
 - `isCustomer()`
@@ -264,6 +266,19 @@ ModuleName/
 - `type`;
 - `payload` json nullable.
 
+`reviews`:
+
+- `order_id` — уникальный заказ, по которому оставлен отзыв;
+- `service_id` nullable — услуга из заказа;
+- `task_id` nullable — задание из заказа;
+- `customer_id` — автор отзыва;
+- `performer_id` — исполнитель, получивший отзыв;
+- `rating` — целое значение от 1 до 5;
+- `comment` nullable, максимум 2000 символов;
+- `status`: `published`, `hidden`;
+- `is_public`;
+- `published_at`, `hidden_at`.
+
 `disputes`:
 
 - `order_id`;
@@ -340,6 +355,12 @@ ModuleName/
 - `OrderFile belongsTo User`
 - `OrderEvent belongsTo Order`
 - `OrderEvent belongsTo User nullable`
+- `Order hasOne Review`
+- `Review belongsTo Order`
+- `Review belongsTo Service nullable`
+- `Review belongsTo Task nullable`
+- `Review belongsTo customer User`
+- `Review belongsTo performer User`
 - `Dispute belongsTo Order`
 - `Dispute belongsTo openedBy User`
 - `Dispute belongsTo resolvedBy User nullable`
@@ -361,10 +382,13 @@ ModuleName/
 | `GET` | `/tasks?category={slug}` | фильтр заданий по категории | guest |
 | `GET` | `/tasks/{task:slug}` | страница опубликованного задания | guest |
 | `GET` | `/performers` | публичная витрина исполнителей | guest |
+| `GET` | `/performers/{user}/reviews` | публичные отзывы исполнителя | guest |
 
 Публично отображаются только услуги со статусом `published`. Черновики, услуги на модерации, архивные и отклоненные услуги не должны попадать в каталог и карточки услуг.
 
 Публично отображаются только задания со статусом `published`. Черновики, закрытые и архивные задания возвращают `404` на прямой публичной ссылке и не попадают в `/tasks`.
+
+Публичные рейтинги берутся только из опубликованных отзывов и завершенных оплаченных заказов. Если отзывов нет, карточки услуг и исполнителей показывают пустое состояние, а не искусственный рейтинг.
 
 ## Индивидуальные Задания И Отклики
 
@@ -681,6 +705,55 @@ canceled
 Команда `php artisan orders:release-due` автоматически завершает только due-заказы `submitted_for_review` с `payment_status = held` и истекшим `review_hold_until`. Для таких заказов заполняются `completed_at`, `released_at`, `release_reason = auto_release`, а в `order_events` пишутся `order_completed` и `funds_released`.
 
 Команда зарегистрирована в Laravel scheduler как hourly-задача. В production cron должен запускать `php artisan schedule:run` каждую минуту; сам scheduler решает, что `orders:release-due` нужно выполнить раз в час. Заказы в статусе `disputed` не подходят под условие команды и не разблокируются автоматически.
+
+## Отзывы И Доверие
+
+Модуль `Reviews` реализован как часть модульного монолита. Основные классы:
+
+- `App\Models\Review`;
+- `App\Policies\ReviewPolicy`;
+- `App\Http\Requests\Customer\StoreReviewRequest`;
+- `App\Http\Controllers\Customer\CustomerReviewController`;
+- `App\Services\Reviews\ReviewAggregateService`.
+
+Защищенные маршруты заказчика:
+
+| Метод | Маршрут | Назначение | Защита |
+|---|---|---|---|
+| `GET` | `/customer/orders/{order}/review/create` | форма отзыва | `ReviewPolicy::create` |
+| `POST` | `/customer/orders/{order}/review` | публикация отзыва | `ReviewPolicy::create`, `ContactGuard` |
+| `GET` | `/customer/reviews` | список своих отзывов | `role:customer` |
+| `GET` | `/customer/reviews/{review}` | просмотр своего отзыва | `ReviewPolicy::view` |
+
+Правила создания:
+
+1. Отзыв доступен только заказчику-владельцу заказа.
+2. Заказ должен быть `completed` и `payment_status = released`.
+3. На один заказ можно создать только один отзыв.
+4. Исполнитель не может оставить отзыв самому себе.
+5. `service_id`, `task_id`, `customer_id` и `performer_id` берутся из заказа, а не из пользовательского payload.
+6. `rating` обязателен, диапазон 1-5.
+7. `comment` необязателен, максимум 2000 символов.
+8. Перед сохранением `comment` проверяется через `ContactGuard`.
+9. При найденном контакте отзыв не сохраняется, создается `moderation_flag` с `entity_type = App\Models\Review` и причиной `contact_detected_in_review`.
+
+Публикация отзыва выполняется в транзакции вместе с пересчетом агрегатов. `ReviewAggregateService` пересчитывает:
+
+- `services.rating` и `services.reviews_count` по публичным опубликованным отзывам услуги;
+- `services.orders_count` по завершенным заказам услуги с разблокированной оплатой;
+- `users.performer_rating` и `users.performer_reviews_count` по публичным опубликованным отзывам исполнителя;
+- `users.performer_completed_orders_count` по завершенным заказам исполнителя с разблокированной оплатой.
+
+Пересчет выполненных заказов также вызывается при досрочной приемке заказчиком, авторазблокировке командой `orders:release-due` и решении спора в пользу исполнителя.
+
+Публичное отображение:
+
+- карточка услуги показывает рейтинг только при наличии отзывов;
+- страница услуги показывает последние публичные отзывы;
+- `/performers` показывает рейтинг, число отзывов, завершенные заказы и число опубликованных услуг;
+- `/performers/{user}/reviews` показывает публичные отзывы исполнителя.
+
+TODO после MVP: ограниченное окно редактирования отзыва, ручное скрытие отзывов модератором, полноценный публичный профиль исполнителя и проверяемые поля верификации.
 
 ## Споры И Арбитраж
 

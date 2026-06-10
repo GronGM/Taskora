@@ -2,7 +2,24 @@ import { Link } from '@inertiajs/react';
 
 const currency = new Intl.NumberFormat('ru-RU');
 
+const pluralReviews = (count) => {
+    const mod10 = count % 10;
+    const mod100 = count % 100;
+
+    if (mod10 === 1 && mod100 !== 11) {
+        return 'отзыв';
+    }
+
+    if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) {
+        return 'отзыва';
+    }
+
+    return 'отзывов';
+};
+
 export default function ServiceCard({ service }) {
+    const hasReviews = service.reviews_count > 0;
+
     return (
         <article className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
@@ -13,7 +30,7 @@ export default function ServiceCard({ service }) {
                     {service.category.name}
                 </Link>
                 <span className="text-sm font-semibold text-slate-600">
-                    {service.rating ?? '5.00'} / 5
+                    {hasReviews ? `${Number(service.rating).toFixed(2)} / 5` : 'Нет отзывов'}
                 </span>
             </div>
 
@@ -39,9 +56,14 @@ export default function ServiceCard({ service }) {
             <div className="mt-5 flex items-center justify-between gap-4 text-sm">
                 <div>
                     <p className="text-slate-500">Исполнитель</p>
-                    <p className="font-semibold text-slate-900">{service.performer.name}</p>
+                    <Link href={service.performer.reviews_url} className="font-semibold text-slate-900 hover:text-blue-700">
+                        {service.performer.name}
+                    </Link>
                 </div>
-                <p className="text-slate-500">{service.reviews_count} отзывов</p>
+                <div className="text-right">
+                    <p className="text-slate-500">{hasReviews ? `${service.reviews_count} ${pluralReviews(service.reviews_count)}` : 'Нет отзывов'}</p>
+                    <p className="mt-1 text-xs text-slate-400">{service.orders_count} завершено</p>
+                </div>
             </div>
 
             <Link

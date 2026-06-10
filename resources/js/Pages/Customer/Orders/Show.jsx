@@ -77,6 +77,28 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                     </div>
                 )}
 
+                {order.status === 'completed' && !order.review && order.can_review && (
+                    <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-5">
+                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                            <p className="text-sm font-semibold text-blue-900">Заказ завершен. Оставьте отзыв исполнителю, чтобы помочь другим заказчикам.</p>
+                            <Link href={order.review_create_url} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+                                Оставить отзыв исполнителю
+                            </Link>
+                        </div>
+                    </div>
+                )}
+
+                {order.review && (
+                    <div className="mt-4 rounded-lg border border-slate-200 bg-white p-5">
+                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                            <p className="text-sm font-semibold text-slate-900">Отзыв оставлен: {order.review.rating} / 5</p>
+                            <Link href={order.review.show_url} className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+                                Открыть отзыв
+                            </Link>
+                        </div>
+                    </div>
+                )}
+
                 <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
                     <article className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                         <h2 className="text-2xl font-semibold text-slate-950">Детали заказа</h2>
@@ -122,6 +144,16 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                                         Запросить доработку
                                     </Link>
                                 </>
+                            )}
+                            {order.status === 'completed' && !order.review && order.can_review && (
+                                <Link href={order.review_create_url} className="block w-full rounded-md bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700">
+                                    Оставить отзыв исполнителю
+                                </Link>
+                            )}
+                            {order.review && (
+                                <Link href={order.review.show_url} className="block w-full rounded-md border border-slate-300 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-800 hover:bg-slate-50">
+                                    Отзыв оставлен
+                                </Link>
                             )}
                             {order.can_open_dispute && (
                                 <Link href={order.open_dispute_url} className="block w-full rounded-md border border-red-200 bg-white px-5 py-3 text-center text-sm font-semibold text-red-700 hover:bg-red-50">

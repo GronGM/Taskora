@@ -4,6 +4,8 @@ import PublicLayout from '../../Layouts/PublicLayout';
 const currency = new Intl.NumberFormat('ru-RU');
 
 export default function Show({ service }) {
+    const hasReviews = service.reviews_count > 0;
+
     return (
         <PublicLayout>
             <Head title={service.title} />
@@ -30,7 +32,7 @@ export default function Show({ service }) {
                             </div>
                             <div className="rounded-md bg-white p-3">
                                 <p className="text-slate-500">Отзывы</p>
-                                <p className="mt-1 font-semibold text-slate-950">{service.reviews_count}</p>
+                                <p className="mt-1 font-semibold text-slate-950">{hasReviews ? service.reviews_count : 'Нет'}</p>
                             </div>
                         </div>
                         {service.packages.length === 0 ? (
@@ -89,20 +91,52 @@ export default function Show({ service }) {
                             ))}
                         </div>
                     </div>
+
+                    <div>
+                        <p className="text-sm font-semibold uppercase text-blue-700">Отзывы заказчиков</p>
+                        {service.reviews.length > 0 ? (
+                            <div className="mt-5 space-y-4">
+                                {service.reviews.map((review) => (
+                                    <article key={review.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                                            <div>
+                                                <p className="text-sm font-semibold text-blue-700">{review.rating} / 5</p>
+                                                <p className="mt-1 text-sm font-semibold text-slate-950">{review.customer.name}</p>
+                                            </div>
+                                            <span className="text-sm text-slate-500">{review.published_at}</span>
+                                        </div>
+                                        {review.comment && <p className="mt-4 whitespace-pre-line text-sm leading-6 text-slate-700">{review.comment}</p>}
+                                    </article>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center">
+                                <h2 className="text-xl font-semibold text-slate-950">Отзывов пока нет</h2>
+                                <p className="mt-2 text-sm leading-6 text-slate-600">
+                                    Первый отзыв появится после завершенного заказа и публикации оценки заказчиком.
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <aside className="space-y-4">
                     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                         <p className="text-sm font-semibold text-slate-500">Исполнитель</p>
-                        <p className="mt-2 text-xl font-semibold text-slate-950">{service.performer.name}</p>
+                        <Link href={service.performer.reviews_url} className="mt-2 block text-xl font-semibold text-slate-950 hover:text-blue-700">
+                            {service.performer.name}
+                        </Link>
                         <p className="mt-3 text-sm leading-6 text-slate-600">
-                            Проверенный локальный демо-исполнитель с опубликованными услугами в каталоге.
+                            {service.performer.reviews_count > 0
+                                ? `${service.performer.reviews_count} отзывов, ${service.performer.completed_orders_count} завершенных заказов.`
+                                : 'У исполнителя пока нет публичных отзывов.'}
                         </p>
                     </div>
                     <div className="rounded-lg border border-blue-100 bg-blue-50 p-5">
                         <p className="text-sm font-semibold uppercase text-blue-700">Блок доверия</p>
                         <div className="mt-4 space-y-3 text-sm text-blue-900">
-                            <p>Рейтинг: {service.rating ?? '5.00'} / 5</p>
+                            <p>Рейтинг: {hasReviews ? `${Number(service.rating).toFixed(2)} / 5` : 'Нет отзывов'}</p>
+                            <p>Отзывы: {service.reviews_count}</p>
                             <p>Выполнено заказов: {service.orders_count}</p>
                             <p>Обсуждение и файлы должны оставаться внутри Таскоры.</p>
                         </div>

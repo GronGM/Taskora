@@ -69,6 +69,12 @@ export default function DashboardLayout({ children }) {
                                 >
                                     Мои заказы
                                 </Link>
+                                <Link
+                                    href="/customer/reviews"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 xl:inline-flex"
+                                >
+                                    Мои отзывы
+                                </Link>
                             </>
                         )}
                         {user?.role === 'performer' && (

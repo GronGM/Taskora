@@ -134,6 +134,16 @@ export default function Workspace({ role, order, statusLabels, paymentStatusLabe
                             Оплата разблокирована заказчиком досрочно.
                         </Notice>
                     )}
+                    {role === 'customer' && order.status === 'completed' && !order.review && order.can.review && (
+                        <Notice tone="blue">
+                            Заказ завершен. <Link href={order.review_create_url} className="underline">Оставить отзыв исполнителю</Link>
+                        </Notice>
+                    )}
+                    {role === 'customer' && order.review && (
+                        <Notice tone="slate">
+                            Отзыв оставлен: {order.review.rating} / 5. <Link href={order.review.show_url} className="underline">Открыть отзыв</Link>
+                        </Notice>
+                    )}
                 </div>
 
                 <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_380px]">
@@ -225,9 +235,11 @@ function Participant({ title, participant }) {
 function Notice({ children, tone }) {
     const classes = {
         amber: 'border-amber-200 bg-amber-50 text-amber-900',
+        blue: 'border-blue-200 bg-blue-50 text-blue-900',
         emerald: 'border-emerald-200 bg-emerald-50 text-emerald-900',
         purple: 'border-purple-200 bg-purple-50 text-purple-900',
         red: 'border-red-200 bg-red-50 text-red-800',
+        slate: 'border-slate-200 bg-white text-slate-900',
     }[tone] ?? 'border-amber-200 bg-amber-50 text-amber-900';
 
     return (
@@ -338,6 +350,16 @@ function QuickActions({ role, order }) {
                         Запросить доработку
                     </Link>
                 )}
+                {role === 'customer' && order.can.review && (
+                    <Link href={order.review_create_url} className="block w-full rounded-md bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700">
+                        Оставить отзыв исполнителю
+                    </Link>
+                )}
+                {role === 'customer' && order.review && (
+                    <Link href={order.review.show_url} className="block w-full rounded-md border border-slate-300 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-800 hover:bg-slate-50">
+                        Отзыв оставлен
+                    </Link>
+                )}
                 {order.can.open_dispute && (
                     <Link href={order.open_dispute_url} className="block w-full rounded-md border border-red-200 bg-white px-5 py-3 text-center text-sm font-semibold text-red-700 hover:bg-red-50">
                         Открыть спор
@@ -397,7 +419,7 @@ function EmptyState({ title, text }) {
 
 function hasActions(role, order) {
     if (role === 'customer') {
-        return order.can.mark_paid || order.can.complete || order.can.request_revision || order.can.cancel_as_customer || order.can.open_dispute || order.active_dispute_url;
+        return order.can.mark_paid || order.can.complete || order.can.request_revision || order.can.review || order.review || order.can.cancel_as_customer || order.can.open_dispute || order.active_dispute_url;
     }
 
     return order.can.submit_work || order.can.cancel_as_performer || order.can.open_dispute || order.active_dispute_url;

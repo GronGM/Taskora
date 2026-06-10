@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\CustomerOrderController;
+use App\Http\Controllers\Customer\CustomerReviewController;
 use App\Http\Controllers\Customer\CustomerTaskController;
 use App\Http\Controllers\Customer\CustomerTaskOfferAcceptController;
 use App\Http\Controllers\Customer\CustomerTaskOfferController;
@@ -36,6 +37,7 @@ Route::get('/tasks', [TaskBoardController::class, 'index'])->name('tasks');
 Route::get('/tasks/{task:slug}', [TaskBoardController::class, 'show'])->name('tasks.show');
 
 Route::get('/performers', [CatalogController::class, 'performers'])->name('performers');
+Route::get('/performers/{user}/reviews', [CatalogController::class, 'performerReviews'])->name('performers.reviews');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -65,6 +67,10 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function (): void {
         Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/review/create', [CustomerReviewController::class, 'create'])->name('orders.review.create');
+        Route::post('/orders/{order}/review', [CustomerReviewController::class, 'store'])
+            ->middleware('throttle:taskora-create')
+            ->name('orders.review.store');
         Route::get('/orders/{order}/workspace', OrderWorkspaceController::class)->name('orders.workspace');
         Route::get('/orders/{order}/disputes/create', [DisputeController::class, 'create'])->name('orders.disputes.create');
         Route::post('/orders/{order}/disputes', [DisputeController::class, 'store'])
@@ -85,6 +91,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/disputes/{dispute}/messages', [DisputeMessageController::class, 'store'])
             ->middleware('throttle:taskora-order-messages')
             ->name('disputes.messages.store');
+        Route::get('/reviews', [CustomerReviewController::class, 'index'])->name('reviews.index');
+        Route::get('/reviews/{review}', [CustomerReviewController::class, 'show'])->name('reviews.show');
         Route::get('/tasks', [CustomerTaskController::class, 'index'])->name('tasks.index');
         Route::get('/tasks/create', [CustomerTaskController::class, 'create'])->name('tasks.create');
         Route::post('/tasks', [CustomerTaskController::class, 'store'])

@@ -26,9 +26,9 @@ class ServiceFactory extends Factory
             'price_from' => fake()->numberBetween(1500, 25000),
             'delivery_days' => fake()->numberBetween(1, 14),
             'status' => Service::STATUS_PUBLISHED,
-            'rating' => fake()->randomFloat(2, 4.6, 5.0),
-            'reviews_count' => fake()->numberBetween(0, 80),
-            'orders_count' => fake()->numberBetween(0, 120),
+            'rating' => null,
+            'reviews_count' => 0,
+            'orders_count' => 0,
             'is_featured' => false,
         ];
     }

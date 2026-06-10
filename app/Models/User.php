@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'performer_rating', 'performer_reviews_count', 'performer_completed_orders_count'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -36,6 +36,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'performer_rating' => 'decimal:2',
+            'performer_reviews_count' => 'integer',
+            'performer_completed_orders_count' => 'integer',
         ];
     }
 
@@ -92,6 +95,16 @@ class User extends Authenticatable
     public function performerOrders(): HasMany
     {
         return $this->hasMany(Order::class, 'performer_id');
+    }
+
+    public function givenReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'customer_id');
+    }
+
+    public function receivedReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'performer_id');
     }
 
     public function orderMessages(): HasMany

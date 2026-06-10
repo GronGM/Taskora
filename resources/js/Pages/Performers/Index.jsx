@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '../../Layouts/PublicLayout';
 
 export default function PerformersIndex({ performers }) {
@@ -27,7 +27,7 @@ export default function PerformersIndex({ performers }) {
                                         <h2 className="mt-2 text-2xl font-semibold text-slate-950">{performer.name}</h2>
                                     </div>
                                     <span className="rounded-md bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-                                        {performer.rating} / 5
+                                        {performer.reviews_count > 0 ? `${Number(performer.rating).toFixed(2)} / 5` : 'Нет отзывов'}
                                     </span>
                                 </div>
                                 <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
@@ -36,10 +36,26 @@ export default function PerformersIndex({ performers }) {
                                         <p className="mt-1 text-xl font-semibold text-slate-950">{performer.services_count}</p>
                                     </div>
                                     <div className="rounded-md bg-slate-50 p-4">
-                                        <p className="text-slate-500">Рейтинг</p>
-                                        <p className="mt-1 text-xl font-semibold text-slate-950">заглушка</p>
+                                        <p className="text-slate-500">Отзывы</p>
+                                        <p className="mt-1 text-xl font-semibold text-slate-950">{performer.reviews_count}</p>
+                                    </div>
+                                    <div className="rounded-md bg-slate-50 p-4">
+                                        <p className="text-slate-500">Завершено</p>
+                                        <p className="mt-1 text-xl font-semibold text-slate-950">{performer.completed_orders_count}</p>
+                                    </div>
+                                    <div className="rounded-md bg-slate-50 p-4">
+                                        <p className="text-slate-500">Доверие</p>
+                                        <p className="mt-1 text-xl font-semibold text-slate-950">
+                                            {performer.reviews_count > 0 ? 'Есть опыт' : 'Новый'}
+                                        </p>
                                     </div>
                                 </div>
+                                <Link
+                                    href={performer.reviews_url}
+                                    className="mt-6 inline-flex w-full justify-center rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+                                >
+                                    Смотреть отзывы
+                                </Link>
                             </article>
                         ))}
                     </div>

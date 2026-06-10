@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Dispute;
 use App\Models\Order;
 use App\Models\OrderSubmission;
+use App\Models\Review;
 use App\Services\Orders\OrderEventLogger;
+use App\Services\Reviews\ReviewAggregateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -21,7 +23,7 @@ class CustomerOrderController extends Controller
 
         $orders = request()->user()
             ->customerOrders()
-            ->with(['performer', 'service', 'task', 'activeDispute'])
+            ->with(['performer', 'service', 'task', 'review', 'activeDispute'])
             ->latest()
             ->get()
             ->map(fn (Order $order): array => $this->orderCard($order, 'customer'));
@@ -37,7 +39,7 @@ class CustomerOrderController extends Controller
     {
         Gate::authorize('viewAsCustomer', $order);
 
-        $order->load(['performer', 'category', 'service', 'task', 'taskOffer', 'submissions.user', 'activeDispute']);
+        $order->load(['performer', 'category', 'service', 'task', 'taskOffer', 'review', 'submissions.user', 'activeDispute']);
 
         return Inertia::render('Customer/Orders/Show', [
             'order' => $this->orderDetail($order, 'customer'),
@@ -96,12 +98,12 @@ class CustomerOrderController extends Controller
             ->with('success', 'Запрошена доработка результата.');
     }
 
-    public function complete(Order $order, OrderEventLogger $events): RedirectResponse
+    public function complete(Order $order, OrderEventLogger $events, ReviewAggregateService $aggregates): RedirectResponse
     {
         Gate::authorize('complete', $order);
         $user = request()->user();
 
-        DB::transaction(function () use ($order, $events, $user): void {
+        DB::transaction(function () use ($order, $events, $user, $aggregates): void {
             $releasedAt = now();
 
             $order->submissions()->latest()->first()?->update([
@@ -125,6 +127,8 @@ class CustomerOrderController extends Controller
                 'release_reason' => Order::RELEASE_CUSTOMER_EARLY_ACCEPT,
                 'released_at' => $releasedAt->toISOString(),
             ]);
+
+            $aggregates->recalculateForOrder($order);
         });
 
         return redirect()
@@ -177,6 +181,10 @@ class CustomerOrderController extends Controller
             'open_dispute_url' => route("{$role}.orders.disputes.create", $order),
             'active_dispute_url' => $order->activeDispute ? route("{$role}.disputes.show", $order->activeDispute) : null,
             'can_open_dispute' => Gate::allows('create', [Dispute::class, $order]),
+            'review' => $this->reviewPayload($order->review),
+            'can_review' => Gate::allows('create', [Review::class, $order]),
+            'review_create_url' => $role === 'customer' ? route('customer.orders.review.create', $order) : null,
+            'reviews_index_url' => $role === 'customer' ? route('customer.reviews.index') : null,
         ];
     }
 
@@ -225,6 +233,24 @@ class CustomerOrderController extends Controller
             Order::RELEASE_DISPUTE_TO_PERFORMER => 'Решение спора в пользу исполнителя',
             default => null,
         };
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function reviewPayload(?Review $review): ?array
+    {
+        if (! $review) {
+            return null;
+        }
+
+        return [
+            'id' => $review->id,
+            'rating' => $review->rating,
+            'comment' => $review->comment,
+            'published_at' => $review->published_at?->format('d.m.Y H:i'),
+            'show_url' => route('customer.reviews.show', $review),
+        ];
     }
 
     /**

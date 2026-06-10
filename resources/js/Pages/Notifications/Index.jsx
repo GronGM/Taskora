@@ -16,6 +16,7 @@ const iconLabels = {
     message: 'СМ',
     file: 'ФЛ',
     dispute: 'СП',
+    review: 'ОТ',
 };
 
 export default function Index({ items = [], unreadCount = 0 }) {

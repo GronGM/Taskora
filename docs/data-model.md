@@ -12,6 +12,9 @@
 - password
 - role
 - status
+- performer_rating
+- performer_reviews_count
+- performer_completed_orders_count
 - email_verified_at
 - timestamps
 
@@ -55,6 +58,9 @@
 - delivery_days
 - status
 - moderation_status
+- rating
+- reviews_count
+- orders_count
 - timestamps
 
 ### service_options
@@ -153,11 +159,16 @@
 
 - id
 - order_id
-- reviewer_id
-- reviewee_id
+- service_id nullable
+- task_id nullable
+- customer_id
+- performer_id
 - rating
-- body
+- comment
+- status
 - is_public
+- published_at
+- hidden_at
 - timestamps
 
 ### disputes

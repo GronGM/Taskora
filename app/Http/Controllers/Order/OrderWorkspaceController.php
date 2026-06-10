@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderEvent;
 use App\Models\OrderFile;
 use App\Models\OrderMessage;
+use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -26,6 +27,7 @@ class OrderWorkspaceController extends Controller
             'orderMessages.user',
             'orderFiles.user',
             'orderEvents.user',
+            'review',
             'activeDispute',
         ]);
 
@@ -80,6 +82,9 @@ class OrderWorkspaceController extends Controller
             'complete_url' => $role === 'customer' ? route('customer.orders.complete', $order) : null,
             'cancel_url' => route("{$role}.orders.cancel", $order),
             'submit_work_url' => $role === 'performer' ? route('performer.orders.submit-work', $order) : null,
+            'review' => $this->reviewPayload($order->review),
+            'review_create_url' => $role === 'customer' ? route('customer.orders.review.create', $order) : null,
+            'reviews_index_url' => $role === 'customer' ? route('customer.reviews.index') : null,
             'messages' => $order->orderMessages->map(fn (OrderMessage $message): array => $this->messagePayload($message, $order)),
             'files' => $order->orderFiles
                 ->where('status', OrderFile::STATUS_AVAILABLE)
@@ -94,7 +99,26 @@ class OrderWorkspaceController extends Controller
                 'submit_work' => Gate::allows('submitWork', $order),
                 'cancel_as_performer' => Gate::allows('cancelAsPerformer', $order),
                 'open_dispute' => Gate::allows('create', [Dispute::class, $order]),
+                'review' => $role === 'customer' && Gate::allows('create', [Review::class, $order]),
             ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function reviewPayload(?Review $review): ?array
+    {
+        if (! $review) {
+            return null;
+        }
+
+        return [
+            'id' => $review->id,
+            'rating' => $review->rating,
+            'comment' => $review->comment,
+            'published_at' => $review->published_at?->format('d.m.Y H:i'),
+            'show_url' => route('customer.reviews.show', $review),
         ];
     }
 

@@ -13,6 +13,7 @@ use App\Models\OrderMessage;
 use App\Models\OrderSubmission;
 use App\Models\User;
 use App\Services\Orders\OrderEventLogger;
+use App\Services\Reviews\ReviewAggregateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -113,12 +114,12 @@ class ModeratorDisputeController extends Controller
             ->with('success', 'Спор взят в работу.');
     }
 
-    public function resolve(ResolveDisputeRequest $request, Dispute $dispute, OrderEventLogger $events): RedirectResponse
+    public function resolve(ResolveDisputeRequest $request, Dispute $dispute, OrderEventLogger $events, ReviewAggregateService $aggregates): RedirectResponse
     {
         $validated = $request->validated();
         $user = $request->user();
 
-        DB::transaction(function () use ($dispute, $validated, $user, $events): void {
+        DB::transaction(function () use ($dispute, $validated, $user, $events, $aggregates): void {
             $dispute->load(['order.submissions']);
             $order = $dispute->order;
             $resolvedAt = now();
@@ -132,7 +133,7 @@ class ModeratorDisputeController extends Controller
             ]);
 
             match ($validated['resolution']) {
-                Dispute::RESOLUTION_RELEASE_TO_PERFORMER => $this->releaseToPerformer($order, $dispute, $user, $events, $resolvedAt),
+                Dispute::RESOLUTION_RELEASE_TO_PERFORMER => $this->releaseToPerformer($order, $dispute, $user, $events, $aggregates, $resolvedAt),
                 Dispute::RESOLUTION_REFUND_TO_CUSTOMER => $this->refundToCustomer($order, $dispute, $user, $events, $resolvedAt),
                 Dispute::RESOLUTION_RETURN_TO_REVISION => $this->returnToRevision($order, $dispute, $user, $events, $resolvedAt),
             };
@@ -149,7 +150,7 @@ class ModeratorDisputeController extends Controller
             ->with('success', 'Решение по спору сохранено.');
     }
 
-    private function releaseToPerformer(Order $order, Dispute $dispute, User $user, OrderEventLogger $events, mixed $resolvedAt): void
+    private function releaseToPerformer(Order $order, Dispute $dispute, User $user, OrderEventLogger $events, ReviewAggregateService $aggregates, mixed $resolvedAt): void
     {
         $order->update([
             'status' => Order::STATUS_COMPLETED,
@@ -171,6 +172,8 @@ class ModeratorDisputeController extends Controller
             'release_reason' => Order::RELEASE_DISPUTE_TO_PERFORMER,
             'released_at' => $resolvedAt->toISOString(),
         ]);
+
+        $aggregates->recalculateForOrder($order);
     }
 
     private function refundToCustomer(Order $order, Dispute $dispute, User $user, OrderEventLogger $events, mixed $resolvedAt): void

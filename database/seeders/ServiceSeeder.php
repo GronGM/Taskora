@@ -90,6 +90,9 @@ class ServiceSeeder extends Seeder
                 ['slug' => $serviceData['slug']],
                 [
                     ...$serviceData,
+                    'rating' => null,
+                    'reviews_count' => 0,
+                    'orders_count' => 0,
                     'user_id' => $performer->id,
                     'category_id' => $category->id,
                     'status' => Service::STATUS_PUBLISHED,
