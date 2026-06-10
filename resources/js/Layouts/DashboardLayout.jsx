@@ -80,6 +80,18 @@ export default function DashboardLayout({ children }) {
                         {user?.role === 'performer' && (
                             <>
                                 <Link
+                                    href="/performer/profile"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
+                                >
+                                    Профиль
+                                </Link>
+                                <Link
+                                    href="/performer/portfolio"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 lg:inline-flex"
+                                >
+                                    Портфолио
+                                </Link>
+                                <Link
                                     href="/performer/services"
                                     className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
                                 >
@@ -101,6 +113,12 @@ export default function DashboardLayout({ children }) {
                         )}
                         {canReview && (
                             <>
+                                <Link
+                                    href="/moderator/performer-profiles"
+                                    className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"
+                                >
+                                    Профили
+                                </Link>
                                 <Link
                                     href="/moderator/services"
                                     className="hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex"

@@ -56,9 +56,10 @@ export default function ServiceCard({ service }) {
             <div className="mt-5 flex items-center justify-between gap-4 text-sm">
                 <div>
                     <p className="text-slate-500">Исполнитель</p>
-                    <Link href={service.performer.reviews_url} className="font-semibold text-slate-900 hover:text-blue-700">
+                    <Link href={service.performer.profile_url ?? service.performer.reviews_url} className="font-semibold text-slate-900 hover:text-blue-700">
                         {service.performer.name}
                     </Link>
+                    {service.performer.is_verified && <p className="mt-1 text-xs font-semibold text-emerald-700">Проверен</p>}
                 </div>
                 <div className="text-right">
                     <p className="text-slate-500">{hasReviews ? `${service.reviews_count} ${pluralReviews(service.reviews_count)}` : 'Нет отзывов'}</p>

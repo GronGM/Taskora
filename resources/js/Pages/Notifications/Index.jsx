@@ -17,6 +17,7 @@ const iconLabels = {
     file: 'ФЛ',
     dispute: 'СП',
     review: 'ОТ',
+    profile: 'ПР',
 };
 
 export default function Index({ items = [], unreadCount = 0 }) {

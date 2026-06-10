@@ -4,12 +4,16 @@ namespace App\Providers;
 
 use App\Models\Dispute;
 use App\Models\Order;
+use App\Models\PerformerPortfolioItem;
+use App\Models\PerformerProfile;
 use App\Models\Review;
 use App\Models\Service;
 use App\Models\Task;
 use App\Models\TaskOffer;
 use App\Policies\DisputePolicy;
 use App\Policies\OrderPolicy;
+use App\Policies\PerformerPortfolioItemPolicy;
+use App\Policies\PerformerProfilePolicy;
 use App\Policies\ReviewPolicy;
 use App\Policies\ServicePolicy;
 use App\Policies\TaskOfferPolicy;
@@ -38,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Service::class, ServicePolicy::class);
         Gate::policy(Dispute::class, DisputePolicy::class);
         Gate::policy(Order::class, OrderPolicy::class);
+        Gate::policy(PerformerProfile::class, PerformerProfilePolicy::class);
+        Gate::policy(PerformerPortfolioItem::class, PerformerPortfolioItemPolicy::class);
         Gate::policy(Review::class, ReviewPolicy::class);
         Gate::policy(Task::class, TaskPolicy::class);
         Gate::policy(TaskOffer::class, TaskOfferPolicy::class);

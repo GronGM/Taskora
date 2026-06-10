@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['parent_id', 'name', 'slug', 'description', 'icon', 'sort_order', 'is_active'])]
@@ -49,6 +50,12 @@ class Category extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function performerProfiles(): BelongsToMany
+    {
+        return $this->belongsToMany(PerformerProfile::class, 'category_performer_profile')
+            ->withTimestamps();
     }
 
     protected function catalogUrl(): Attribute

@@ -11,6 +11,7 @@ use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
 use App\Http\Controllers\Moderator\ModerationFlagController;
 use App\Http\Controllers\Moderator\ModeratorDisputeController;
+use App\Http\Controllers\Moderator\ModeratorPerformerProfileController;
 use App\Http\Controllers\Moderator\ModeratorServiceController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Order\DisputeController;
@@ -19,6 +20,8 @@ use App\Http\Controllers\Order\OrderFileController;
 use App\Http\Controllers\Order\OrderMessageController;
 use App\Http\Controllers\Order\OrderWorkspaceController;
 use App\Http\Controllers\Performer\PerformerOrderController;
+use App\Http\Controllers\Performer\PerformerPortfolioController;
+use App\Http\Controllers\Performer\PerformerProfileController;
 use App\Http\Controllers\Performer\PerformerServiceController;
 use App\Http\Controllers\Performer\TaskOfferController;
 use App\Http\Controllers\Public\CatalogController;
@@ -38,6 +41,7 @@ Route::get('/tasks/{task:slug}', [TaskBoardController::class, 'show'])->name('ta
 
 Route::get('/performers', [CatalogController::class, 'performers'])->name('performers');
 Route::get('/performers/{user}/reviews', [CatalogController::class, 'performerReviews'])->name('performers.reviews');
+Route::get('/performers/{user}', [CatalogController::class, 'performer'])->name('performers.show');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -112,6 +116,23 @@ Route::middleware('auth')->group(function (): void {
         ->name('performer.dashboard');
 
     Route::middleware('role:performer')->prefix('performer')->name('performer.')->group(function (): void {
+        Route::get('/profile', [PerformerProfileController::class, 'show'])->name('profile.show');
+        Route::patch('/profile', [PerformerProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/avatar', [PerformerProfileController::class, 'uploadAvatar'])->name('profile.avatar');
+        Route::post('/profile/cover', [PerformerProfileController::class, 'uploadCover'])->name('profile.cover');
+        Route::post('/profile/submit-verification', [PerformerProfileController::class, 'submitVerification'])
+            ->middleware('throttle:taskora-create')
+            ->name('profile.submit-verification');
+        Route::get('/portfolio', [PerformerPortfolioController::class, 'index'])->name('portfolio.index');
+        Route::get('/portfolio/create', [PerformerPortfolioController::class, 'create'])->name('portfolio.create');
+        Route::post('/portfolio', [PerformerPortfolioController::class, 'store'])
+            ->middleware('throttle:taskora-create')
+            ->name('portfolio.store');
+        Route::get('/portfolio/{item}/edit', [PerformerPortfolioController::class, 'edit'])->name('portfolio.edit');
+        Route::patch('/portfolio/{item}', [PerformerPortfolioController::class, 'update'])->name('portfolio.update');
+        Route::post('/portfolio/{item}/hide', [PerformerPortfolioController::class, 'hide'])->name('portfolio.hide');
+        Route::post('/portfolio/{item}/publish', [PerformerPortfolioController::class, 'publish'])->name('portfolio.publish');
+        Route::delete('/portfolio/{item}', [PerformerPortfolioController::class, 'destroy'])->name('portfolio.destroy');
         Route::get('/orders', [PerformerOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [PerformerOrderController::class, 'show'])->name('orders.show');
         Route::get('/orders/{order}/workspace', OrderWorkspaceController::class)->name('orders.workspace');
@@ -164,6 +185,10 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/services/{service}', [ModeratorServiceController::class, 'show'])->name('services.show');
         Route::post('/services/{service}/approve', [ModeratorServiceController::class, 'approve'])->name('services.approve');
         Route::post('/services/{service}/reject', [ModeratorServiceController::class, 'reject'])->name('services.reject');
+        Route::get('/performer-profiles', [ModeratorPerformerProfileController::class, 'index'])->name('performer-profiles.index');
+        Route::get('/performer-profiles/{profile}', [ModeratorPerformerProfileController::class, 'show'])->name('performer-profiles.show');
+        Route::post('/performer-profiles/{profile}/approve', [ModeratorPerformerProfileController::class, 'approve'])->name('performer-profiles.approve');
+        Route::post('/performer-profiles/{profile}/reject', [ModeratorPerformerProfileController::class, 'reject'])->name('performer-profiles.reject');
         Route::get('/moderation-flags', [ModerationFlagController::class, 'index'])->name('moderation-flags.index');
         Route::post('/moderation-flags/{flag}/resolve', [ModerationFlagController::class, 'resolve'])->name('moderation-flags.resolve');
         Route::get('/disputes', [ModeratorDisputeController::class, 'index'])->name('disputes.index');

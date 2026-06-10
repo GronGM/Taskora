@@ -123,9 +123,14 @@ export default function Show({ service }) {
                 <aside className="space-y-4">
                     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                         <p className="text-sm font-semibold text-slate-500">Исполнитель</p>
-                        <Link href={service.performer.reviews_url} className="mt-2 block text-xl font-semibold text-slate-950 hover:text-blue-700">
+                        <Link href={service.performer.profile_url ?? service.performer.reviews_url} className="mt-2 block text-xl font-semibold text-slate-950 hover:text-blue-700">
                             {service.performer.name}
                         </Link>
+                        {service.performer.is_verified && (
+                            <span className="mt-3 inline-flex rounded-md bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                Проверен
+                            </span>
+                        )}
                         <p className="mt-3 text-sm leading-6 text-slate-600">
                             {service.performer.reviews_count > 0
                                 ? `${service.performer.reviews_count} отзывов, ${service.performer.completed_orders_count} завершенных заказов.`

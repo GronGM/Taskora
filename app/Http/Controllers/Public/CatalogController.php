@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\PerformerPortfolioItem;
+use App\Models\PerformerProfile;
 use App\Models\Review;
 use App\Models\Service;
 use App\Models\User;
@@ -82,7 +84,7 @@ class CatalogController extends Controller
 
         $service->load([
             'category.parent',
-            'user',
+            'user.performerProfile',
             'packages',
             'reviews' => fn ($query) => $query
                 ->where('status', Review::STATUS_PUBLISHED)
@@ -113,37 +115,67 @@ class CatalogController extends Controller
         ]);
     }
 
-    public function performers(): Response
+    public function performers(Request $request): Response
     {
+        $activeCategory = null;
+
+        if ($request->filled('category')) {
+            $activeCategory = Category::query()
+                ->where('slug', $request->string('category')->toString())
+                ->where('is_active', true)
+                ->first();
+        }
+
         $performers = User::query()
             ->where('role', User::ROLE_PERFORMER)
-            ->whereHas('services', fn (Builder $query) => $query->published())
+            ->where(function (Builder $query): void {
+                $query
+                    ->whereHas('services', fn (Builder $query) => $query->published())
+                    ->orWhereHas('performerProfile', fn (Builder $query) => $query->where('is_public', true));
+            })
+            ->when($activeCategory, function (Builder $query) use ($activeCategory): void {
+                $categoryIds = [$activeCategory->id, ...$activeCategory->children()->pluck('id')->all()];
+
+                $query->where(function (Builder $query) use ($categoryIds): void {
+                    $query
+                        ->whereHas('performerProfile.specializations', fn (Builder $query) => $query->whereIn('categories.id', $categoryIds))
+                        ->orWhereHas('services', fn (Builder $query) => $query->published()->whereIn('category_id', $categoryIds));
+                });
+            })
+            ->with(['performerProfile.specializations.parent'])
             ->withCount(['services as published_services_count' => fn (Builder $query) => $query->published()])
             ->orderByDesc('performer_completed_orders_count')
             ->orderByDesc('performer_reviews_count')
             ->orderBy('name')
             ->get()
-            ->map(fn (User $user): array => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'role' => 'Исполнитель',
-                'services_count' => $user->published_services_count,
-                'rating' => $user->performer_reviews_count > 0 ? (float) $user->performer_rating : null,
-                'reviews_count' => $user->performer_reviews_count,
-                'completed_orders_count' => $user->performer_completed_orders_count,
-                'reviews_url' => route('performers.reviews', $user),
-            ]);
+            ->map(fn (User $user): array => $this->performerCard($user));
 
         return Inertia::render('Performers/Index', [
             'performers' => $performers,
+            'categories' => $this->categories(),
+            'filters' => [
+                'category' => $activeCategory?->slug,
+            ],
         ]);
     }
 
-    public function performerReviews(User $user): Response
+    public function performer(User $user): Response
     {
         abort_unless($user->isPerformer(), 404);
 
+        $user->load([
+            'performerProfile.specializations.parent',
+            'performerProfile.publishedPortfolioItems.category',
+        ]);
         $user->loadCount(['services as published_services_count' => fn (Builder $query) => $query->published()]);
+
+        $services = $user->services()
+            ->published()
+            ->with(['category', 'user.performerProfile'])
+            ->orderByDesc('is_featured')
+            ->orderByDesc('orders_count')
+            ->get()
+            ->map(fn (Service $service): array => $this->serviceCard($service));
 
         $reviews = $user->receivedReviews()
             ->where('status', Review::STATUS_PUBLISHED)
@@ -151,27 +183,47 @@ class CatalogController extends Controller
             ->with(['customer', 'service', 'task', 'order'])
             ->latest('published_at')
             ->latest()
+            ->limit(5)
             ->get()
             ->map(fn (Review $review): array => $this->reviewPayload($review));
 
-        return Inertia::render('Performers/Reviews', [
+        $profile = $user->performerProfile?->is_public ? $user->performerProfile : null;
+
+        return Inertia::render('Performers/Show', [
             'performer' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'rating' => $user->performer_reviews_count > 0 ? (float) $user->performer_rating : null,
-                'reviews_count' => $user->performer_reviews_count,
-                'completed_orders_count' => $user->performer_completed_orders_count,
-                'services_count' => $user->published_services_count,
+                ...$this->performerCard($user),
+                'bio' => $profile?->bio,
+                'portfolio_summary' => $profile?->portfolio_summary,
+                'cover_url' => $profile?->cover_url,
+                'response_time_label' => $profile?->response_time_label,
+                'trust_badges' => $this->trustBadges($user, $profile),
             ],
+            'services' => $services,
+            'portfolio' => $profile
+                ? $profile->publishedPortfolioItems->map(fn (PerformerPortfolioItem $item): array => [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'category' => $item->category?->name,
+                    'image_url' => $item->image_url,
+                    'file_url' => $item->file_url,
+                    'external_url' => $item->external_url,
+                ])
+                : [],
             'reviews' => $reviews,
         ]);
+    }
+
+    public function performerReviews(User $user): Response
+    {
+        return $this->performer($user);
     }
 
     private function publishedServicesQuery(): Builder
     {
         return Service::query()
             ->published()
-            ->with(['category', 'user']);
+            ->with(['category', 'user.performerProfile']);
     }
 
     private function categories()
@@ -211,6 +263,9 @@ class CatalogController extends Controller
 
     private function serviceCard(Service $service): array
     {
+        $service->loadMissing(['category', 'user.performerProfile']);
+        $profile = $service->user->performerProfile?->is_public ? $service->user->performerProfile : null;
+
         return [
             'id' => $service->id,
             'title' => $service->title,
@@ -229,13 +284,70 @@ class CatalogController extends Controller
             ],
             'performer' => [
                 'id' => $service->user->id,
-                'name' => $service->user->name,
+                'name' => $profile?->display_name ?: $service->user->name,
+                'avatar_url' => $profile?->avatar_url,
+                'headline' => $profile?->headline,
+                'is_verified' => $profile?->verification_status === PerformerProfile::STATUS_VERIFIED,
                 'rating' => $service->user->performer_reviews_count > 0 ? (float) $service->user->performer_rating : null,
                 'reviews_count' => $service->user->performer_reviews_count,
                 'completed_orders_count' => $service->user->performer_completed_orders_count,
                 'reviews_url' => route('performers.reviews', $service->user),
+                'profile_url' => route('performers.show', $service->user),
             ],
         ];
+    }
+
+    private function performerCard(User $user): array
+    {
+        $profile = $user->performerProfile?->is_public ? $user->performerProfile : null;
+
+        return [
+            'id' => $user->id,
+            'name' => $profile?->display_name ?: $user->name,
+            'role' => 'Исполнитель',
+            'headline' => $profile?->headline,
+            'avatar_url' => $profile?->avatar_url,
+            'is_verified' => $profile?->verification_status === PerformerProfile::STATUS_VERIFIED,
+            'services_count' => (int) ($user->published_services_count ?? 0),
+            'rating' => $user->performer_reviews_count > 0 ? (float) $user->performer_rating : null,
+            'reviews_count' => $user->performer_reviews_count,
+            'completed_orders_count' => $user->performer_completed_orders_count,
+            'specializations' => $profile
+                ? $profile->specializations->map(fn (Category $category): array => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'url' => route('performers', ['category' => $category->slug]),
+                ])
+                : [],
+            'reviews_url' => route('performers.reviews', $user),
+            'profile_url' => route('performers.show', $user),
+        ];
+    }
+
+    /**
+     * @return array<int, array<string, string>>
+     */
+    private function trustBadges(User $user, ?PerformerProfile $profile): array
+    {
+        $badges = [];
+
+        if ($profile?->verification_status === PerformerProfile::STATUS_VERIFIED) {
+            $badges[] = ['label' => 'Проверен', 'tone' => 'emerald'];
+        }
+
+        if ($user->performer_reviews_count > 0) {
+            $badges[] = ['label' => 'Есть отзывы', 'tone' => 'blue'];
+        }
+
+        if ($user->performer_completed_orders_count > 0) {
+            $badges[] = ['label' => 'Выполненные заказы', 'tone' => 'slate'];
+        }
+
+        if (filled($profile?->response_time_label)) {
+            $badges[] = ['label' => $profile->response_time_label, 'tone' => 'amber'];
+        }
+
+        return $badges;
     }
 
     private function reviewPayload(Review $review): array

@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -77,6 +78,11 @@ class User extends Authenticatable
         return $this->hasMany(Service::class);
     }
 
+    public function performerProfile(): HasOne
+    {
+        return $this->hasOne(PerformerProfile::class);
+    }
+
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
@@ -130,6 +136,11 @@ class User extends Authenticatable
     public function resolvedDisputes(): HasMany
     {
         return $this->hasMany(Dispute::class, 'resolved_by');
+    }
+
+    public function verifiedPerformerProfiles(): HasMany
+    {
+        return $this->hasMany(PerformerProfile::class, 'verified_by');
     }
 
     public function disputeMessages(): HasMany

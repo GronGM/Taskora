@@ -3,6 +3,11 @@ import DashboardLayout from '../../Layouts/DashboardLayout';
 
 const cards = [
     {
+        title: 'Профили исполнителей',
+        description: 'Ручная проверка публичных профилей, специализаций и портфолио без KYC.',
+        href: '/moderator/performer-profiles',
+    },
+    {
         title: 'Услуги на проверке',
         description: 'Проверка описаний, пакетов и публикация готовых услуг.',
         href: '/moderator/services',
@@ -11,11 +16,6 @@ const cards = [
         title: 'Флаги модерации',
         description: 'Срабатывания ContactGuard и обработка открытых флагов.',
         href: '/moderator/moderation-flags',
-    },
-    {
-        title: 'Задания на проверке',
-        description: 'Раздел будет реализован после запуска индивидуальных заданий.',
-        href: null,
     },
     {
         title: 'Споры',
@@ -36,14 +36,12 @@ export default function Moderator() {
                         <article key={card.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                             <h2 className="text-lg font-semibold text-slate-950">{card.title}</h2>
                             <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
-                            {card.href && (
-                                <Link
-                                    href={card.href}
-                                    className="mt-5 inline-flex rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
-                                >
-                                    Открыть
-                                </Link>
-                            )}
+                            <Link
+                                href={card.href}
+                                className="mt-5 inline-flex rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                            >
+                                Открыть
+                            </Link>
                         </article>
                     ))}
                 </div>

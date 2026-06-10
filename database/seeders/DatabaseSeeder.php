@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             TaskSeeder::class,
             ReviewSeeder::class,
+            PerformerProfileSeeder::class,
         ]);
     }
 }
