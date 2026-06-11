@@ -40,6 +40,21 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = $this->user();
+
+        if ($user?->isBlocked()) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'auth' => 'Аккаунт заблокирован. Обратитесь к администратору.',
+            ]);
+        }
+
+        $user?->forceFill([
+            'last_login_at' => now(),
+            'last_login_ip' => $this->ip(),
+        ])->save();
+
         $this->session()->regenerate();
     }
 }

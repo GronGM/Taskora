@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Controllers\Admin\AdminPaymentSettingsController;
 use App\Http\Controllers\Admin\AdminTaskTypeController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -261,6 +262,13 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/finance', AdminFinanceController::class)->name('finance.index');
         Route::get('/payment-settings', AdminPaymentSettingsController::class)->name('payment-settings.index');
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+        Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+        Route::patch('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/block', [AdminUserController::class, 'block'])->name('users.block');
+        Route::post('/users/{user}/unblock', [AdminUserController::class, 'unblock'])->name('users.unblock');
+        Route::patch('/users/{user}/admin-note', [AdminUserController::class, 'updateAdminNote'])->name('users.admin-note');
         Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
         Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
         Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');

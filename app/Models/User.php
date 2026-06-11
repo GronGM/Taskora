@@ -7,12 +7,28 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'performer_rating', 'performer_reviews_count', 'performer_completed_orders_count'])]
+#[Fillable([
+    'name',
+    'email',
+    'password',
+    'role',
+    'status',
+    'blocked_at',
+    'blocked_by',
+    'block_reason',
+    'last_login_at',
+    'last_login_ip',
+    'admin_note',
+    'performer_rating',
+    'performer_reviews_count',
+    'performer_completed_orders_count',
+])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -27,6 +43,10 @@ class User extends Authenticatable
 
     public const ROLE_ADMIN = 'admin';
 
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_BLOCKED = 'blocked';
+
     /**
      * Get the attributes that should be cast.
      *
@@ -37,6 +57,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'blocked_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'performer_rating' => 'decimal:2',
             'performer_reviews_count' => 'integer',
             'performer_completed_orders_count' => 'integer',
@@ -61,6 +83,59 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isBlocked(): bool
+    {
+        return $this->status === self::STATUS_BLOCKED;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function roles(): array
+    {
+        return [
+            self::ROLE_CUSTOMER,
+            self::ROLE_PERFORMER,
+            self::ROLE_MODERATOR,
+            self::ROLE_ADMIN,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function roleLabels(): array
+    {
+        return [
+            self::ROLE_CUSTOMER => 'Заказчик',
+            self::ROLE_PERFORMER => 'Исполнитель',
+            self::ROLE_MODERATOR => 'Модератор',
+            self::ROLE_ADMIN => 'Администратор',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function statuses(): array
+    {
+        return [
+            self::STATUS_ACTIVE,
+            self::STATUS_BLOCKED,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_ACTIVE => 'Активен',
+            self::STATUS_BLOCKED => 'Заблокирован',
+        ];
     }
 
     public function dashboardPath(): string
@@ -181,5 +256,25 @@ class User extends Authenticatable
     public function betaFeedback(): HasMany
     {
         return $this->hasMany(BetaFeedback::class);
+    }
+
+    public function moderationFlags(): HasMany
+    {
+        return $this->hasMany(ModerationFlag::class);
+    }
+
+    public function blockedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'blocked_by');
+    }
+
+    public function adminEvents(): HasMany
+    {
+        return $this->hasMany(UserAdminEvent::class, 'target_user_id')->latest();
+    }
+
+    public function performedAdminEvents(): HasMany
+    {
+        return $this->hasMany(UserAdminEvent::class, 'actor_user_id')->latest();
     }
 }

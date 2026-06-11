@@ -12,11 +12,32 @@
 - password
 - role
 - status
+- blocked_at nullable
+- blocked_by nullable
+- block_reason nullable
+- last_login_at nullable
+- last_login_ip nullable
+- admin_note nullable
 - performer_rating
 - performer_reviews_count
 - performer_completed_orders_count
 - email_verified_at
 - timestamps
+
+`users.status` принимает значения `active` и `blocked`. Заблокированный пользователь не может войти в систему; если активная сессия была создана до блокировки, следующий web-запрос разлогинит пользователя. Пароль, `remember_token`, reset-токены и полный IP не выводятся в админские Inertia props.
+
+### user_admin_events
+
+- id
+- target_user_id
+- actor_user_id
+- type
+- old_values json nullable
+- new_values json nullable
+- comment nullable
+- timestamps
+
+Таблица хранит аудит админских действий над пользователями: `role_changed`, `user_blocked`, `user_unblocked`, `admin_note_updated`. Физическое удаление пользователей, смена пароля администратором и impersonation в MVP не реализуются.
 
 ### performer_profiles
 
