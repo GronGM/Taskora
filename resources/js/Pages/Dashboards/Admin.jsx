@@ -23,6 +23,11 @@ const cards = [
         description: 'Проверить payment operations, escrow и будущие webhook-события в stub-режиме.',
     },
     {
+        title: 'Заказы',
+        href: '/admin/orders',
+        description: 'Искать заказы, проверять статусы, участников, споры, события workspace и ledger без изменения финансовой логики.',
+    },
+    {
         title: 'Настройки платежей',
         href: '/admin/payment-settings',
         description: 'Проверить текущий provider, stub-режим и наличие будущих настроек ЮKassa без вывода секретов.',

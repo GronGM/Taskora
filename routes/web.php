@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminBetaFeedbackController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminFinanceController;
+use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminPaymentSettingsController;
 use App\Http\Controllers\Admin\AdminTaskTypeController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -262,6 +263,10 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/finance', AdminFinanceController::class)->name('finance.index');
         Route::get('/payment-settings', AdminPaymentSettingsController::class)->name('payment-settings.index');
+        Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/events', [AdminOrderController::class, 'events'])->name('orders.events');
+        Route::get('/orders/{order}/ledger', [AdminOrderController::class, 'ledger'])->name('orders.ledger');
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
         Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');

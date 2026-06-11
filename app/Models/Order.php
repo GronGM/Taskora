@@ -84,6 +84,81 @@ class Order extends Model
     public const RELEASE_DISPUTE_TO_PERFORMER = 'dispute_release_to_performer';
 
     /**
+     * @return array<int, string>
+     */
+    public static function statuses(): array
+    {
+        return array_keys(self::statusLabels());
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_AWAITING_PAYMENT => 'Ожидает оплаты',
+            self::STATUS_IN_PROGRESS => 'В работе',
+            self::STATUS_SUBMITTED_FOR_REVIEW => 'На проверке',
+            self::STATUS_REVISION_REQUESTED => 'Требуется доработка',
+            self::STATUS_COMPLETED => 'Завершен',
+            self::STATUS_DISPUTED => 'Спор',
+            self::STATUS_CANCELED => 'Отменен',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function paymentStatuses(): array
+    {
+        return array_keys(self::paymentStatusLabels());
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function paymentStatusLabels(): array
+    {
+        return [
+            self::PAYMENT_UNPAID => 'Не оплачено',
+            self::PAYMENT_HELD => 'Оплата удерживается',
+            self::PAYMENT_RELEASED => 'Оплата разблокирована',
+            self::PAYMENT_REFUNDED => 'Возврат',
+            self::PAYMENT_CANCELED => 'Отменено',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function sourceTypes(): array
+    {
+        return array_keys(self::sourceTypeLabels());
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function sourceTypeLabels(): array
+    {
+        return [
+            self::SOURCE_SERVICE => 'Услуга',
+            self::SOURCE_TASK_OFFER => 'Отклик на задание',
+        ];
+    }
+
+    public static function releaseReasonLabel(?string $releaseReason): ?string
+    {
+        return match ($releaseReason) {
+            self::RELEASE_CUSTOMER_EARLY_ACCEPT => 'Досрочно принято заказчиком',
+            self::RELEASE_AUTO => 'Автоматически после срока проверки',
+            self::RELEASE_DISPUTE_TO_PERFORMER => 'Решение спора в пользу исполнителя',
+            default => null,
+        };
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
