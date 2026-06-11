@@ -32,6 +32,11 @@ class TaskType extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(PerformerFavoriteTaskType::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);

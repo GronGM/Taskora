@@ -164,6 +164,7 @@ class TaskBoardController extends Controller
 
         return TaskType::query()
             ->active()
+            ->whereHas('category', fn (Builder $query) => $query->where('is_active', true))
             ->where('slug', $slug)
             ->first();
     }
@@ -205,6 +206,7 @@ class TaskBoardController extends Controller
     {
         return TaskType::query()
             ->active()
+            ->whereHas('category', fn (Builder $query) => $query->where('is_active', true))
             ->with('category')
             ->orderBy('sort_order')
             ->orderBy('name')

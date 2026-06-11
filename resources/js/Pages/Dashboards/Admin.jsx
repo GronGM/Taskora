@@ -2,13 +2,43 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
 const cards = [
-    { title: 'Beta-отзывы', href: '/admin/beta-feedback', description: 'Смотреть обращения друзей и первых тестировщиков, менять статусы и фиксировать проблемы MVP.' },
-    { title: 'Финансовая сводка', href: '/admin/finance', description: 'Проверить payment operations, escrow и будущие webhook-события.' },
-    { title: 'Настройки платежей', href: '/admin/payment-settings', description: 'Проверить текущий provider, stub-режим и наличие будущих настроек ЮKassa без вывода секретов.' },
-    { title: 'Пользователи', description: 'Раздел будет реализован на следующих этапах MVP.' },
-    { title: 'Категории', description: 'Раздел будет реализован на следующих этапах MVP.' },
-    { title: 'Настройки платформы', description: 'Раздел будет реализован на следующих этапах MVP.' },
-    { title: 'Комиссии', description: 'Раздел будет реализован на следующих этапах MVP.' },
+    {
+        title: 'Beta-отзывы',
+        href: '/admin/beta-feedback',
+        description: 'Смотреть обращения друзей и первых тестировщиков, менять статусы и фиксировать проблемы MVP.',
+    },
+    {
+        title: 'Категории',
+        href: '/admin/categories',
+        description: 'Управлять разделами каталога и биржи заданий: активность, вложенность, сортировка и публичные описания.',
+    },
+    {
+        title: 'Виды заданий',
+        href: '/admin/task-types',
+        description: 'Настраивать типы работ внутри категорий для фильтров, избранного и форм создания заданий.',
+    },
+    {
+        title: 'Финансовая сводка',
+        href: '/admin/finance',
+        description: 'Проверить payment operations, escrow и будущие webhook-события в stub-режиме.',
+    },
+    {
+        title: 'Настройки платежей',
+        href: '/admin/payment-settings',
+        description: 'Проверить текущий provider, stub-режим и наличие будущих настроек ЮKassa без вывода секретов.',
+    },
+    {
+        title: 'Пользователи',
+        description: 'Раздел будет реализован на следующих этапах MVP.',
+    },
+    {
+        title: 'Настройки платформы',
+        description: 'Раздел будет реализован на следующих этапах MVP.',
+    },
+    {
+        title: 'Комиссии',
+        description: 'Раздел будет реализован на следующих этапах MVP.',
+    },
 ];
 
 export default function Admin() {

@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminBetaFeedbackController;
+use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Controllers\Admin\AdminPaymentSettingsController;
+use App\Http\Controllers\Admin\AdminTaskTypeController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -259,6 +261,22 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/finance', AdminFinanceController::class)->name('finance.index');
         Route::get('/payment-settings', AdminPaymentSettingsController::class)->name('payment-settings.index');
+        Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
+        Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
+        Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
+        Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
+        Route::patch('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
+        Route::post('/categories/{category}/toggle-active', [AdminCategoryController::class, 'toggleActive'])->name('categories.toggle-active');
+        Route::post('/categories/{category}/move-up', [AdminCategoryController::class, 'moveUp'])->name('categories.move-up');
+        Route::post('/categories/{category}/move-down', [AdminCategoryController::class, 'moveDown'])->name('categories.move-down');
+        Route::get('/task-types', [AdminTaskTypeController::class, 'index'])->name('task-types.index');
+        Route::get('/task-types/create', [AdminTaskTypeController::class, 'create'])->name('task-types.create');
+        Route::post('/task-types', [AdminTaskTypeController::class, 'store'])->name('task-types.store');
+        Route::get('/task-types/{taskType}/edit', [AdminTaskTypeController::class, 'edit'])->name('task-types.edit');
+        Route::patch('/task-types/{taskType}', [AdminTaskTypeController::class, 'update'])->name('task-types.update');
+        Route::post('/task-types/{taskType}/toggle-active', [AdminTaskTypeController::class, 'toggleActive'])->name('task-types.toggle-active');
+        Route::post('/task-types/{taskType}/move-up', [AdminTaskTypeController::class, 'moveUp'])->name('task-types.move-up');
+        Route::post('/task-types/{taskType}/move-down', [AdminTaskTypeController::class, 'moveDown'])->name('task-types.move-down');
         Route::get('/beta-feedback', [AdminBetaFeedbackController::class, 'index'])->name('beta-feedback.index');
         Route::get('/beta-feedback/{feedback}', [AdminBetaFeedbackController::class, 'show'])->name('beta-feedback.show');
         Route::post('/beta-feedback/{feedback}/status', [AdminBetaFeedbackController::class, 'updateStatus'])->name('beta-feedback.status');
