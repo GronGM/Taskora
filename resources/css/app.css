@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
@@ -9,11 +11,198 @@
 }
 
 @layer base {
+    html {
+        color-scheme: light;
+    }
+
+    html.dark {
+        color-scheme: dark;
+    }
+
     body {
-        @apply bg-slate-50 text-slate-950 antialiased;
+        @apply bg-slate-50 text-slate-950 antialiased transition-colors duration-150 dark:bg-slate-950 dark:text-slate-100;
     }
 
     a {
         @apply transition-colors;
+    }
+
+    input,
+    select,
+    textarea {
+        @apply transition-colors;
+    }
+}
+
+@layer components {
+    .dark .taskora-logo-mark {
+        background-color: rgb(255 255 255) !important;
+    }
+
+    .dark input,
+    .dark select,
+    .dark textarea {
+        border-color: rgb(71 85 105);
+        background-color: rgb(15 23 42);
+        color: rgb(248 250 252);
+    }
+
+    .dark input::placeholder,
+    .dark textarea::placeholder {
+        color: rgb(148 163 184);
+    }
+
+    .dark input:focus,
+    .dark select:focus,
+    .dark textarea:focus {
+        border-color: rgb(96 165 250);
+        box-shadow: 0 0 0 2px rgb(30 58 138 / 0.5);
+    }
+
+    .dark option {
+        background-color: rgb(15 23 42);
+        color: rgb(248 250 252);
+    }
+}
+
+@layer utilities {
+    .dark .bg-white,
+    .dark .bg-white\/90,
+    .dark .bg-white\/95 {
+        background-color: rgb(15 23 42 / var(--tw-bg-opacity, 1));
+    }
+
+    .dark .bg-slate-50 {
+        background-color: rgb(2 6 23 / var(--tw-bg-opacity, 1));
+    }
+
+    .dark .bg-slate-100,
+    .dark .hover\:bg-slate-100:hover {
+        background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
+    }
+
+    .dark .bg-slate-200 {
+        background-color: rgb(51 65 85 / var(--tw-bg-opacity, 1));
+    }
+
+    .dark .bg-blue-50 {
+        background-color: rgb(23 37 84 / var(--tw-bg-opacity, 1));
+    }
+
+    .dark .bg-emerald-50 {
+        background-color: rgb(6 78 59 / 0.35);
+    }
+
+    .dark .bg-amber-50 {
+        background-color: rgb(69 26 3 / 0.45);
+    }
+
+    .dark .bg-red-50 {
+        background-color: rgb(69 10 10 / 0.45);
+    }
+
+    .dark .bg-yellow-50 {
+        background-color: rgb(66 32 6 / 0.45);
+    }
+
+    .dark .border-slate-100,
+    .dark .border-slate-200,
+    .dark .border-slate-300,
+    .dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+    .dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+    .dark .divide-slate-300 > :not([hidden]) ~ :not([hidden]) {
+        border-color: rgb(51 65 85 / var(--tw-border-opacity, 1));
+    }
+
+    .dark .border-blue-100,
+    .dark .border-blue-200 {
+        border-color: rgb(30 64 175 / 0.65);
+    }
+
+    .dark .border-emerald-200 {
+        border-color: rgb(5 150 105 / 0.6);
+    }
+
+    .dark .border-amber-200 {
+        border-color: rgb(217 119 6 / 0.6);
+    }
+
+    .dark .border-red-200 {
+        border-color: rgb(220 38 38 / 0.6);
+    }
+
+    .dark .text-slate-950,
+    .dark .text-slate-900,
+    .dark .text-slate-800,
+    .dark .text-gray-950,
+    .dark .text-gray-900,
+    .dark .text-gray-800 {
+        color: rgb(248 250 252 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .text-slate-700,
+    .dark .text-slate-600,
+    .dark .text-gray-700,
+    .dark .text-gray-600 {
+        color: rgb(203 213 225 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .text-slate-500,
+    .dark .text-slate-400,
+    .dark .text-gray-500,
+    .dark .text-gray-400 {
+        color: rgb(148 163 184 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .text-blue-700,
+    .dark .text-blue-800 {
+        color: rgb(147 197 253 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .text-emerald-700,
+    .dark .text-emerald-800,
+    .dark .text-green-700,
+    .dark .text-green-800 {
+        color: rgb(110 231 183 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .text-amber-700,
+    .dark .text-amber-800,
+    .dark .text-amber-900,
+    .dark .text-yellow-700,
+    .dark .text-yellow-800 {
+        color: rgb(252 211 77 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .text-red-600,
+    .dark .text-red-700,
+    .dark .text-red-800 {
+        color: rgb(252 165 165 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .ring-slate-200,
+    .dark .ring-slate-300 {
+        --tw-ring-color: rgb(51 65 85);
+    }
+
+    .dark .ring-blue-100,
+    .dark .focus\:ring-blue-100:focus {
+        --tw-ring-color: rgb(30 58 138 / 0.7);
+    }
+
+    .dark .ring-amber-200 {
+        --tw-ring-color: rgb(217 119 6 / 0.55);
+    }
+
+    .dark .ring-red-200 {
+        --tw-ring-color: rgb(220 38 38 / 0.55);
+    }
+
+    .dark .shadow-sm,
+    .dark .shadow,
+    .dark .shadow-lg,
+    .dark .shadow-xl,
+    .dark .shadow-2xl {
+        --tw-shadow-color: rgb(0 0 0 / 0.35);
     }
 }

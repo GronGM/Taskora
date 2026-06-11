@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import ThemeToggle from '../Components/Theme/ThemeToggle';
 import TestModeBanner from '../Components/TestModeBanner';
 
 const navigation = [
@@ -14,14 +15,14 @@ export default function PublicLayout({ children }) {
     const dashboardUrl = auth?.dashboard_url ?? '/dashboard';
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-950">
+        <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
             <TestModeBanner />
-            <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
+            <header className="border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
                 <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between gap-4">
                         <Link href="/" className="flex items-center gap-3" aria-label="Таскора">
                             <span className="grid h-10 w-10 place-items-center rounded-md bg-blue-600" aria-hidden="true">
-                                <span className="h-4 w-4 rounded-sm bg-white" />
+                                <span className="taskora-logo-mark h-4 w-4 rounded-sm bg-white" />
                             </span>
                             <span className="text-xl font-semibold tracking-normal text-slate-950">Таскора</span>
                         </Link>
@@ -37,6 +38,8 @@ export default function PublicLayout({ children }) {
                                 </Link>
                             ))}
                         </nav>
+
+                        <ThemeToggle className="hidden lg:inline-flex" />
 
                         {user ? (
                             <div className="flex shrink-0 items-center gap-2">
@@ -73,17 +76,20 @@ export default function PublicLayout({ children }) {
                         )}
                     </div>
 
-                    <nav className="mt-4 flex gap-2 overflow-x-auto pb-1 md:hidden" aria-label="Основная навигация">
-                        {navigation.map((item) => (
-                            <Link
-                                key={item.label}
-                                href={item.href}
-                                className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                            >
-                                {item.label}
-                            </Link>
-                        ))}
-                    </nav>
+                    <div className="mt-4 flex items-center gap-3 md:hidden">
+                        <nav className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1" aria-label="Основная навигация">
+                            {navigation.map((item) => (
+                                <Link
+                                    key={item.label}
+                                    href={item.href}
+                                    className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:bg-blue-950 dark:hover:text-blue-200"
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </nav>
+                        <ThemeToggle className="shrink-0" />
+                    </div>
                 </div>
             </header>
 

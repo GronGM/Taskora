@@ -72,6 +72,16 @@ ModuleName/
 
 `app/Support` использовать только для реально общих вещей: форматирование денег, нормализация текста, enum helpers, общие value objects.
 
+## Theme Preference
+
+Таскора поддерживает три режима темы: `light`, `dark` и `system`. Пользовательский выбор хранится на клиенте в `localStorage` по ключу `taskora_theme`; сервер не хранит эту настройку и не требует дополнительных таблиц.
+
+Темная тема включается class-based dark mode: на `document.documentElement` выставляется или снимается класс `dark`. Режим `system` вычисляется через `window.matchMedia('(prefers-color-scheme: dark)')`; при изменении системной темы React-провайдер обновляет resolved theme без перезагрузки страницы.
+
+До монтирования React базовый Blade layout выполняет маленький inline script, который применяет сохраненную или системную тему сразу при загрузке HTML. Это снижает flash неправильной темы и не зависит от внешних сервисов.
+
+Frontend-слой темы расположен в `resources/js/Components/Theme`: `ThemeProvider` хранит preference/resolved theme и `ThemeToggle` дает доступный переключатель в публичном, кабинетном и beta-gate интерфейсе. Tailwind v4 настраивается через `@custom-variant dark` в `resources/css/app.css`.
+
 ## Модули
 
 | Модуль | Ответственность |

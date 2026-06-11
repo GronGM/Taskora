@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import ThemeToggle from '../Components/Theme/ThemeToggle';
 import TestModeBanner from '../Components/TestModeBanner';
 
 const roleLabels = {
@@ -15,14 +16,14 @@ export default function DashboardLayout({ children }) {
     const unreadCount = notifications?.unread_count ?? 0;
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-950">
+        <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
             <TestModeBanner />
-            <header className="border-b border-slate-200 bg-white">
+            <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
                 <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between gap-4">
                         <Link href="/" className="flex items-center gap-3" aria-label="Таскора">
                             <span className="grid h-10 w-10 place-items-center rounded-md bg-blue-600" aria-hidden="true">
-                                <span className="h-4 w-4 rounded-sm bg-white" />
+                                <span className="taskora-logo-mark h-4 w-4 rounded-sm bg-white" />
                             </span>
                             <span className="text-xl font-semibold tracking-normal">Таскора</span>
                         </Link>
@@ -38,6 +39,7 @@ export default function DashboardLayout({ children }) {
                             <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
                             <p className="text-xs text-slate-500">{roleLabels[user?.role] ?? 'Пользователь'}</p>
                         </div>
+                        <ThemeToggle className="order-last w-full justify-end sm:order-none sm:w-auto" />
                         <Link
                             href="/dashboard"
                             className="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
