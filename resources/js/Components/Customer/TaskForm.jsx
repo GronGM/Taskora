@@ -1,5 +1,7 @@
 export default function TaskForm({ form, categories, onSubmit, submitLabel, showPublishButton = false, children }) {
     const { data, setData, processing, errors } = form;
+    const selectedCategory = categories.find((category) => String(category.id) === String(data.category_id));
+    const taskTypes = selectedCategory?.task_types ?? [];
 
     return (
         <form onSubmit={(event) => onSubmit(event, false)} className="space-y-8">
@@ -18,13 +20,43 @@ export default function TaskForm({ form, categories, onSubmit, submitLabel, show
                             id="category_id"
                             name="category_id"
                             value={data.category_id}
-                            onChange={(event) => setData('category_id', event.target.value)}
+                            onChange={(event) => {
+                                setData({
+                                    ...data,
+                                    category_id: event.target.value,
+                                    task_type_id: '',
+                                });
+                            }}
                             className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         >
                             <option value="">Выберите категорию</option>
                             {categories.map((category) => (
                                 <option key={category.id} value={category.id}>
                                     {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
+
+                    <Field id="task_type_id" label="Вид задания" error={errors.task_type_id}>
+                        <select
+                            id="task_type_id"
+                            name="task_type_id"
+                            value={data.task_type_id}
+                            disabled={!data.category_id || taskTypes.length === 0}
+                            onChange={(event) => setData('task_type_id', event.target.value)}
+                            className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                        >
+                            <option value="">
+                                {!data.category_id
+                                    ? 'Сначала выберите категорию'
+                                    : taskTypes.length === 0
+                                      ? 'Для категории нет видов'
+                                      : 'Выберите вид задания'}
+                            </option>
+                            {taskTypes.map((taskType) => (
+                                <option key={taskType.id} value={taskType.id}>
+                                    {taskType.name}
                                 </option>
                             ))}
                         </select>

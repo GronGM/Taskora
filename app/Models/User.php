@@ -93,6 +93,21 @@ class User extends Authenticatable
         return $this->hasMany(TaskOffer::class);
     }
 
+    public function taskFavorites(): HasMany
+    {
+        return $this->hasMany(TaskFavorite::class);
+    }
+
+    public function favoriteCategories(): HasMany
+    {
+        return $this->hasMany(PerformerFavoriteCategory::class);
+    }
+
+    public function favoriteTaskTypes(): HasMany
+    {
+        return $this->hasMany(PerformerFavoriteTaskType::class);
+    }
+
     public function customerOrders(): HasMany
     {
         return $this->hasMany(Order::class, 'customer_id');

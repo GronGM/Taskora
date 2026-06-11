@@ -22,7 +22,7 @@ class CustomerTaskController extends Controller
 
         $tasks = request()->user()
             ->tasks()
-            ->with('category')
+            ->with(['category', 'taskType'])
             ->latest()
             ->get()
             ->map(fn (Task $task): array => $this->taskListPayload($task));
@@ -62,7 +62,7 @@ class CustomerTaskController extends Controller
     {
         Gate::authorize('view', $task);
 
-        $task->load(['category', 'customer', 'offers.performer']);
+        $task->load(['category', 'taskType', 'customer', 'offers.performer']);
 
         return Inertia::render('Customer/Tasks/Show', [
             'task' => $this->taskDetailPayload($task),
@@ -75,7 +75,7 @@ class CustomerTaskController extends Controller
     {
         Gate::authorize('update', $task);
 
-        $task->load('category');
+        $task->load(['category', 'taskType']);
 
         return Inertia::render('Customer/Tasks/Edit', [
             'task' => $this->taskFormPayload($task),
@@ -145,6 +145,7 @@ class CustomerTaskController extends Controller
             'title' => $task->title,
             'status' => $task->status,
             'category' => $task->category?->name,
+            'task_type' => $task->taskType?->name,
             'budget_label' => $this->budgetLabel($task),
             'deadline_at' => $task->deadline_at?->format('d.m.Y'),
             'offers_count' => $task->offers_count,
@@ -162,6 +163,7 @@ class CustomerTaskController extends Controller
             ...$this->taskFormPayload($task),
             'status' => $task->status,
             'category' => $task->category?->name,
+            'task_type' => $task->taskType?->name,
             'budget_label' => $this->budgetLabel($task),
             'deadline_label' => $task->deadline_at?->format('d.m.Y'),
             'offers_count' => $task->offers_count,
@@ -196,6 +198,7 @@ class CustomerTaskController extends Controller
             'title' => $task->title,
             'description' => $task->description,
             'category_id' => $task->category_id,
+            'task_type_id' => $task->task_type_id,
             'budget_min' => $task->budget_min,
             'budget_max' => $task->budget_max,
             'deadline_at' => $task->deadline_at?->format('Y-m-d'),
@@ -224,7 +227,10 @@ class CustomerTaskController extends Controller
     {
         return Category::query()
             ->where('is_active', true)
-            ->with('parent')
+            ->with([
+                'parent',
+                'taskTypes' => fn ($query) => $query->active()->orderBy('sort_order')->orderBy('name'),
+            ])
             ->orderBy('parent_id')
             ->orderBy('sort_order')
             ->orderBy('name')
@@ -232,6 +238,10 @@ class CustomerTaskController extends Controller
             ->map(fn (Category $category): array => [
                 'id' => $category->id,
                 'name' => $category->parent ? "{$category->parent->name} / {$category->name}" : $category->name,
+                'task_types' => $category->taskTypes->map(fn ($type): array => [
+                    'id' => $type->id,
+                    'name' => $type->name,
+                ])->values(),
             ]);
     }
 

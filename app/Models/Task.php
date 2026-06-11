@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'user_id',
     'category_id',
+    'task_type_id',
     'title',
     'slug',
     'description',
@@ -61,9 +62,19 @@ class Task extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function taskType(): BelongsTo
+    {
+        return $this->belongsTo(TaskType::class);
+    }
+
     public function offers(): HasMany
     {
         return $this->hasMany(TaskOffer::class);
+    }
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(TaskFavorite::class);
     }
 
     public function files(): HasMany

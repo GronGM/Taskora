@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             CategorySeeder::class,
+            TaskTypeSeeder::class,
             ServiceSeeder::class,
             TaskSeeder::class,
             ReviewSeeder::class,

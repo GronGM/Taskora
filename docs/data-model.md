@@ -45,6 +45,17 @@
 - is_active
 - timestamps
 
+### task_types
+
+- id
+- category_id nullable
+- name
+- slug unique
+- description nullable
+- sort_order
+- is_active
+- timestamps
+
 ### services
 
 - id
@@ -77,26 +88,53 @@
 ### tasks
 
 - id
-- customer_id
+- user_id
 - category_id
+- task_type_id nullable
+- slug unique
 - title
 - description
 - budget_min
 - budget_max
 - deadline_at
 - status
-- moderation_status
+- offers_count
+- views_count
 - timestamps
 
-### offers
+### task_offers
 
 - id
 - task_id
-- performer_id
+- user_id
 - message
 - price
 - delivery_days
 - status
+- timestamps
+
+### task_favorites
+
+- id
+- task_id
+- user_id
+- unique task_id, user_id
+- timestamps
+
+### performer_favorite_categories
+
+- id
+- user_id
+- category_id
+- unique user_id, category_id
+- timestamps
+
+### performer_favorite_task_types
+
+- id
+- user_id
+- task_type_id
+- unique user_id, task_type_id
 - timestamps
 
 ### orders
@@ -267,9 +305,40 @@ Ledger-записи не редактируются после создания.
 ## Правила Видимости
 
 - Заказчик видит свои задания, отклики на свои задания и свои заказы.
-- Исполнитель видит публичные доступные задания, свои отклики, свои услуги и свои заказы.
+- Исполнитель видит публичные доступные задания, свои отклики, избранные задания/категории/виды заданий, свои услуги и свои заказы.
 - Модератор видит только данные, нужные для модерации.
 - Администратор управляет настройками платформы и имеет доступ к более широким операционным данным.
+
+## Связи Биржи Заданий
+
+- `Category hasMany TaskType`
+- `Category hasMany Task`
+- `Category hasMany PerformerFavoriteCategory`
+- `TaskType belongsTo Category`
+- `TaskType hasMany Task`
+- `TaskType hasMany PerformerFavoriteTaskType`
+- `Task belongsTo User as customer`
+- `Task belongsTo Category`
+- `Task belongsTo TaskType nullable`
+- `Task hasMany TaskOffer`
+- `Task hasMany TaskFavorite`
+- `TaskOffer belongsTo Task`
+- `TaskOffer belongsTo User as performer`
+- `TaskFavorite belongsTo Task`
+- `TaskFavorite belongsTo User`
+- `User hasMany Task`
+- `User hasMany TaskOffer`
+- `User hasMany TaskFavorite`
+- `User hasMany PerformerFavoriteCategory`
+- `User hasMany PerformerFavoriteTaskType`
+
+Правила:
+
+- `task_type_id` в задании nullable, но обязателен в форме заказчика, если у выбранной категории есть активные виды заданий.
+- Избранные категории, виды заданий и задания доступны только роли `performer`.
+- В избранное можно добавить только опубликованное задание, активную категорию и активный вид задания.
+- Закрытое или архивное задание можно убрать из избранного, но нельзя добавить заново.
+- Быстрые фильтры `/tasks?favorite_categories=1` и `/tasks?favorite_types=1` используют избранное текущего исполнителя.
 
 ## Связи Платежной Архитектуры
 

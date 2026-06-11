@@ -5,6 +5,7 @@ import DashboardLayout from '../../../Layouts/DashboardLayout';
 export default function Create({ categories }) {
     const form = useForm({
         category_id: '',
+        task_type_id: '',
         title: '',
         description: '',
         budget_min: '',

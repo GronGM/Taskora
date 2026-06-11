@@ -47,6 +47,16 @@ class Category extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function taskTypes(): HasMany
+    {
+        return $this->hasMany(TaskType::class)->orderBy('sort_order')->orderBy('name');
+    }
+
+    public function favoritePerformers(): HasMany
+    {
+        return $this->hasMany(PerformerFavoriteCategory::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);

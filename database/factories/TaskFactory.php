@@ -19,6 +19,7 @@ class TaskFactory extends Factory
         return [
             'user_id' => User::factory(['role' => User::ROLE_CUSTOMER]),
             'category_id' => Category::factory(),
+            'task_type_id' => null,
             'title' => fake()->unique()->sentence(5),
             'slug' => fake()->unique()->slug(5),
             'description' => fake()->paragraphs(3, true),

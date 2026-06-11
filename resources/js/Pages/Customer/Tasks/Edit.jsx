@@ -5,6 +5,7 @@ import DashboardLayout from '../../../Layouts/DashboardLayout';
 export default function Edit({ task, categories, statusLabels }) {
     const form = useForm({
         category_id: task.category_id ?? '',
+        task_type_id: task.task_type_id ?? '',
         title: task.title ?? '',
         description: task.description ?? '',
         budget_min: task.budget_min ?? '',

@@ -26,12 +26,16 @@ use App\Http\Controllers\Order\DisputeMessageController;
 use App\Http\Controllers\Order\OrderFileController;
 use App\Http\Controllers\Order\OrderMessageController;
 use App\Http\Controllers\Order\OrderWorkspaceController;
-use App\Http\Controllers\Performer\PerformerOrderController;
+use App\Http\Controllers\Performer\CategoryFavoriteController;
 use App\Http\Controllers\Performer\PerformerFinanceController;
+use App\Http\Controllers\Performer\PerformerFavoriteController;
+use App\Http\Controllers\Performer\PerformerOrderController;
 use App\Http\Controllers\Performer\PerformerPortfolioController;
 use App\Http\Controllers\Performer\PerformerProfileController;
 use App\Http\Controllers\Performer\PerformerServiceController;
+use App\Http\Controllers\Performer\TaskFavoriteController;
 use App\Http\Controllers\Performer\TaskOfferController;
+use App\Http\Controllers\Performer\TaskTypeFavoriteController;
 use App\Http\Controllers\Public\CatalogController;
 use App\Http\Controllers\Public\BetaTestingController;
 use App\Http\Controllers\Public\HomeController;
@@ -156,6 +160,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::middleware('role:performer')->prefix('performer')->name('performer.')->group(function (): void {
         Route::get('/finance', PerformerFinanceController::class)->name('finance.index');
+        Route::get('/favorites', PerformerFavoriteController::class)->name('favorites.index');
         Route::get('/profile', [PerformerProfileController::class, 'show'])->name('profile.show');
         Route::patch('/profile', [PerformerProfileController::class, 'update'])->name('profile.update');
         Route::post('/profile/avatar', [PerformerProfileController::class, 'uploadAvatar'])->name('profile.avatar');
@@ -215,6 +220,13 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/services/{service:slug}/order', [ServiceOrderController::class, 'store'])
         ->middleware('role:customer')
         ->name('services.order.store');
+
+    Route::post('/tasks/{task}/favorite', [TaskFavoriteController::class, 'store'])->name('tasks.favorite.store');
+    Route::delete('/tasks/{task}/favorite', [TaskFavoriteController::class, 'destroy'])->name('tasks.favorite.destroy');
+    Route::post('/categories/{category}/favorite', [CategoryFavoriteController::class, 'store'])->name('categories.favorite.store');
+    Route::delete('/categories/{category}/favorite', [CategoryFavoriteController::class, 'destroy'])->name('categories.favorite.destroy');
+    Route::post('/task-types/{taskType}/favorite', [TaskTypeFavoriteController::class, 'store'])->name('task-types.favorite.store');
+    Route::delete('/task-types/{taskType}/favorite', [TaskTypeFavoriteController::class, 'destroy'])->name('task-types.favorite.destroy');
 
     Route::get('/moderator/dashboard', [RoleDashboardController::class, 'moderator'])
         ->middleware('role:moderator')

@@ -26,7 +26,12 @@ export default function TaskShow({ task, canOffer, existingOffer, offerStatusLab
                         <div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{task.category.name}</span>
+                                {task.task_type && (
+                                    <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{task.task_type.name}</span>
+                                )}
                                 <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{task.offers_count} откл.</span>
+                                {task.badges.urgent && <span className="rounded-md bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">Срочно</span>}
+                                {task.badges.favorited && <span className="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">В избранном</span>}
                             </div>
                             <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-normal text-slate-950">{task.title}</h1>
                             <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-4">
@@ -36,11 +41,29 @@ export default function TaskShow({ task, canOffer, existingOffer, offerStatusLab
                                 <p>Просмотры: <span className="font-semibold text-slate-950">{task.views_count}</span></p>
                             </div>
                         </div>
-                        {canOffer && (
-                            <a href="#offer-form" className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                                Откликнуться
-                            </a>
-                        )}
+                        <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
+                            {canOffer && (
+                                <a href="#offer-form" className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+                                    Откликнуться
+                                </a>
+                            )}
+                            {task.favorite.can_favorite && (
+                                <Link
+                                    href={task.favorite.is_favorited ? task.favorite.destroy_url : task.favorite.store_url}
+                                    method={task.favorite.is_favorited ? 'delete' : 'post'}
+                                    as="button"
+                                    preserveScroll
+                                    className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                                >
+                                    {task.favorite.is_favorited ? 'В избранном' : 'В избранное'}
+                                </Link>
+                            )}
+                            {task.favorite.show_login_cta && (
+                                <Link href={task.favorite.login_url} className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+                                    Войти, чтобы сохранить
+                                </Link>
+                            )}
+                        </div>
                     </div>
                 </div>
             </section>
@@ -128,6 +151,7 @@ export default function TaskShow({ task, canOffer, existingOffer, offerStatusLab
                             <p>Бюджет: <span className="font-semibold text-slate-950">{task.budget_label}</span></p>
                             <p>Откликов: <span className="font-semibold text-slate-950">{task.offers_count}</span></p>
                             <p>Категория: <span className="font-semibold text-slate-950">{task.category.name}</span></p>
+                            {task.task_type && <p>Вид задания: <span className="font-semibold text-slate-950">{task.task_type.name}</span></p>}
                         </div>
                     </div>
                 </aside>

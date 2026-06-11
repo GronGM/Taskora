@@ -43,6 +43,11 @@ export default function Index({ tasks, statusLabels }) {
                                             <span className="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
                                                 {task.category}
                                             </span>
+                                            {task.task_type && (
+                                                <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                                                    {task.task_type}
+                                                </span>
+                                            )}
                                         </div>
                                         <h2 className="mt-4 text-2xl font-semibold text-slate-950">{task.title}</h2>
                                         <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-3">

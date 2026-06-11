@@ -146,10 +146,14 @@ ModuleName/
 | `PerformerProfile` | публичный профиль исполнителя |
 | `PerformerPortfolioItem` | публичная работа портфолио исполнителя |
 | `Category` | категория или подкатегория |
+| `TaskType` | вид задания внутри категории |
+| `PerformerFavoriteCategory` | избранная категория исполнителя |
+| `PerformerFavoriteTaskType` | избранный вид задания исполнителя |
 | `Service` | готовая услуга |
 | `ServicePackage` | пакет услуги с ценой, сроком и количеством правок |
 | `Task` | индивидуальное задание |
 | `TaskOffer` | отклик исполнителя на задание |
+| `TaskFavorite` | избранное задание исполнителя |
 | `TaskFile` | файл, прикрепленный к заданию |
 | `Order` | заказ из услуги или выбранного отклика |
 | `OrderSubmission` | сдача работы исполнителем на проверку |
@@ -177,6 +181,13 @@ ModuleName/
 - `sort_order`;
 - `is_active`.
 
+`task_types`:
+
+- `category_id` nullable;
+- `name`, уникальный `slug`, `description`;
+- `sort_order`;
+- `is_active`.
+
 `services`:
 
 - `user_id` — исполнитель;
@@ -200,11 +211,30 @@ ModuleName/
 
 - `user_id` — заказчик;
 - `category_id`;
+- `task_type_id` nullable;
 - `title`, уникальный `slug`, `description`;
 - `budget_min`, `budget_max`;
 - `deadline_at`;
 - `status`: `draft`, `published`, `closed`, `archived`;
 - `offers_count`, `views_count`.
+
+`performer_favorite_categories`:
+
+- `user_id` — исполнитель;
+- `category_id`;
+- уникальная пара `user_id`, `category_id`.
+
+`performer_favorite_task_types`:
+
+- `user_id` — исполнитель;
+- `task_type_id`;
+- уникальная пара `user_id`, `task_type_id`.
+
+`task_favorites`:
+
+- `task_id`;
+- `user_id` — исполнитель;
+- уникальная пара `task_id`, `user_id`.
 
 `task_offers`:
 
@@ -319,6 +349,8 @@ ModuleName/
 - `Category hasMany Services`
 - `Category belongsTo parent Category`
 - `Category hasMany children Categories`
+- `Category hasMany TaskTypes`
+- `Category hasMany PerformerFavoriteCategories`
 - `Service belongsTo User`
 - `Service belongsTo Category`
 - `Service hasMany ServicePackages`
@@ -326,11 +358,25 @@ ModuleName/
 - `User hasMany Services`
 - `User hasMany Tasks`
 - `User hasMany TaskOffers`
+- `User hasMany TaskFavorites`
+- `User hasMany PerformerFavoriteCategories`
+- `User hasMany PerformerFavoriteTaskTypes`
 - `Category hasMany Tasks`
 - `Task belongsTo User as customer`
 - `Task belongsTo Category`
+- `Task belongsTo TaskType`
 - `Task hasMany TaskOffers`
+- `Task hasMany TaskFavorites`
 - `Task hasMany TaskFiles`
+- `TaskType belongsTo Category`
+- `TaskType hasMany Tasks`
+- `TaskType hasMany PerformerFavoriteTaskTypes`
+- `TaskFavorite belongsTo Task`
+- `TaskFavorite belongsTo User`
+- `PerformerFavoriteCategory belongsTo User`
+- `PerformerFavoriteCategory belongsTo Category`
+- `PerformerFavoriteTaskType belongsTo User`
+- `PerformerFavoriteTaskType belongsTo TaskType`
 - `TaskOffer belongsTo Task`
 - `TaskOffer belongsTo User as performer`
 - `TaskOffer hasOne Order`
@@ -385,6 +431,10 @@ ModuleName/
 | `GET` | `/services/{service:slug}` | страница опубликованной услуги | guest |
 | `GET` | `/tasks` | биржа опубликованных заданий | guest |
 | `GET` | `/tasks?category={slug}` | фильтр заданий по категории | guest |
+| `GET` | `/tasks?type={slug}` | фильтр заданий по виду задания | guest |
+| `GET` | `/tasks?q={text}` | поиск по названию и описанию задания | guest |
+| `GET` | `/tasks?favorite_categories=1` | быстрый фильтр по избранным категориям исполнителя | `role:performer` для полезного результата |
+| `GET` | `/tasks?favorite_types=1` | быстрый фильтр по избранным видам заданий исполнителя | `role:performer` для полезного результата |
 | `GET` | `/tasks/{task:slug}` | страница опубликованного задания | guest |
 | `GET` | `/performers` | публичная витрина исполнителей | guest |
 | `GET` | `/performers/{user}` | публичный профиль исполнителя с услугами, отзывами и портфолио | guest |
@@ -436,6 +486,13 @@ ContactGuard применяется к `display_name`, `headline`, `bio`, `portf
 | `POST` | `/tasks/{task}/offers` | отправка отклика на опубликованное задание | `TaskOfferPolicy::create` |
 | `GET` | `/performer/offers` | список своих откликов | `TaskOfferPolicy::viewAny` |
 | `POST` | `/performer/task-offers/{offer}/withdraw` | отзыв своего отклика | `TaskOfferPolicy::withdraw` |
+| `GET` | `/performer/favorites` | центр избранных заданий, категорий и видов заданий | `role:performer` |
+| `POST` | `/tasks/{task}/favorite` | добавить опубликованное задание в избранное | `role:performer` |
+| `DELETE` | `/tasks/{task}/favorite` | убрать задание из избранного | `role:performer` |
+| `POST` | `/categories/{category}/favorite` | добавить активную категорию в избранное | `role:performer` |
+| `DELETE` | `/categories/{category}/favorite` | убрать категорию из избранного | `role:performer` |
+| `POST` | `/task-types/{taskType}/favorite` | добавить активный вид задания в избранное | `role:performer` |
+| `DELETE` | `/task-types/{taskType}/favorite` | убрать вид задания из избранного | `role:performer` |
 
 Правила:
 
@@ -443,7 +500,13 @@ ContactGuard применяется к `display_name`, `headline`, `bio`, `portf
 - новое задание сохраняется как `draft`, если заказчик не нажал публикацию;
 - публикация переводит только свой черновик в `published`;
 - архивное задание не показывается публично;
+- если у категории есть активные виды заданий, заказчик должен выбрать `task_type_id`;
+- выбранный вид задания обязан быть активным и относиться к выбранной категории;
+- `ContactGuard` проверяет пользовательские тексты задания и отклика, но не технические `category_id` и `task_type_id`;
 - исполнитель может отправить только один отклик на опубликованное задание;
+- только исполнитель добавляет в избранное задания, активные категории и активные виды заданий;
+- заказчик, модератор и администратор получают `403` на действия избранного исполнителя;
+- закрытые и архивные задания можно убрать из избранного, но нельзя добавить заново;
 - заказчик и гость не могут отправить отклик;
 - исполнитель может отозвать только свой отклик со статусом `submitted`;
 - заказчик видит отклики только на свои задания, может отклонить отклик или выбрать исполнителя;
