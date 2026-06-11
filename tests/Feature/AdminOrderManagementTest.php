@@ -146,7 +146,11 @@ class AdminOrderManagementTest extends TestCase
     public function test_admin_can_search_orders_by_id(): void
     {
         $matched = $this->order(['title' => 'Search by id']);
-        $missed = $this->order(['title' => 'Other id']);
+        $missedCustomer = $this->user(User::ROLE_CUSTOMER, ['email' => "missed-{$matched->id}@taskora.local"]);
+        $missed = $this->order([
+            'customer_id' => $missedCustomer->id,
+            'title' => "Other id {$matched->id}",
+        ]);
 
         $ids = $this->indexIds(['q' => (string) $matched->id]);
 

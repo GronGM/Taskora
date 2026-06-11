@@ -207,15 +207,17 @@ class AdminOrderController extends Controller
             ->when($filters['q'] !== '', function (Builder $query) use ($filters): void {
                 $q = $filters['q'];
 
+                if (ctype_digit($q)) {
+                    $query->where('id', (int) $q);
+
+                    return;
+                }
+
                 $query->where(function (Builder $query) use ($q): void {
                     $query
                         ->where('title', 'like', "%{$q}%")
                         ->orWhereHas('customer', fn (Builder $query) => $query->where('email', 'like', "%{$q}%"))
                         ->orWhereHas('performer', fn (Builder $query) => $query->where('email', 'like', "%{$q}%"));
-
-                    if (ctype_digit($q)) {
-                        $query->orWhere('id', (int) $q);
-                    }
                 });
             })
             ->when($filters['status'] !== 'all', fn (Builder $query) => $query->where('status', $filters['status']))
