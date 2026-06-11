@@ -60,6 +60,7 @@
 - Проверить доступ ролей `customer`, `performer`, `moderator`, `admin`.
 - Проверить, что `/admin/users` доступен только роли `admin`, а `moderator` получает `403`.
 - Проверить, что `/admin/orders`, `/admin/orders/{order}`, `/admin/orders/{order}/events` и `/admin/orders/{order}/ledger` доступны только роли `admin`, а `moderator`, `customer` и `performer` получают `403`.
+- Проверить, что `/admin/mail-settings` доступен только роли `admin` и не выводит `MAIL_PASSWORD`, SMTP-токены, beta-пароль, `APP_KEY` или другие секреты из `.env`.
 - Проверить блокировку и разблокировку пользователя: заблокированный аккаунт не входит в систему и разлогинивается на следующем запросе.
 - Проверить, что админские Inertia props не содержат `password`, `remember_token`, reset-токены, beta-пароль, приватные ключи, полный `last_login_ip`, storage paths и download URL приватных файлов заказа.
 - Проверить аудит `user_admin_events` для смены роли, блокировки, разблокировки и обновления админской заметки.
@@ -102,6 +103,7 @@
 - Проверить зеленый GitHub Actions CI перед деплоем.
 - Пройти smoke-test `/admin/users`, карточки пользователя, смены роли, блокировки, разблокировки и админской заметки на staging.
 - Пройти smoke-test `/admin/orders`: список, фильтры, карточка, события, ledger, отсутствие действий смены статуса/возврата/разблокировки и отсутствие прямых ссылок на приватные файлы.
+- Пройти smoke-test `/admin/mail-settings`: доступ только admin, почтовый режим понятен, SMTP-секреты не отображаются.
 - Пройти `php artisan test`.
 - Пройти `npm run build`.
 - Пройти `composer validate --strict`.

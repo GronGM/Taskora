@@ -33,6 +33,18 @@ class ThemePreferenceTest extends TestCase
         $this->assertStringContainsString('<ThemeToggle', $dashboardLayout);
     }
 
+    public function test_public_layout_uses_single_theme_toggle_and_compact_mobile_menu(): void
+    {
+        $publicLayout = file_get_contents(resource_path('js/Layouts/PublicLayout.jsx'));
+
+        $this->assertSame(1, substr_count($publicLayout, '<ThemeToggle'));
+        $this->assertStringContainsString('public-mobile-menu', $publicLayout);
+        $this->assertStringContainsString('data-testid="public-mobile-menu"', $publicLayout);
+        $this->assertStringContainsString('aria-expanded={isMobileMenuOpen}', $publicLayout);
+        $this->assertStringContainsString('Меню', $publicLayout);
+        $this->assertStringNotContainsString('overflow-x-auto', $publicLayout);
+    }
+
     public function test_theme_toggle_contains_accessible_russian_options(): void
     {
         $toggleSource = file_get_contents(resource_path('js/Components/Theme/ThemeToggle.jsx'));

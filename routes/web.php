@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminBetaFeedbackController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminFinanceController;
+use App\Http\Controllers\Admin\AdminMailSettingsController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminPaymentSettingsController;
 use App\Http\Controllers\Admin\AdminTaskTypeController;
@@ -262,6 +263,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/finance', AdminFinanceController::class)->name('finance.index');
+        Route::get('/mail-settings', AdminMailSettingsController::class)->name('mail-settings.index');
         Route::get('/payment-settings', AdminPaymentSettingsController::class)->name('payment-settings.index');
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
