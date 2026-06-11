@@ -67,7 +67,7 @@ Disallow: /
 
 ## Восстановление Пароля На Staging
 
-На staging реальная почта не подключена: `MAIL_MAILER=log`. Если тестировщик нажимает «Забыли пароль?» и отправляет форму `/forgot-password`, Laravel записывает письмо со ссылкой сброса в `storage/logs/laravel.log` на сервере.
+На staging реальная почта не подключена: `MAIL_MAILER=log`. Если тестировщик нажимает «Забыли пароль?» и отправляет форму `/forgot-password`, Laravel записывает письмо со ссылкой сброса в `storage/logs/mail.log` на сервере.
 
 Это ожидаемое поведение для beta/staging. Не пересылать логи целиком и не публиковать reset link в общих чатах. Перед public launch нужно подключить реального mail provider отдельной задачей и проверить доставку password reset email.
 

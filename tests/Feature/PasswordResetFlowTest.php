@@ -285,6 +285,17 @@ class PasswordResetFlowTest extends TestCase
             ->assertInertia(fn ($page) => $page->where('mailLogNotice', false));
     }
 
+    public function test_log_mailer_uses_dedicated_debug_mail_log_channel(): void
+    {
+        $mailConfig = require config_path('mail.php');
+        $loggingConfig = require config_path('logging.php');
+
+        $this->assertSame('mail', $mailConfig['mailers']['log']['channel']);
+        $this->assertSame('single', $loggingConfig['channels']['mail']['driver']);
+        $this->assertSame(storage_path('logs/mail.log'), $loggingConfig['channels']['mail']['path']);
+        $this->assertSame('debug', $loggingConfig['channels']['mail']['level']);
+    }
+
     public function test_reset_token_is_not_rendered_on_login_or_forgot_password_pages(): void
     {
         $token = 'secret-reset-token-that-must-not-appear';

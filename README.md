@@ -701,6 +701,8 @@ CACHE_STORE=database
 QUEUE_CONNECTION=sync
 FILESYSTEM_DISK=local
 MAIL_MAILER=log
+MAIL_LOG_CHANNEL=mail
+MAIL_LOG_LEVEL=debug
 
 TASKORA_PLATFORM_FEE_PERCENT=15
 TASKORA_CONTACT_GUARD_ENABLED=true
@@ -749,7 +751,7 @@ TASKORA_PAYMENTS_MODE=stub
 | `GET` | `/reset-password/{token}` | `password.reset` | форма нового пароля |
 | `POST` | `/reset-password` | `password.store` | сохранение нового пароля |
 
-В `local` и `staging` используется `MAIL_MAILER=log`, поэтому письмо не отправляется во внешнюю почту: reset link пишется в Laravel log. Реальный email-провайдер перед public launch нужно подключить отдельной задачей.
+В `local` и `staging` используется `MAIL_MAILER=log`, поэтому письмо не отправляется во внешнюю почту: reset link пишется в `storage/logs/mail.log`. Реальный email-провайдер перед public launch нужно подключить отдельной задачей.
 
 ## Закрытое beta-тестирование
 
