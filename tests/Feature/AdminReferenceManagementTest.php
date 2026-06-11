@@ -322,19 +322,19 @@ class AdminReferenceManagementTest extends TestCase
     public function test_move_up_and_move_down_change_sort_order(): void
     {
         $admin = $this->user(User::ROLE_ADMIN);
-        $first = Category::factory()->create(['sort_order' => 10, 'name' => 'А первая']);
-        $second = Category::factory()->create(['sort_order' => 20, 'name' => 'Б вторая']);
-        $category = Category::factory()->create(['is_active' => true]);
-        $firstType = TaskType::factory()->for($category)->create(['sort_order' => 10, 'name' => 'А первый']);
-        $secondType = TaskType::factory()->for($category)->create(['sort_order' => 20, 'name' => 'Б второй']);
+        $first = Category::factory()->create(['sort_order' => 1000, 'name' => 'А первая']);
+        $second = Category::factory()->create(['sort_order' => 2000, 'name' => 'Б вторая']);
+        $category = Category::factory()->create(['is_active' => true, 'sort_order' => 3000]);
+        $firstType = TaskType::factory()->for($category)->create(['sort_order' => 1000, 'name' => 'А первый']);
+        $secondType = TaskType::factory()->for($category)->create(['sort_order' => 2000, 'name' => 'Б второй']);
 
         $this->actingAs($admin)->post(route('admin.categories.move-up', $second))->assertRedirect();
-        $this->assertSame(10, $second->refresh()->sort_order);
-        $this->assertSame(20, $first->refresh()->sort_order);
+        $this->assertSame(1000, $second->refresh()->sort_order);
+        $this->assertSame(2000, $first->refresh()->sort_order);
 
         $this->actingAs($admin)->post(route('admin.task-types.move-up', $secondType))->assertRedirect();
-        $this->assertSame(10, $secondType->refresh()->sort_order);
-        $this->assertSame(20, $firstType->refresh()->sort_order);
+        $this->assertSame(1000, $secondType->refresh()->sort_order);
+        $this->assertSame(2000, $firstType->refresh()->sort_order);
     }
 
     public function test_tasks_still_open_after_category_and_type_disabled(): void
