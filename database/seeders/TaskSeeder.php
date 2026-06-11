@@ -87,7 +87,7 @@ class TaskSeeder extends Seeder
             $this->syncOffer($task, $performer, [
                 'message' => 'Готов выполнить задачу внутри платформы: уточню требования, согласую формат результата и подготовлю аккуратную версию без передачи контактов.',
                 'price' => max(1000, (int) round(($task->budget_min + $task->budget_max) / 2)),
-                'delivery_days' => max(1, now()->diffInDays($task->deadline_at, false) - 1),
+                'delivery_days' => max(1, (int) floor(now()->diffInDays($task->deadline_at, false) - 1)),
             ]);
         }
     }
