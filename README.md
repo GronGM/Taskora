@@ -736,6 +736,21 @@ TASKORA_PAYMENTS_MODE=stub
 | `GET` | `/admin/beta-feedback/{feedback}` | карточка beta-отзыва |
 | `POST` | `/admin/beta-feedback/{feedback}/status` | смена статуса beta-отзыва |
 
+## Восстановление пароля
+
+На странице входа есть ссылка `/forgot-password`. Гость вводит email, а приложение всегда показывает нейтральное сообщение: если аккаунт существует, ссылка для сброса будет отправлена. Это не раскрывает, зарегистрирована ли почта.
+
+Маршруты password reset:
+
+| Метод | Маршрут | Имя | Назначение |
+|---|---|---|---|
+| `GET` | `/forgot-password` | `password.request` | форма запроса ссылки |
+| `POST` | `/forgot-password` | `password.email` | отправка reset link через Laravel password broker |
+| `GET` | `/reset-password/{token}` | `password.reset` | форма нового пароля |
+| `POST` | `/reset-password` | `password.store` | сохранение нового пароля |
+
+В `local` и `staging` используется `MAIL_MAILER=log`, поэтому письмо не отправляется во внешнюю почту: reset link пишется в Laravel log. Реальный email-провайдер перед public launch нужно подключить отдельной задачей.
+
 ## Закрытое beta-тестирование
 
 Staging-версия доступна по адресу `https://staging.таскора.рф` и закрыта общим beta-паролем. Beta-пароль не хранится в репозитории, README или документации; его нужно передавать тестировщикам отдельно через личный канал.

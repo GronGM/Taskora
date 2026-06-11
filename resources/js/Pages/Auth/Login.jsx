@@ -2,7 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import PasswordInput from '../../Components/Auth/PasswordInput';
 import PublicLayout from '../../Layouts/PublicLayout';
 
-export default function Login() {
+export default function Login({ flash = {} }) {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
@@ -33,6 +33,15 @@ export default function Login() {
                     </div>
 
                     <form onSubmit={submit} className="rounded-lg border border-slate-200 bg-slate-50 p-6 shadow-sm">
+                        {flash.success && (
+                            <div
+                                role="status"
+                                className="mb-5 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+                            >
+                                {flash.success}
+                            </div>
+                        )}
+
                         {authError && (
                             <div
                                 role="alert"
@@ -71,6 +80,11 @@ export default function Login() {
                                 error={errors.password}
                                 required
                             />
+                            <div className="mt-3 text-right">
+                                <Link href="/forgot-password" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
+                                    Забыли пароль?
+                                </Link>
+                            </div>
                         </div>
 
                         <label className="mt-5 flex items-center gap-3 text-sm text-slate-600">

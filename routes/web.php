@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\AdminBetaFeedbackController;
 use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Controllers\Admin\AdminPaymentSettingsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\BetaAccessController;
 use App\Http\Controllers\BetaFeedbackController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -74,6 +76,15 @@ Route::get('/performers/{user}', [CatalogController::class, 'performer'])->name(
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])
+        ->middleware('throttle:taskora-password-email')
+        ->name('password.email');
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])
+        ->middleware('throttle:taskora-password-reset')
+        ->name('password.store');
 
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');

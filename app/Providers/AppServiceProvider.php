@@ -72,10 +72,27 @@ class AppServiceProvider extends ServiceProvider
             'taskora-notifications',
             fn (Request $request): Limit => Limit::perMinute(60)->by($this->rateLimitKey($request)),
         );
+
+        RateLimiter::for(
+            'taskora-password-email',
+            fn (Request $request): Limit => Limit::perMinute(5)->by($this->passwordEmailRateLimitKey($request)),
+        );
+
+        RateLimiter::for(
+            'taskora-password-reset',
+            fn (Request $request): Limit => Limit::perMinute(10)->by($this->rateLimitKey($request)),
+        );
     }
 
     private function rateLimitKey(Request $request): string
     {
         return (string) ($request->user()?->getAuthIdentifier() ?? $request->ip());
+    }
+
+    private function passwordEmailRateLimitKey(Request $request): string
+    {
+        $email = strtolower((string) $request->input('email'));
+
+        return $request->ip().'|'.$email;
     }
 }

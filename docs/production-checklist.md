@@ -98,6 +98,7 @@
 - Пройти `composer validate --strict`.
 - Проверить `php artisan route:list --except-vendor`.
 - Проверить `php artisan schedule:list`.
+- Подключить реальный mail provider и проверить доставку password reset email.
 - Отключить `BETA_ACCESS_ENABLED` перед настоящим production launch или заменить его production-авторизацией.
 - Проверить, что production `/robots.txt` не запрещает индексацию, если публичный запуск действительно разрешен.
 - Проверить основные публичные страницы и кабинеты на 360, 390, 768 и 1280 px.
