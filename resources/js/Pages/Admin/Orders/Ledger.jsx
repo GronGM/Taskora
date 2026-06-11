@@ -11,17 +11,17 @@ export default function Ledger({ order, operations = {}, ledgerEntries = {}, acc
 
     return (
         <DashboardLayout>
-            <Head title={`Ledger заказа #${order.id}`} />
+            <Head title={`Финансовый журнал заказа #${order.id}`} />
 
             <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                     <div className="min-w-0">
                         <p className="text-sm font-semibold uppercase text-blue-700">Финансовая диагностика</p>
                         <h1 className="mt-3 break-words text-4xl font-semibold tracking-normal text-slate-950">
-                            Ledger заказа #{order.id}
+                            Финансовый журнал заказа #{order.id}
                         </h1>
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-                            Read-only сводка payment operations и ledger entries. Эта страница не меняет статусы,
+                            Сводка платежных операций и записей финансового журнала только для чтения. Эта страница не меняет статусы,
                             не запускает выплаты, возвраты или внешние платежные запросы.
                         </p>
                     </div>
@@ -33,7 +33,7 @@ export default function Ledger({ order, operations = {}, ledgerEntries = {}, acc
                             События
                         </Link>
                         <Link href={links.finance} className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                            Admin finance
+                            Финансовая сводка
                         </Link>
                     </div>
                 </div>
@@ -62,7 +62,7 @@ export default function Ledger({ order, operations = {}, ledgerEntries = {}, acc
                 </Panel>
 
                 <div className="mt-8 grid gap-6 xl:grid-cols-2">
-                    <Panel title="Payment operations">
+                    <Panel title="Платежные операции">
                         {operationRows.length > 0 ? (
                             <ul>
                                 {operationRows.map((operation) => (
@@ -72,7 +72,7 @@ export default function Ledger({ order, operations = {}, ledgerEntries = {}, acc
                                                 <p className="break-words text-sm font-semibold text-slate-950">
                                                     #{operation.id} {operation.type_label}
                                                 </p>
-                                                <p className="mt-1 text-sm text-slate-500">{operation.status_label} · {operation.provider}</p>
+                                                <p className="mt-1 text-sm text-slate-500">{operation.status_label} · {providerLabel(operation.provider)}</p>
                                             </div>
                                             <p className="text-lg font-semibold text-slate-950">{formatMoney(operation.amount)}</p>
                                         </div>
@@ -92,7 +92,7 @@ export default function Ledger({ order, operations = {}, ledgerEntries = {}, acc
                         <Pagination paginator={operations} />
                     </Panel>
 
-                    <Panel title="Ledger entries">
+                    <Panel title="Записи журнала">
                         {ledgerRows.length > 0 ? (
                             <ul>
                                 {ledgerRows.map((entry) => (
@@ -102,7 +102,7 @@ export default function Ledger({ order, operations = {}, ledgerEntries = {}, acc
                                                 <p className="break-words text-sm font-semibold text-slate-950">
                                                     #{entry.id} {entry.account_label}
                                                 </p>
-                                                <p className="mt-1 text-sm text-slate-500">{entry.direction_label} · operation #{entry.payment_operation_id ?? '—'}</p>
+                                                <p className="mt-1 text-sm text-slate-500">{entry.direction_label} · операция #{entry.payment_operation_id ?? '—'}</p>
                                             </div>
                                             <p className="text-lg font-semibold text-slate-950">{formatMoney(entry.amount)}</p>
                                         </div>
@@ -169,4 +169,8 @@ function Pagination({ paginator = {} }) {
             </div>
         </div>
     );
+}
+
+function providerLabel(provider) {
+    return provider === 'stub' ? 'Заглушка' : provider;
 }

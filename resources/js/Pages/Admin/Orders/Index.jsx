@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import DashboardLayout from '../../../Layouts/DashboardLayout';
 
@@ -48,6 +49,8 @@ export default function Index({ orders = {}, filters = {}, summary = {}, options
     };
 
     const activeFilters = filterChips(filters, options);
+    const activeFilterCount = activeFilters.length;
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
     return (
         <DashboardLayout>
@@ -59,7 +62,7 @@ export default function Index({ orders = {}, filters = {}, summary = {}, options
                         <p className="text-sm font-semibold uppercase text-blue-700">Администрирование</p>
                         <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Заказы</h1>
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-                            Read-only диагностика заказов: статусы, участники, источник, споры, события workspace и внутренний ledger. Статусы и платежи здесь не изменяются.
+                            Диагностика заказов только для чтения: статусы, участники, источник, споры, события рабочей области и внутренний финансовый журнал. Статусы и платежи здесь не изменяются.
                         </p>
                     </div>
                     <Link href="/admin/dashboard" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
@@ -75,7 +78,36 @@ export default function Index({ orders = {}, filters = {}, summary = {}, options
                 </div>
 
                 <form onSubmit={submit} className="mt-8 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="grid gap-4 lg:grid-cols-6">
+                    <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 lg:hidden">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p className="text-base font-semibold text-slate-950">Фильтры</p>
+                                {activeFilterCount > 0 && (
+                                    <p className="mt-1 text-sm text-slate-500">
+                                        Активно: {activeFilterCount}
+                                    </p>
+                                )}
+                            </div>
+                            <button
+                                type="button"
+                                aria-controls="admin-order-filters"
+                                aria-expanded={filtersOpen}
+                                onClick={() => setFiltersOpen((open) => !open)}
+                                className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                            >
+                                {filtersOpen ? 'Скрыть фильтры' : 'Показать фильтры'}
+                            </button>
+                        </div>
+                        <Link href="/admin/orders" className="inline-flex w-full justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 sm:w-auto">
+                            Сбросить фильтры
+                        </Link>
+                    </div>
+
+                    <div id="admin-order-filters" className={`${filtersOpen ? 'block' : 'hidden'} pt-5 lg:block lg:pt-0`}>
+                        <div className="hidden lg:mb-5 lg:block">
+                            <h2 className="text-lg font-semibold text-slate-950">Фильтры</h2>
+                        </div>
+                        <div className="grid gap-4 lg:grid-cols-6">
                         <label className="lg:col-span-2">
                             <span className="text-sm font-medium text-slate-700">Поиск</span>
                             <input
@@ -128,7 +160,7 @@ export default function Index({ orders = {}, filters = {}, summary = {}, options
                             />
                         </label>
                         <label>
-                            <span className="text-sm font-medium text-slate-700">Customer ID</span>
+                            <span className="text-sm font-medium text-slate-700">ID заказчика</span>
                             <input
                                 type="number"
                                 min="1"
@@ -138,7 +170,7 @@ export default function Index({ orders = {}, filters = {}, summary = {}, options
                             />
                         </label>
                         <label>
-                            <span className="text-sm font-medium text-slate-700">Performer ID</span>
+                            <span className="text-sm font-medium text-slate-700">ID исполнителя</span>
                             <input
                                 type="number"
                                 min="1"
@@ -148,15 +180,16 @@ export default function Index({ orders = {}, filters = {}, summary = {}, options
                             />
                         </label>
                         <Select label="Сортировка" value={form.data.sort} onChange={(value) => form.setData('sort', value)} options={options.sorts} />
-                    </div>
+                        </div>
 
-                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <button type="submit" className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                            Применить
-                        </button>
-                        <Link href="/admin/orders" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-800 hover:bg-slate-50">
-                            Сбросить фильтры
-                        </Link>
+                        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <button type="submit" className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                                Применить
+                            </button>
+                            <Link href="/admin/orders" className="hidden rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-800 hover:bg-slate-50 lg:inline-flex">
+                                Сбросить фильтры
+                            </Link>
+                        </div>
                     </div>
                 </form>
 
@@ -318,7 +351,7 @@ const filterLabels = {
     date_to: 'Дата до',
     price_min: 'Цена от',
     price_max: 'Цена до',
-    customer_id: 'Customer ID',
-    performer_id: 'Performer ID',
+    customer_id: 'ID заказчика',
+    performer_id: 'ID исполнителя',
     sort: 'Сортировка',
 };

@@ -36,6 +36,38 @@ class AdminOrderManagementTest extends TestCase
         $this->assertSame(1, $response->inertiaProps('summary.filtered'));
     }
 
+    public function test_admin_orders_page_contains_compact_filter_controls(): void
+    {
+        $this->order();
+
+        $response = $this->actingAs($this->user(User::ROLE_ADMIN))
+            ->get(route('admin.orders.index'))
+            ->assertOk();
+
+        $source = file_get_contents(resource_path('js/Pages/Admin/Orders/Index.jsx'));
+
+        $this->assertSame('Admin/Orders/Index', $response->inertiaPage()['component']);
+        $this->assertStringContainsString('Фильтры', $source);
+        $this->assertStringContainsString('Показать фильтры', $source);
+        $this->assertStringContainsString('Скрыть фильтры', $source);
+        $this->assertStringContainsString('aria-expanded', $source);
+        $this->assertStringContainsString('activeFilterCount', $source);
+    }
+
+    public function test_admin_orders_page_keeps_reset_filters_control_when_filters_are_active(): void
+    {
+        $this->order(['status' => Order::STATUS_COMPLETED]);
+
+        $response = $this->actingAs($this->user(User::ROLE_ADMIN))
+            ->get(route('admin.orders.index', ['status' => Order::STATUS_COMPLETED]))
+            ->assertOk();
+
+        $source = file_get_contents(resource_path('js/Pages/Admin/Orders/Index.jsx'));
+
+        $this->assertSame(Order::STATUS_COMPLETED, $response->inertiaProps('filters.status'));
+        $this->assertStringContainsString('Сбросить фильтры', $source);
+    }
+
     public function test_guest_is_redirected_from_orders_page(): void
     {
         $this->get(route('admin.orders.index'))->assertRedirect('/login');
@@ -579,6 +611,42 @@ class AdminOrderManagementTest extends TestCase
         $this->assertStringNotContainsString('stored_name', $source);
         $this->assertStringNotContainsString('download_url', $source);
         $this->assertStringNotContainsString('<table', $source);
+    }
+
+    public function test_admin_order_react_pages_use_russian_finance_and_event_labels(): void
+    {
+        $order = $this->order();
+
+        $this->actingAs($this->user(User::ROLE_ADMIN))
+            ->get(route('admin.orders.show', $order))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Admin/Orders/Show'));
+
+        $this->actingAs($this->user(User::ROLE_ADMIN))
+            ->get(route('admin.orders.events', $order))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Admin/Orders/Events'));
+
+        $this->actingAs($this->user(User::ROLE_ADMIN))
+            ->get(route('admin.orders.ledger', $order))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Admin/Orders/Ledger'));
+
+        $source = collect([
+            resource_path('js/Pages/Admin/Orders/Show.jsx'),
+            resource_path('js/Pages/Admin/Orders/Events.jsx'),
+            resource_path('js/Pages/Admin/Orders/Ledger.jsx'),
+        ])->map(fn (string $path): string => file_get_contents($path))->implode("\n");
+
+        $this->assertStringContainsString('Рабочая область', $source);
+        $this->assertStringContainsString('События заказа', $source);
+        $this->assertStringContainsString('Финансовый журнал', $source);
+        $this->assertStringContainsString('Платежные операции', $source);
+        $this->assertStringContainsString('Записи журнала', $source);
+        $this->assertStringNotContainsString('Admin finance', $source);
+        $this->assertStringNotContainsString('Ledger entries', $source);
+        $this->assertStringNotContainsString('Payment operations', $source);
+        $this->assertStringNotContainsString('Order events', $source);
     }
 
     public static function nonAdminRoles(): array

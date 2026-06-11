@@ -271,6 +271,24 @@ class PaymentLedgerArchitectureTest extends TestCase
         $this->assertSame('Admin/Finance/Index', $response->inertiaPage()['component']);
     }
 
+    public function test_admin_finance_page_uses_russian_visible_labels(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.finance.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Admin/Finance/Index'));
+
+        $source = file_get_contents(resource_path('js/Pages/Admin/Finance/Index.jsx'));
+
+        $this->assertStringContainsString('Финансовая сводка', $source);
+        $this->assertStringContainsString('Провайдер', $source);
+        $this->assertStringContainsString('Платежные операции', $source);
+        $this->assertStringNotContainsString('Admin finance', $source);
+        $this->assertStringNotContainsString('Provider', $source);
+    }
+
     public function test_admin_sees_payment_settings(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);

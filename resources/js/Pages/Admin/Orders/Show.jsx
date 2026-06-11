@@ -50,7 +50,7 @@ export default function Show({
                             #{order.id} {order.title}
                         </h1>
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-                            Read-only карточка заказа для диагностики. Здесь нет действий для смены статусов,
+                            Карточка заказа только для чтения. Здесь нет действий для смены статусов,
                             возвратов, разблокировки средств или изменения финансовой логики.
                         </p>
                     </div>
@@ -62,7 +62,7 @@ export default function Show({
                             Все события
                         </Link>
                         <Link href={links.ledger} className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                            Ledger
+                            Финансовый журнал
                         </Link>
                     </div>
                 </div>
@@ -109,7 +109,7 @@ export default function Show({
                             <Source source={order.source} />
                         </Panel>
 
-                        <Panel title="Workspace">
+                        <Panel title="Рабочая область">
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Metric title="Сообщения" value={workspace.messages_count ?? 0} compact />
                                 <Metric title="Файлы" value={workspace.files_count ?? 0} compact />
@@ -157,17 +157,17 @@ export default function Show({
                             </div>
                         </Panel>
 
-                        <Panel title="Финансы и ledger">
+                        <Panel title="Финансы и журнал">
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Metric title="Операции" value={finance.operations_count ?? 0} compact />
-                                <Metric title="Ledger entries" value={finance.ledger_entries_count ?? 0} compact />
+                                <Metric title="Записи журнала" value={finance.ledger_entries_count ?? 0} compact />
                             </div>
                             <div className="mt-6 grid gap-6 lg:grid-cols-2">
                                 <List title="Операции" empty="Операций пока нет.">
                                     {(finance.operations ?? []).map((operation) => (
                                         <li key={operation.id} className="border-t border-slate-100 py-3 first:border-t-0 first:pt-0">
                                             <p className="text-sm font-semibold text-slate-900">{operation.type_label} · {operation.status_label}</p>
-                                            <p className="mt-1 text-xs text-slate-500">{formatMoney(operation.amount)} · {operation.provider} · {operation.created_at}</p>
+                                            <p className="mt-1 text-xs text-slate-500">{formatMoney(operation.amount)} · {providerLabel(operation.provider)} · {operation.created_at}</p>
                                         </li>
                                     ))}
                                 </List>
@@ -189,10 +189,10 @@ export default function Show({
                                 {order.customer?.admin_url && <QuickLink href={order.customer.admin_url}>Заказчик в админке</QuickLink>}
                                 {order.performer?.admin_url && <QuickLink href={order.performer.admin_url}>Исполнитель в админке</QuickLink>}
                                 {sourcePublicUrl(order.source) && <QuickLink href={sourcePublicUrl(order.source)}>Публичный источник</QuickLink>}
-                                <QuickLink href={links.finance}>Admin finance</QuickLink>
+                                <QuickLink href={links.finance}>Финансовая сводка</QuickLink>
                                 <QuickLink href={links.events}>События заказа</QuickLink>
-                                <QuickLink href={links.ledger}>Ledger заказа</QuickLink>
-                                <QuickLink href={links.beta_feedback}>Beta feedback</QuickLink>
+                                <QuickLink href={links.ledger}>Финансовый журнал заказа</QuickLink>
+                                <QuickLink href={links.beta_feedback}>Beta-обращения</QuickLink>
                             </nav>
                         </Panel>
 
@@ -243,7 +243,7 @@ function Source({ source }) {
         return (
             <div className="grid gap-4 sm:grid-cols-2">
                 <Info label="Тип" value={source.label} />
-                <Info label="Service ID" value={source.service.id} />
+                <Info label="ID услуги" value={source.service.id} />
                 <Info label="Название" value={source.service.title} />
                 <Info label="Категория" value={source.service.category ?? '—'} />
                 {source.service.public_url && <LinkLine href={source.service.public_url}>Открыть услугу</LinkLine>}
@@ -254,10 +254,10 @@ function Source({ source }) {
     return (
         <div className="grid gap-4 sm:grid-cols-2">
             <Info label="Тип" value={source.label} />
-            <Info label="Task ID" value={source.task?.id ?? '—'} />
+            <Info label="ID задания" value={source.task?.id ?? '—'} />
             <Info label="Задание" value={source.task?.title ?? '—'} />
             <Info label="Статус задания" value={source.task?.status ?? '—'} />
-            <Info label="Offer ID" value={source.task_offer?.id ?? '—'} />
+            <Info label="ID отклика" value={source.task_offer?.id ?? '—'} />
             <Info label="Цена отклика" value={source.task_offer ? formatMoney(source.task_offer.price) : '—'} />
             {source.task?.public_url && <LinkLine href={source.task.public_url}>Открыть задание</LinkLine>}
         </div>
@@ -387,4 +387,8 @@ function formatBytes(bytes) {
     }
 
     return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
+}
+
+function providerLabel(provider) {
+    return provider === 'stub' ? 'Заглушка' : provider;
 }
