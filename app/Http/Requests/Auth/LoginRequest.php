@@ -20,11 +20,23 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Введите почту.',
+            'email.email' => 'Введите корректную почту.',
+            'password.required' => 'Введите пароль.',
+        ];
+    }
+
     public function authenticate(): void
     {
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             throw ValidationException::withMessages([
-                'email' => 'Неверный email или пароль.',
+                'auth' => 'Неверная почта или пароль.',
             ]);
         }
 

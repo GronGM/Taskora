@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import PasswordInput from '../../Components/Auth/PasswordInput';
 import PublicLayout from '../../Layouts/PublicLayout';
 
 const roleOptions = [
@@ -107,31 +108,26 @@ export default function Register() {
 
                         <div className="mt-5 grid gap-4 sm:grid-cols-2">
                             <div>
-                                <label className="text-sm font-semibold text-slate-900" htmlFor="password">
-                                    Пароль
-                                </label>
-                                <input
+                                <PasswordInput
                                     id="password"
-                                    type="password"
+                                    name="password"
+                                    label="Пароль"
                                     value={data.password}
                                     onChange={(event) => setData('password', event.target.value)}
-                                    className="mt-2 w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                     autoComplete="new-password"
+                                    error={errors.password}
                                     required
                                 />
-                                {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
                             </div>
                             <div>
-                                <label className="text-sm font-semibold text-slate-900" htmlFor="password_confirmation">
-                                    Повтор пароля
-                                </label>
-                                <input
+                                <PasswordInput
                                     id="password_confirmation"
-                                    type="password"
+                                    name="password_confirmation"
+                                    label="Повтор пароля"
                                     value={data.password_confirmation}
                                     onChange={(event) => setData('password_confirmation', event.target.value)}
-                                    className="mt-2 w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                     autoComplete="new-password"
+                                    error={errors.password_confirmation}
                                     required
                                 />
                             </div>

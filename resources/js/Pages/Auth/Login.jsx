@@ -1,8 +1,9 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import PasswordInput from '../../Components/Auth/PasswordInput';
 import PublicLayout from '../../Layouts/PublicLayout';
 
 export default function Login() {
-    const { data, setData, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
         remember: false,
@@ -10,18 +11,10 @@ export default function Login() {
 
     const submit = (event) => {
         event.preventDefault();
-
-        const form = event.currentTarget;
-        const email = form.elements.namedItem('email');
-        const password = form.elements.namedItem('password');
-        const remember = form.elements.namedItem('remember');
-
-        router.post('/login', {
-            email: email?.value ?? '',
-            password: password?.value ?? '',
-            remember: remember?.checked ?? false,
-        });
+        post('/login', { preserveScroll: true });
     };
+
+    const authError = errors.auth;
 
     return (
         <PublicLayout>
@@ -40,6 +33,15 @@ export default function Login() {
                     </div>
 
                     <form onSubmit={submit} className="rounded-lg border border-slate-200 bg-slate-50 p-6 shadow-sm">
+                        {authError && (
+                            <div
+                                role="alert"
+                                className="mb-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                            >
+                                {authError}
+                            </div>
+                        )}
+
                         <div>
                             <label className="text-sm font-semibold text-slate-900" htmlFor="email">
                                 Email
@@ -59,21 +61,16 @@ export default function Login() {
                         </div>
 
                         <div className="mt-5">
-                            <label className="text-sm font-semibold text-slate-900" htmlFor="password">
-                                Пароль
-                            </label>
-                            <input
+                            <PasswordInput
                                 id="password"
                                 name="password"
-                                type="password"
+                                label="Пароль"
                                 value={data.password}
                                 onChange={(event) => setData('password', event.target.value)}
-                                onInput={(event) => setData('password', event.currentTarget.value)}
-                                className="mt-2 w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 autoComplete="current-password"
+                                error={errors.password}
                                 required
                             />
-                            {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
                         </div>
 
                         <label className="mt-5 flex items-center gap-3 text-sm text-slate-600">
@@ -93,7 +90,7 @@ export default function Login() {
                             disabled={processing}
                             className="mt-6 w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            Войти
+                            {processing ? 'Входим...' : 'Войти'}
                         </button>
 
                         <p className="mt-5 text-center text-sm text-slate-600">
