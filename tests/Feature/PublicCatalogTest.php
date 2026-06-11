@@ -134,4 +134,36 @@ class PublicCatalogTest extends TestCase
             collect($response->inertiaProps('services'))->pluck('title')->contains('Оформлю документ Word по требованиям'),
         );
     }
+
+    public function test_home_page_uses_polished_hero_copy_and_ctas(): void
+    {
+        $source = file_get_contents(resource_path('js/Pages/Home.jsx'));
+
+        $this->assertStringContainsString('Найдите исполнителя для задачи — быстро, понятно и безопасно', $source);
+        $this->assertStringContainsString('Разместите задание или выберите готовую услугу.', $source);
+        $this->assertStringContainsString('Разместить задание', $source);
+        $this->assertStringContainsString('Найти услугу', $source);
+        $this->assertStringContainsString('Стать исполнителем', $source);
+        $this->assertStringContainsString("import { MessagesSquare, Search, ShieldCheck, Star } from 'lucide-react';", $source);
+        $this->assertStringNotContainsString('Премиальная основа для сервиса', $source);
+    }
+
+    public function test_category_links_have_dark_hover_and_focus_readability_classes(): void
+    {
+        $catalogIndex = file_get_contents(resource_path('js/Pages/Catalog/Index.jsx'));
+        $categoryPage = file_get_contents(resource_path('js/Pages/Catalog/Category.jsx'));
+        $tasksIndex = file_get_contents(resource_path('js/Pages/Tasks/Index.jsx'));
+        $serviceCard = file_get_contents(resource_path('js/Components/ServiceCard.jsx'));
+
+        foreach ([$catalogIndex, $categoryPage, $tasksIndex, $serviceCard] as $source) {
+            $this->assertStringContainsString('dark:hover:bg-', $source);
+            $this->assertStringContainsString('dark:hover:text-', $source);
+            $this->assertStringContainsString('focus-visible:ring', $source);
+        }
+
+        $this->assertStringContainsString('dark:hover:bg-slate-800', $catalogIndex);
+        $this->assertStringContainsString('dark:hover:bg-slate-800', $categoryPage);
+        $this->assertStringContainsString('dark:hover:bg-slate-800', $tasksIndex);
+        $this->assertStringContainsString('dark:hover:bg-blue-900', $serviceCard);
+    }
 }

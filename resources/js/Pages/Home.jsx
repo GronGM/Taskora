@@ -1,19 +1,28 @@
 import { Head, Link } from '@inertiajs/react';
+import { MessagesSquare, Search, ShieldCheck, Star } from 'lucide-react';
 import PublicLayout from '../Layouts/PublicLayout';
 import ServiceCard from '../Components/ServiceCard';
 
 const advantages = [
     {
-        title: 'Две модели работы',
-        text: 'Покупайте готовые услуги или публикуйте индивидуальные задания с откликами исполнителей.',
+        title: 'Работа внутри заказа',
+        text: 'Чат, файлы, статусы и история действий хранятся в одном месте.',
+        Icon: MessagesSquare,
     },
     {
-        title: 'Сделка внутри платформы',
-        text: 'Чат, файлы, статусы, споры и платежная заглушка собраны в единой рабочей области заказа.',
+        title: 'Понятная безопасная сделка',
+        text: 'Оплата в тестовом режиме удерживается до проверки результата. Реальный платежный шлюз будет подключен отдельно.',
+        Icon: ShieldCheck,
     },
     {
-        title: 'Защита контактов',
-        text: 'MVP сразу предусматривает модерацию сообщений, описаний и файлов от попыток увести сделку.',
+        title: 'Исполнители с профилем',
+        text: 'Отзывы, рейтинг, портфолио и верификация помогают быстрее выбрать подходящего специалиста.',
+        Icon: Search,
+    },
+    {
+        title: 'Споры и модерация',
+        text: 'Если что-то пошло не так, спор можно передать на рассмотрение модератору.',
+        Icon: Star,
     },
 ];
 
@@ -28,56 +37,62 @@ export default function Home({ categories = [], services = [] }) {
         <PublicLayout>
             <Head title="Главная" />
 
-            <section className="border-b border-slate-200 bg-white">
+            <section className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
                 <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-20">
                     <div className="flex flex-col justify-center">
-                        <div className="mb-6 inline-flex w-fit items-center rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+                        <div className="mb-6 inline-flex w-fit items-center rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
                             Маркетплейс задач и услуг
                         </div>
-                        <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-normal text-slate-950 sm:text-5xl lg:text-6xl">
-                            Таскора помогает находить исполнителей без лишнего шума
+                        <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
+                            Найдите исполнителя для задачи — быстро, понятно и безопасно
                         </h1>
-                        <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-                            Премиальная основа для сервиса, где заказчики размещают задачи и покупают услуги, а исполнители работают через прозрачную систему заказов.
+                        <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+                            Разместите задание или выберите готовую услугу. Таскора помогает договориться, вести заказ, обмениваться файлами и решать спорные ситуации внутри одной платформы.
                         </p>
-                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                             <Link
-                                href="/catalog"
-                                className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-                            >
-                                Смотреть каталог
-                            </Link>
-                            <Link
-                                href="/tasks"
-                                className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-100"
+                                href="/customer/tasks/create"
+                                className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950"
                             >
                                 Разместить задание
+                            </Link>
+                            <Link
+                                href="/catalog"
+                                className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950"
+                            >
+                                Найти услугу
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="inline-flex justify-center rounded-md px-5 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-blue-200 dark:hover:bg-blue-950 dark:hover:text-blue-100 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950"
+                            >
+                                Стать исполнителем
                             </Link>
                         </div>
                     </div>
 
-                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-sm">
-                        <div className="rounded-md bg-white p-5 shadow-sm">
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div className="rounded-md bg-white p-5 shadow-sm dark:bg-slate-950">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Заказ в работе</p>
-                                    <h2 className="mt-2 text-2xl font-semibold text-slate-950">Лендинг для онлайн-школы</h2>
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Заказ в работе</p>
+                                    <h2 className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">Лендинг для онлайн-школы</h2>
                                 </div>
-                                <span className="rounded-md bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                                <span className="rounded-md bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200">
                                     В срок
                                 </span>
                             </div>
                             <div className="mt-6 grid grid-cols-3 gap-3">
                                 {['Бриф', 'Дизайн', 'Верстка'].map((item, index) => (
-                                    <div key={item} className="rounded-md border border-slate-200 p-3">
-                                        <p className="text-xs font-medium text-slate-500">Этап {index + 1}</p>
-                                        <p className="mt-1 text-sm font-semibold text-slate-900">{item}</p>
+                                    <div key={item} className="rounded-md border border-slate-200 p-3 dark:border-slate-800">
+                                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Этап {index + 1}</p>
+                                        <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">{item}</p>
                                     </div>
                                 ))}
                             </div>
-                            <div className="mt-6 rounded-md border border-blue-100 bg-blue-50 p-4">
-                                <p className="text-sm font-medium text-blue-900">Рабочая область</p>
-                                <p className="mt-1 text-sm leading-6 text-blue-800">
+                            <div className="mt-6 rounded-md border border-blue-100 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/70">
+                                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Рабочая область</p>
+                                <p className="mt-1 text-sm leading-6 text-blue-800 dark:text-blue-200">
                                     Статусы, чат, файлы и решения по заказу остаются внутри платформы.
                                 </p>
                             </div>
@@ -89,34 +104,41 @@ export default function Home({ categories = [], services = [] }) {
             <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
                 <div className="mb-8 max-w-2xl">
                     <p className="text-sm font-semibold uppercase text-blue-700">Преимущества</p>
-                    <h2 className="mt-2 text-3xl font-semibold text-slate-950">Что делает Таскору удобной для рынка услуг</h2>
+                    <h2 className="mt-2 text-3xl font-semibold text-slate-950 dark:text-white">Что делает Таскору удобной для рынка услуг</h2>
                 </div>
-                <div className="grid gap-4 md:grid-cols-3">
-                    {advantages.map((item) => (
-                        <article key={item.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                            <h3 className="text-lg font-semibold text-slate-950">{item.title}</h3>
-                            <p className="mt-3 text-sm leading-6 text-slate-600">{item.text}</p>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    {advantages.map(({ Icon, ...item }) => (
+                        <article key={item.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <span className="grid h-11 w-11 place-items-center rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-200">
+                                <Icon aria-hidden="true" className="h-5 w-5" strokeWidth={2} />
+                            </span>
+                            <h3 className="mt-5 text-lg font-semibold text-slate-950 dark:text-white">{item.title}</h3>
+                            <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.text}</p>
                         </article>
                     ))}
                 </div>
             </section>
 
-            <section className="border-y border-slate-200 bg-white">
+            <section className="border-y border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
                 <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
                     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                         <div>
                             <p className="text-sm font-semibold uppercase text-blue-700">Категории</p>
-                            <h2 className="mt-2 text-3xl font-semibold text-slate-950">Стартовые направления MVP</h2>
+                            <h2 className="mt-2 text-3xl font-semibold text-slate-950 dark:text-white">Стартовые направления MVP</h2>
                         </div>
-                        <Link href="/catalog" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
+                        <Link href="/catalog" className="text-sm font-semibold text-blue-700 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-blue-300 dark:hover:text-blue-200 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950">
                             Перейти в каталог
                         </Link>
                     </div>
                     <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {categories.map((category) => (
-                            <Link key={category.slug} href={category.url} className="rounded-lg border border-slate-200 bg-slate-50 p-5 hover:border-blue-200 hover:bg-blue-50">
-                                <p className="text-base font-semibold text-slate-950">{category.name}</p>
-                                <p className="mt-2 text-sm leading-6 text-slate-600">{category.description}</p>
+                            <Link
+                                key={category.slug}
+                                href={category.url}
+                                className="rounded-lg border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:hover:border-blue-700 dark:hover:bg-slate-800 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950"
+                            >
+                                <p className="text-base font-semibold text-slate-950 dark:text-slate-100 dark:hover:text-white">{category.name}</p>
+                                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{category.description}</p>
                             </Link>
                         ))}
                     </div>
@@ -127,7 +149,7 @@ export default function Home({ categories = [], services = [] }) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Популярные услуги</p>
-                        <h2 className="mt-2 text-3xl font-semibold text-slate-950">Примеры опубликованных услуг</h2>
+                        <h2 className="mt-2 text-3xl font-semibold text-slate-950 dark:text-white">Примеры опубликованных услуг</h2>
                     </div>
                     <Link href="/catalog" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
                         Смотреть все услуги
@@ -143,18 +165,18 @@ export default function Home({ categories = [], services = [] }) {
             <section className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
                 <div>
                     <p className="text-sm font-semibold uppercase text-blue-700">Как работает сервис</p>
-                    <h2 className="mt-2 text-3xl font-semibold text-slate-950">Простой процесс без внешних договоренностей</h2>
-                    <p className="mt-4 text-sm leading-6 text-slate-600">
+                    <h2 className="mt-2 text-3xl font-semibold text-slate-950 dark:text-white">Простой процесс без внешних договоренностей</h2>
+                    <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
                         MVP строится вокруг понятного заказа: условия фиксируются в системе, общение идет в чате, а ключевые действия сохраняются в истории.
                     </p>
                 </div>
                 <div className="space-y-3">
                     {steps.map((step, index) => (
-                        <div key={step} className="flex gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-950 text-sm font-semibold text-white">
+                        <div key={step} className="flex gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-950 text-sm font-semibold text-white dark:bg-blue-600">
                                 {index + 1}
                             </span>
-                            <p className="self-center text-base font-medium text-slate-900">{step}</p>
+                            <p className="self-center text-base font-medium text-slate-900 dark:text-slate-100">{step}</p>
                         </div>
                     ))}
                 </div>

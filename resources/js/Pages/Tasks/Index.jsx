@@ -9,7 +9,8 @@ const sortLabels = {
     budget_low: 'Бюджет ниже',
     offers_low: 'Меньше откликов',
 };
-const inputClass = 'w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
+const focusClass = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950';
+const inputClass = 'w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-blue-400 dark:focus:ring-blue-950';
 
 export default function TasksIndex({
     categories,
@@ -30,7 +31,7 @@ export default function TasksIndex({
         <PublicLayout>
             <Head title="Биржа заданий" />
 
-            <section className="border-b border-slate-200 bg-white">
+            <section className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
                 <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                     <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
                         <div>
@@ -78,9 +79,9 @@ export default function TasksIndex({
                                         href={tasksUrl({ type: type.slug, category: '', favorite_types: '' })}
                                         className={`rounded-full border px-4 py-2 text-sm font-semibold ${
                                             filters.type === type.slug
-                                                ? 'border-blue-200 bg-blue-50 text-blue-700'
-                                                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                                        }`}
+                                                ? 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-200'
+                                                : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-slate-50 hover:text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:bg-slate-800 dark:hover:text-white'
+                                        } ${focusClass}`}
                                     >
                                         {type.name}
                                     </Link>
@@ -96,7 +97,7 @@ export default function TasksIndex({
                     <button
                         type="button"
                         onClick={() => setFiltersOpen((value) => !value)}
-                        className="mb-4 w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 lg:hidden"
+                        className={`mb-4 w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 lg:hidden ${focusClass}`}
                     >
                         {filtersOpen ? 'Скрыть фильтры' : 'Фильтры'}
                     </button>
@@ -105,29 +106,29 @@ export default function TasksIndex({
                         <FilterForm filters={filters} taskTypes={taskTypes} viewer={viewer} />
 
                         {favoriteHintVisible && (
-                            <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
+                            <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-900 dark:border-blue-800 dark:bg-blue-950/70 dark:text-blue-100">
                                 Добавляйте категории и виды заданий в избранное, чтобы быстрее находить подходящие заказы.
                             </div>
                         )}
 
                         {viewer.is_performer && (
-                            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
-                                        <h2 className="text-lg font-semibold text-slate-950">Мои избранные направления</h2>
-                                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                                        <h2 className="text-lg font-semibold text-slate-950 dark:text-white">Мои избранные направления</h2>
+                                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
                                             Категории: {favoritesSummary.category_count}. Виды заданий: {favoritesSummary.task_type_count}.
                                         </p>
                                     </div>
-                                    <Link href="/performer/favorites" className="shrink-0 text-sm font-semibold text-blue-700 hover:text-blue-800">
+                                    <Link href="/performer/favorites" className={`shrink-0 text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 ${focusClass}`}>
                                         Открыть
                                     </Link>
                                 </div>
                                 <div className="mt-4 grid gap-2">
-                                    <Link href={tasksUrl({ favorite_categories: '1', category: '' })} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                                    <Link href={tasksUrl({ favorite_categories: '1', category: '' })} className={`rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-blue-200 hover:bg-slate-100 hover:text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:bg-slate-800 dark:hover:text-white ${focusClass}`}>
                                         Задания из моих категорий
                                     </Link>
-                                    <Link href={tasksUrl({ favorite_types: '1', type: '' })} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                                    <Link href={tasksUrl({ favorite_types: '1', type: '' })} className={`rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-blue-200 hover:bg-slate-100 hover:text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:bg-slate-800 dark:hover:text-white ${focusClass}`}>
                                         Задания моих видов
                                     </Link>
                                 </div>
@@ -177,8 +178,8 @@ export default function TasksIndex({
 
 function FilterForm({ filters, taskTypes, viewer }) {
     return (
-        <form action="/tasks" method="get" className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-950">Фильтры</h2>
+        <form action="/tasks" method="get" className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="text-lg font-semibold text-slate-950 dark:text-white">Фильтры</h2>
             <div className="mt-5 space-y-4">
                 <input type="hidden" name="q" value={filters.q ?? ''} />
                 <input type="hidden" name="category" value={filters.category ?? ''} />
@@ -217,22 +218,22 @@ function FilterForm({ filters, taskTypes, viewer }) {
                     </select>
                 </Field>
 
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                     <input type="checkbox" name="without_offers" value="1" defaultChecked={filters.without_offers} className="h-4 w-4 rounded border-slate-300 text-blue-600" />
                     Только без откликов
                 </label>
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                     <input type="checkbox" name="urgent" value="1" defaultChecked={filters.urgent} className="h-4 w-4 rounded border-slate-300 text-blue-600" />
                     Только срочные
                 </label>
 
                 {viewer.is_performer && (
                     <>
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                             <input type="checkbox" name="favorite_categories" value="1" defaultChecked={filters.favorite_categories} className="h-4 w-4 rounded border-slate-300 text-blue-600" />
                             Мои категории
                         </label>
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                             <input type="checkbox" name="favorite_types" value="1" defaultChecked={filters.favorite_types} className="h-4 w-4 rounded border-slate-300 text-blue-600" />
                             Мои виды заданий
                         </label>
@@ -244,7 +245,7 @@ function FilterForm({ filters, taskTypes, viewer }) {
                 <button type="submit" className="rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700">
                     Применить фильтры
                 </button>
-                <Link href="/tasks" className="rounded-md border border-slate-300 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-800 hover:bg-slate-50">
+                <Link href="/tasks" className={`rounded-md border border-slate-300 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 ${focusClass}`}>
                     Сбросить фильтры
                 </Link>
             </div>
@@ -257,11 +258,11 @@ function DirectionPanel({ title, items, activeSlug, type, viewer }) {
     const visibleItems = expanded ? items : items.slice(0, 7);
 
     return (
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+                <h2 className="text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
                 {items.length > 7 && (
-                    <button type="button" onClick={() => setExpanded((value) => !value)} className="text-sm font-semibold text-blue-700 hover:text-blue-800">
+                    <button type="button" onClick={() => setExpanded((value) => !value)} className={`text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 ${focusClass}`}>
                         {expanded ? 'Свернуть' : 'Показать все'}
                     </button>
                 )}
@@ -272,16 +273,16 @@ function DirectionPanel({ title, items, activeSlug, type, viewer }) {
                         key={`${type}-${item.id}`}
                         className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 ${
                             activeSlug === item.slug || item.is_favorited
-                                ? 'border-blue-100 bg-blue-50'
-                                : 'border-slate-100 bg-slate-50'
+                                ? 'border-blue-100 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/70'
+                                : 'border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-950'
                         }`}
                     >
                         <Link
                             href={type === 'category' ? tasksUrl({ category: item.slug, favorite_categories: '' }) : tasksUrl({ type: item.slug, favorite_types: '' })}
-                            className="min-w-0 flex-1"
+                            className={`min-w-0 flex-1 rounded-md hover:text-blue-700 dark:hover:text-white ${focusClass}`}
                         >
-                            <span className="block truncate text-sm font-semibold text-slate-900">{item.name}</span>
-                            <span className="text-xs text-slate-500">{item.task_count} заданий</span>
+                            <span className="block truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{item.name}</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">{item.task_count} заданий</span>
                         </Link>
                         {viewer.is_performer && (
                             <FavoriteDirectionButton item={item} />
@@ -301,8 +302,10 @@ function FavoriteDirectionButton({ item }) {
             as="button"
             preserveScroll
             className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${
-                item.is_favorited ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-700 ring-1 ring-blue-200 hover:bg-blue-50'
-            }`}
+                item.is_favorited
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400'
+                    : 'bg-white text-blue-700 ring-1 ring-blue-200 hover:bg-blue-50 dark:bg-slate-900 dark:text-blue-200 dark:ring-blue-800 dark:hover:bg-slate-800'
+            } ${focusClass}`}
         >
             {item.is_favorited ? 'В избранном' : 'В избранное'}
         </Link>
@@ -417,7 +420,7 @@ function Badge({ tone, children }) {
 function Field({ label, children }) {
     return (
         <label className="block">
-            <span className="text-sm font-semibold text-slate-900">{label}</span>
+            <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{label}</span>
             <span className="mt-2 block">{children}</span>
         </label>
     );

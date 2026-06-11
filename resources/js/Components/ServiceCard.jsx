@@ -25,7 +25,7 @@ export default function ServiceCard({ service }) {
             <div className="flex items-start justify-between gap-4">
                 <Link
                     href={service.category.url}
-                    className="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                    className="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-blue-950 dark:text-blue-200 dark:hover:bg-blue-900 dark:hover:text-white dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950"
                 >
                     {service.category.name}
                 </Link>
