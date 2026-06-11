@@ -678,6 +678,7 @@ class AdminOrderController extends Controller
         $labels = $this->eventLabels();
 
         return $order->orderEvents()
+            ->reorder()
             ->select('type')
             ->distinct()
             ->pluck('type')

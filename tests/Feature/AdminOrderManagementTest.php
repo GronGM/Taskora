@@ -15,6 +15,7 @@ use App\Models\Task;
 use App\Models\TaskOffer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -486,6 +487,29 @@ class AdminOrderManagementTest extends TestCase
 
         $this->assertTrue($ids->contains($matched->id));
         $this->assertFalse($ids->contains($missed->id));
+    }
+
+    public function test_order_event_type_options_do_not_keep_relation_ordering(): void
+    {
+        $order = $this->order();
+        OrderEvent::factory()->for($order)->create(['type' => OrderEvent::TYPE_FILE_UPLOADED]);
+        OrderEvent::factory()->for($order)->create(['type' => OrderEvent::TYPE_MESSAGE_SENT]);
+
+        $queries = [];
+        DB::listen(function ($query) use (&$queries): void {
+            if (str_contains($query->sql, 'select distinct') && str_contains($query->sql, 'order_events')) {
+                $queries[] = $query->sql;
+            }
+        });
+
+        $this->actingAs($this->user(User::ROLE_ADMIN))
+            ->get(route('admin.orders.events', $order))
+            ->assertOk();
+
+        $this->assertNotEmpty($queries);
+        $this->assertTrue(collect($queries)->every(
+            fn (string $sql): bool => ! str_contains(strtolower($sql), 'order by')
+        ));
     }
 
     public function test_admin_can_sort_order_events_oldest_first(): void
