@@ -51,6 +51,22 @@ class ThemePreferenceTest extends TestCase
         $this->assertStringNotContainsString('overflow-x-auto', $publicLayout);
     }
 
+    public function test_dashboard_layout_separates_actions_from_role_navigation(): void
+    {
+        $dashboardLayout = file_get_contents(resource_path('js/Layouts/DashboardLayout.jsx'));
+
+        $this->assertStringContainsString('data-testid="dashboard-top-bar"', $dashboardLayout);
+        $this->assertStringContainsString('data-testid="dashboard-actions"', $dashboardLayout);
+        $this->assertStringContainsString('data-testid="dashboard-role-nav"', $dashboardLayout);
+        $this->assertStringContainsString("aria-label=\"Разделы кабинета\"", $dashboardLayout);
+        $this->assertStringContainsString('roleNavigation.map', $dashboardLayout);
+        $this->assertStringContainsString('performerLinks', $dashboardLayout);
+        $this->assertStringContainsString("href: '/performer/profile'", $dashboardLayout);
+        $this->assertStringContainsString("href: '/performer/finance'", $dashboardLayout);
+        $this->assertStringContainsString('hidden flex-wrap items-center gap-2 border-t', $dashboardLayout);
+        $this->assertStringNotContainsString('overflow-x-auto', $dashboardLayout);
+    }
+
     public function test_theme_toggle_is_accessible_switch_without_dropdown(): void
     {
         $toggleSource = file_get_contents(resource_path('js/Components/Theme/ThemeToggle.jsx'));
