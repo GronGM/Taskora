@@ -57,10 +57,11 @@ function getRoleNavigation(user, canReview) {
 }
 
 export default function DashboardLayout({ children }) {
-    const { auth, notifications = {} } = usePage().props;
+    const { auth, notifications = {}, messages = {} } = usePage().props;
     const user = auth?.user;
     const canReview = user?.role === 'moderator' || user?.role === 'admin';
     const unreadCount = notifications?.unread_count ?? 0;
+    const unreadMessagesCount = messages?.unread_count ?? 0;
     const roleNavigation = getRoleNavigation(user, canReview);
 
     return (
@@ -100,6 +101,19 @@ export default function DashboardLayout({ children }) {
                                 className={dashboardLinkClass}
                             >
                                 Кабинет
+                            </Link>
+                            <Link
+                                href="/messages"
+                                className={`relative ${dashboardLinkClass}`}
+                                aria-label={unreadMessagesCount > 0 ? `Сообщения: ${unreadMessagesCount} непрочитанных` : 'Сообщения'}
+                            >
+                                <span className="hidden sm:inline">Сообщения</span>
+                                <span className="sm:hidden">Сообщ.</span>
+                                {unreadMessagesCount > 0 && (
+                                    <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-blue-600 px-1.5 py-0.5 text-center text-xs font-semibold text-white">
+                                        {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                                    </span>
+                                )}
                             </Link>
                             <Link
                                 href="/notifications"

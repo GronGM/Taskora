@@ -21,6 +21,7 @@ use App\Http\Controllers\Customer\CustomerTaskOfferAcceptController;
 use App\Http\Controllers\Customer\CustomerTaskOfferController;
 use App\Http\Controllers\Dashboard\DashboardRedirectController;
 use App\Http\Controllers\Dashboard\RoleDashboardController;
+use App\Http\Controllers\Messages\MessageController;
 use App\Http\Controllers\Moderator\ModerationFlagController;
 use App\Http\Controllers\Moderator\ModeratorDisputeController;
 use App\Http\Controllers\Moderator\ModeratorPerformerProfileController;
@@ -112,6 +113,21 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])
         ->middleware('throttle:taskora-notifications')
         ->name('notifications.read-all');
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/orders/{order}', [MessageController::class, 'showOrder'])->name('messages.orders.show');
+    Route::post('/messages/orders/{order}', [MessageController::class, 'storeOrder'])
+        ->middleware('throttle:taskora-order-messages')
+        ->name('messages.orders.store');
+    Route::post('/messages/orders/{order}/mark-read', [MessageController::class, 'markOrderRead'])
+        ->middleware('throttle:taskora-order-messages')
+        ->name('messages.orders.mark-read');
+    Route::get('/messages/disputes/{dispute}', [MessageController::class, 'showDispute'])->name('messages.disputes.show');
+    Route::post('/messages/disputes/{dispute}', [MessageController::class, 'storeDispute'])
+        ->middleware('throttle:taskora-order-messages')
+        ->name('messages.disputes.store');
+    Route::post('/messages/disputes/{dispute}/mark-read', [MessageController::class, 'markDisputeRead'])
+        ->middleware('throttle:taskora-order-messages')
+        ->name('messages.disputes.mark-read');
 
     Route::get('/customer/dashboard', [RoleDashboardController::class, 'customer'])
         ->middleware('role:customer')

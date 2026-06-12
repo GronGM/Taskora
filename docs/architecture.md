@@ -94,7 +94,7 @@ Frontend-слой темы расположен в `resources/js/Components/Them
 | `Tasks` | индивидуальные задания заказчиков |
 | `Offers` | отклики исполнителей на задания |
 | `Orders` | заказы, рабочая область, статусы, таймлайн |
-| `Messaging` | чат внутри заказа |
+| `Messaging` | чат заказа, сообщения спора, единый inbox `/messages`, read-state диалогов |
 | `Files` | загрузка, хранение, доступ и проверка файлов |
 | `Reviews` | отзывы после завершения заказа |
 | `Disputes` | споры и решения модерации |
@@ -103,6 +103,29 @@ Frontend-слой темы расположен в `resources/js/Components/Them
 | `Billing` | заглушка платежей, ledger, комиссии, возвраты и будущие webhook-контракты |
 | `Admin` | админка и модераторская панель |
 | `BetaAccess` | закрытый доступ к local/staging через общий пароль без production launch |
+
+## Messaging И Inbox
+
+`Messaging` остается частью модульного монолита и не подключает WebSocket, Broadcasting, Reverb, Pusher или внешние сервисы. MVP-обмен сообщениями работает через обычные HTTP/Inertia-запросы.
+
+Слой состоит из:
+
+- существующих таблиц `order_messages` и `dispute_messages`;
+- `conversation_reads` для отметок прочтения по пользователю, типу диалога и id диалога;
+- `MessageDeliveryService`, который переиспользуется старыми workspace/dispute endpoints и новыми `/messages` routes;
+- `ConversationReadService`, который считает unread и обновляет `last_read_at`;
+- `MessageController`, который отдает единый inbox и страницы диалогов.
+
+Правила доступа:
+
+- прямой чат заказа доступен только заказчику и исполнителю заказа через `OrderPolicy::viewWorkspace` / `sendMessage`;
+- модератор и администратор не получают доступ к прямому чату заказа без спора;
+- диалог спора доступен участникам заказа, модератору и администратору через `DisputePolicy::view` / `message`;
+- отправка сообщений всегда проходит `ContactGuard`, пишет `order_events` и создает внутренние database notifications;
+- opening `/messages/orders/{order}` или `/messages/disputes/{dispute}` отмечает конкретный диалог прочитанным;
+- в Inertia shared props передается только `messages.unread_count`, без списка сообщений.
+
+TODO после beta: решить, нужно ли синхронизировать `conversation_reads.last_read_at` с `notifications.read_at`. В MVP эти состояния независимы, чтобы не менять существующую модель уведомлений.
 
 ## Основные Роли
 

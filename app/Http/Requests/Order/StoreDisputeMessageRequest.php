@@ -24,4 +24,15 @@ class StoreDisputeMessageRequest extends FormRequest
             'body' => ['required', 'string', 'max:4000'],
         ];
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'body.required' => 'Введите текст сообщения.',
+            'body.max' => 'Сообщение не должно быть длиннее 4000 символов.',
+        ];
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Messages\ConversationReadService;
 use App\Services\Notifications\NotificationService;
 use App\Support\BetaAccess;
 use Illuminate\Http\Request;
@@ -58,6 +59,13 @@ class HandleInertiaRequests extends Middleware
                 : [
                     'unread_count' => 0,
                     'latest' => [],
+                ],
+            'messages' => fn (): array => $user
+                ? [
+                    'unread_count' => app(ConversationReadService::class)->unreadCount($user),
+                ]
+                : [
+                    'unread_count' => 0,
                 ],
             'testMode' => [
                 'enabled' => BetaAccess::shouldShowTestModeBanner(),
