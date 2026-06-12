@@ -77,7 +77,7 @@ class PerformerFavoriteController extends Controller
             'name' => $category->name,
             'slug' => $category->slug,
             'task_count' => Task::published()->whereIn('category_id', $categoryIds)->count(),
-            'tasks_url' => route('tasks', ['category' => $category->slug]),
+            'tasks_url' => route('tasks', ['categories' => [$category->slug]]),
             'favorite_url' => route('categories.favorite.destroy', $category),
         ];
     }
@@ -90,7 +90,7 @@ class PerformerFavoriteController extends Controller
             'slug' => $taskType->slug,
             'category' => $taskType->category?->name,
             'task_count' => Task::published()->where('task_type_id', $taskType->id)->count(),
-            'tasks_url' => route('tasks', ['type' => $taskType->slug]),
+            'tasks_url' => route('tasks', ['task_types' => [$taskType->slug]]),
             'favorite_url' => route('task-types.favorite.destroy', $taskType),
         ];
     }

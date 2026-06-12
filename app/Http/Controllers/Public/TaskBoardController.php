@@ -20,18 +20,22 @@ class TaskBoardController extends Controller
     {
         $user = $request->user();
         $filters = $this->filters($request);
-        $activeCategory = $this->activeCategory($filters['category']);
-        $activeTaskType = $this->activeTaskType($filters['type']);
+        $activeCategories = $this->activeCategories($filters['categories']);
+        $activeTaskTypes = $this->activeTaskTypes($filters['task_types']);
+        $selectedCategoryFilterIds = $this->selectedCategoryFilterIds($activeCategories);
+        $selectedTaskTypeIds = $activeTaskTypes->pluck('id')->values();
         $favoriteCategoryIds = $this->favoriteCategoryIds($user);
         $favoriteCategoryFilterIds = $this->favoriteCategoryFilterIds($favoriteCategoryIds);
         $favoriteTaskTypeIds = $this->favoriteTaskTypeIds($user);
         $favoriteTaskIds = $this->favoriteTaskIds($user);
+        $categoryPayloads = $this->categories($user, $favoriteCategoryIds);
+        $taskTypePayloads = $this->taskTypes($user, $favoriteTaskTypeIds);
 
         $tasksQuery = Task::query()
             ->published()
             ->with(['category', 'taskType.category', 'customer'])
-            ->when($activeCategory, fn (Builder $query) => $this->applyCategoryFilter($query, $activeCategory))
-            ->when($activeTaskType, fn (Builder $query) => $query->where('task_type_id', $activeTaskType->id))
+            ->when($selectedCategoryFilterIds->isNotEmpty(), fn (Builder $query) => $query->whereIn('category_id', $selectedCategoryFilterIds))
+            ->when($selectedTaskTypeIds->isNotEmpty(), fn (Builder $query) => $query->whereIn('task_type_id', $selectedTaskTypeIds))
             ->when($filters['q'] !== '', function (Builder $query) use ($filters): void {
                 $search = $filters['q'];
 
@@ -59,10 +63,10 @@ class TaskBoardController extends Controller
             ->when($filters['deadline_before'] !== '', fn (Builder $query) => $query->whereDate('deadline_at', '<=', $filters['deadline_before']))
             ->when($filters['without_offers'], fn (Builder $query) => $query->where('offers_count', 0))
             ->when($filters['urgent'], fn (Builder $query) => $query->whereNotNull('deadline_at')->whereDate('deadline_at', '<=', now()->addDays(3)->toDateString()))
-            ->when($filters['favorite_categories'], fn (Builder $query) => $favoriteCategoryFilterIds->isEmpty()
+            ->when($selectedCategoryFilterIds->isEmpty() && $filters['favorite_categories'], fn (Builder $query) => $favoriteCategoryFilterIds->isEmpty()
                 ? $query->whereRaw('1 = 0')
                 : $query->whereIn('category_id', $favoriteCategoryFilterIds))
-            ->when($filters['favorite_types'], fn (Builder $query) => $favoriteTaskTypeIds->isEmpty()
+            ->when($selectedTaskTypeIds->isEmpty() && $filters['favorite_types'], fn (Builder $query) => $favoriteTaskTypeIds->isEmpty()
                 ? $query->whereRaw('1 = 0')
                 : $query->whereIn('task_type_id', $favoriteTaskTypeIds));
 
@@ -73,16 +77,21 @@ class TaskBoardController extends Controller
             ->map(fn (Task $task): array => $this->taskCard($task, $user, $favoriteTaskIds));
 
         return Inertia::render('Tasks/Index', [
-            'categories' => $this->categories($user, $favoriteCategoryIds),
-            'taskTypes' => $this->taskTypes($user, $favoriteTaskTypeIds),
-            'popularTaskTypes' => $this->taskTypes($user, $favoriteTaskTypeIds)->sortByDesc('task_count')->take(10)->values(),
+            'categories' => $categoryPayloads,
+            'taskTypes' => $taskTypePayloads,
+            'popularTaskTypes' => $taskTypePayloads->sortByDesc('task_count')->take(10)->values(),
             'tasks' => $tasks,
             'filters' => $filters,
-            'activeCategory' => $activeCategory ? $this->categoryPayload($activeCategory, $user, $favoriteCategoryIds) : null,
-            'activeTaskType' => $activeTaskType ? $this->taskTypePayload($activeTaskType, $user, $favoriteTaskTypeIds) : null,
+            'activeCategory' => $activeCategories->first() ? $this->categoryPayload($activeCategories->first(), $user, $favoriteCategoryIds) : null,
+            'activeTaskType' => $activeTaskTypes->first() ? $this->taskTypePayload($activeTaskTypes->first(), $user, $favoriteTaskTypeIds) : null,
+            'activeCategories' => $activeCategories->map(fn (Category $category): array => $this->categoryPayload($category, $user, $favoriteCategoryIds))->values(),
+            'activeTaskTypes' => $activeTaskTypes->map(fn (TaskType $taskType): array => $this->taskTypePayload($taskType, $user, $favoriteTaskTypeIds))->values(),
             'viewer' => [
                 'role' => $user?->role,
                 'is_performer' => $user?->isPerformer() === true,
+                'bulk_task_type_favorite_url' => $user?->isPerformer() === true
+                    ? route('task-types.favorite.bulk')
+                    : null,
             ],
             'favoritesSummary' => [
                 'category_count' => $favoriteCategoryIds->count(),
@@ -126,11 +135,25 @@ class TaskBoardController extends Controller
     private function filters(Request $request): array
     {
         $q = trim($request->string('q', $request->string('search')->toString())->toString());
+        $categories = $this->stringList($request->input('categories', []));
+        $legacyCategory = trim($request->string('category')->toString());
+        $taskTypes = $this->stringList($request->input('task_types', []));
+        $legacyTaskType = trim($request->string('type')->toString());
+
+        if ($legacyCategory !== '' && ! in_array($legacyCategory, $categories, true)) {
+            $categories[] = $legacyCategory;
+        }
+
+        if ($legacyTaskType !== '' && ! in_array($legacyTaskType, $taskTypes, true)) {
+            $taskTypes[] = $legacyTaskType;
+        }
 
         return [
             'q' => $q,
-            'category' => $request->string('category')->toString(),
-            'type' => $request->string('type')->toString(),
+            'category' => $categories[0] ?? '',
+            'type' => $taskTypes[0] ?? '',
+            'categories' => $categories,
+            'task_types' => $taskTypes,
             'budget_min' => $request->filled('budget_min') ? max(0, (int) $request->input('budget_min')) : null,
             'budget_max' => $request->filled('budget_max') ? max(0, (int) $request->input('budget_max')) : null,
             'deadline_before' => $request->string('deadline_before')->toString(),
@@ -144,36 +167,65 @@ class TaskBoardController extends Controller
         ];
     }
 
-    private function activeCategory(string $slug): ?Category
+    private function stringList(mixed $value): array
     {
-        if ($slug === '') {
-            return null;
-        }
+        $items = is_array($value) ? $value : [$value];
 
-        return Category::query()
-            ->where('slug', $slug)
-            ->where('is_active', true)
-            ->first();
+        return collect($items)
+            ->flatten()
+            ->map(fn ($item): string => trim((string) $item))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 
-    private function activeTaskType(string $slug): ?TaskType
+    private function activeCategories(array $slugs)
     {
-        if ($slug === '') {
-            return null;
+        if ($slugs === []) {
+            return collect();
         }
+
+        $order = array_flip($slugs);
+
+        return Category::query()
+            ->whereIn('slug', $slugs)
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn (Category $category): int => $order[$category->slug] ?? PHP_INT_MAX)
+            ->values();
+    }
+
+    private function activeTaskTypes(array $slugs)
+    {
+        if ($slugs === []) {
+            return collect();
+        }
+
+        $order = array_flip($slugs);
 
         return TaskType::query()
             ->active()
             ->whereHas('category', fn (Builder $query) => $query->where('is_active', true))
-            ->where('slug', $slug)
-            ->first();
+            ->whereIn('slug', $slugs)
+            ->get()
+            ->sortBy(fn (TaskType $taskType): int => $order[$taskType->slug] ?? PHP_INT_MAX)
+            ->values();
     }
 
-    private function applyCategoryFilter(Builder $query, Category $category): Builder
+    private function selectedCategoryFilterIds($categories)
     {
-        $categoryIds = [$category->id, ...$category->children()->pluck('id')->all()];
+        if ($categories->isEmpty()) {
+            return collect();
+        }
 
-        return $query->whereIn('category_id', $categoryIds);
+        return $categories
+            ->flatMap(fn (Category $category) => [
+                $category->id,
+                ...$category->children()->pluck('id')->all(),
+            ])
+            ->unique()
+            ->values();
     }
 
     private function applySort(Builder $query, string $sort): void
@@ -225,6 +277,7 @@ class TaskBoardController extends Controller
             'slug' => $category->slug,
             'description' => $category->description,
             'task_count' => Task::published()->whereIn('category_id', $categoryIds)->count(),
+            'tasks_url' => route('tasks', ['categories' => [$category->slug]]),
             'is_favorited' => $favoriteCategoryIds->contains($category->id),
             'can_favorite' => $user?->isPerformer() === true,
             'favorite_store_url' => route('categories.favorite.store', $category),
@@ -245,6 +298,7 @@ class TaskBoardController extends Controller
                 'slug' => $taskType->category?->slug,
             ],
             'task_count' => Task::published()->where('task_type_id', $taskType->id)->count(),
+            'tasks_url' => route('tasks', ['task_types' => [$taskType->slug]]),
             'is_favorited' => $favoriteTaskTypeIds->contains($taskType->id),
             'can_favorite' => $user?->isPerformer() === true,
             'favorite_store_url' => route('task-types.favorite.store', $taskType),

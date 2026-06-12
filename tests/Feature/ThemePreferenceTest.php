@@ -15,7 +15,9 @@ class ThemePreferenceTest extends TestCase
         $source = file_get_contents(resource_path('views/app.blade.php'));
 
         $this->assertStringContainsString('taskora_theme', $source);
-        $this->assertStringContainsString("window.matchMedia?.('(prefers-color-scheme: dark)')", $source);
+        $this->assertStringNotContainsString('matchMedia', $source);
+        $this->assertStringContainsString("let preference = 'light';", $source);
+        $this->assertStringContainsString("['light', 'dark'].includes(stored)", $source);
         $this->assertStringContainsString("root.classList.toggle('dark'", $source);
         $this->assertStringContainsString('root.dataset.themePreference', $source);
         $this->assertStringContainsString('root.dataset.theme', $source);
@@ -60,7 +62,9 @@ class ThemePreferenceTest extends TestCase
         $this->assertStringContainsString('Тема оформления', $toggleSource);
         $this->assertStringContainsString('Светлая', $providerSource);
         $this->assertStringContainsString('Темная', $providerSource);
-        $this->assertStringContainsString('Как в системе', $providerSource);
+        $this->assertStringNotContainsString('Как в системе', $providerSource);
+        $this->assertStringNotContainsString('system:', $providerSource);
+        $this->assertStringNotContainsString('matchMedia', $providerSource);
         $this->assertStringContainsString('resolvedTheme', $providerSource);
         $this->assertStringContainsString('setTheme', $providerSource);
     }

@@ -77,6 +77,25 @@ class TaskBoardV2Test extends TestCase
         $this->assertFalse($titles->contains('Другая категория'));
     }
 
+    public function test_task_board_filters_by_multiple_categories(): void
+    {
+        $first = Category::factory()->create(['slug' => 'first-category']);
+        $second = Category::factory()->create(['slug' => 'second-category']);
+        $third = Category::factory()->create(['slug' => 'third-category']);
+
+        $this->publishedTask(['category_id' => $first->id, 'title' => 'Первая категория']);
+        $this->publishedTask(['category_id' => $second->id, 'title' => 'Вторая категория']);
+        $this->publishedTask(['category_id' => $third->id, 'title' => 'Третья категория']);
+
+        $response = $this->get('/tasks?categories[]=first-category&categories[]=second-category')->assertOk();
+        $titles = $this->taskTitles($response);
+
+        $this->assertSame(['first-category', 'second-category'], $response->inertiaProps('filters.categories'));
+        $this->assertTrue($titles->contains('Первая категория'));
+        $this->assertTrue($titles->contains('Вторая категория'));
+        $this->assertFalse($titles->contains('Третья категория'));
+    }
+
     public function test_task_board_filters_parent_category_with_children(): void
     {
         $parent = Category::factory()->create(['slug' => 'parent-category']);
@@ -101,6 +120,40 @@ class TaskBoardV2Test extends TestCase
 
         $this->assertTrue($titles->contains('Нужный вид'));
         $this->assertFalse($titles->contains('Другой вид'));
+    }
+
+    public function test_task_board_filters_by_multiple_task_types(): void
+    {
+        [$category, $firstType] = $this->categoryWithType(['slug' => 'first-type']);
+        $secondType = TaskType::factory()->for($category)->create(['slug' => 'second-type']);
+        $thirdType = TaskType::factory()->for($category)->create(['slug' => 'third-type']);
+
+        $this->publishedTask(['category_id' => $category->id, 'task_type_id' => $firstType->id, 'title' => 'Первый вид']);
+        $this->publishedTask(['category_id' => $category->id, 'task_type_id' => $secondType->id, 'title' => 'Второй вид']);
+        $this->publishedTask(['category_id' => $category->id, 'task_type_id' => $thirdType->id, 'title' => 'Третий вид']);
+
+        $response = $this->get('/tasks?task_types[]=first-type&task_types[]=second-type')->assertOk();
+        $titles = $this->taskTitles($response);
+
+        $this->assertSame(['first-type', 'second-type'], $response->inertiaProps('filters.task_types'));
+        $this->assertTrue($titles->contains('Первый вид'));
+        $this->assertTrue($titles->contains('Второй вид'));
+        $this->assertFalse($titles->contains('Третий вид'));
+    }
+
+    public function test_legacy_category_and_type_filters_are_mapped_to_multi_select_filters(): void
+    {
+        [$category, $taskType] = $this->categoryWithType([
+            'slug' => 'legacy-type',
+        ]);
+        $category->update(['slug' => 'legacy-category']);
+
+        $response = $this->get('/tasks?category=legacy-category&type=legacy-type')->assertOk();
+
+        $this->assertSame(['legacy-category'], $response->inertiaProps('filters.categories'));
+        $this->assertSame(['legacy-type'], $response->inertiaProps('filters.task_types'));
+        $this->assertSame('legacy-category', $response->inertiaProps('filters.category'));
+        $this->assertSame('legacy-type', $response->inertiaProps('filters.type'));
     }
 
     public function test_task_board_searches_title_and_description(): void
@@ -279,6 +332,41 @@ class TaskBoardV2Test extends TestCase
         ]);
     }
 
+    public function test_performer_can_bulk_add_selected_task_types_to_favorites(): void
+    {
+        $performer = $this->user(User::ROLE_PERFORMER);
+        [, $firstType] = $this->categoryWithType(['slug' => 'bulk-first']);
+        [, $secondType] = $this->categoryWithType(['slug' => 'bulk-second']);
+
+        $this->actingAs($performer)
+            ->post(route('task-types.favorite.bulk'), [
+                'task_type_slugs' => ['bulk-first', 'bulk-second', 'bulk-first'],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success', 'Виды заданий добавлены в избранное.');
+
+        $this->assertDatabaseHas('performer_favorite_task_types', [
+            'user_id' => $performer->id,
+            'task_type_id' => $firstType->id,
+        ]);
+        $this->assertDatabaseHas('performer_favorite_task_types', [
+            'user_id' => $performer->id,
+            'task_type_id' => $secondType->id,
+        ]);
+        $this->assertSame(2, PerformerFavoriteTaskType::count());
+    }
+
+    #[DataProvider('nonPerformerRoles')]
+    public function test_only_performer_can_bulk_favorite_task_types(string $role): void
+    {
+        $user = $this->user($role);
+        [, $taskType] = $this->categoryWithType(['slug' => 'bulk-denied']);
+
+        $this->actingAs($user)
+            ->post(route('task-types.favorite.bulk'), ['task_type_slugs' => [$taskType->slug]])
+            ->assertForbidden();
+    }
+
     public function test_task_type_favorite_is_not_duplicated(): void
     {
         $performer = $this->user(User::ROLE_PERFORMER);
@@ -317,6 +405,22 @@ class TaskBoardV2Test extends TestCase
         $this->assertFalse($titles->contains('Из другой категории'));
     }
 
+    public function test_specific_categories_have_priority_over_favorite_categories_filter(): void
+    {
+        $performer = $this->user(User::ROLE_PERFORMER);
+        $favorite = Category::factory()->create(['slug' => 'favorite-category']);
+        $selected = Category::factory()->create(['slug' => 'selected-category']);
+
+        PerformerFavoriteCategory::create(['user_id' => $performer->id, 'category_id' => $favorite->id]);
+        $this->publishedTask(['category_id' => $favorite->id, 'title' => 'Из избранной категории']);
+        $this->publishedTask(['category_id' => $selected->id, 'title' => 'Из выбранной категории']);
+
+        $titles = $this->taskTitles($this->actingAs($performer)->get('/tasks?favorite_categories=1&categories[]=selected-category')->assertOk());
+
+        $this->assertTrue($titles->contains('Из выбранной категории'));
+        $this->assertFalse($titles->contains('Из избранной категории'));
+    }
+
     public function test_favorite_task_types_filter_uses_performer_favorites(): void
     {
         $performer = $this->user(User::ROLE_PERFORMER);
@@ -331,6 +435,22 @@ class TaskBoardV2Test extends TestCase
 
         $this->assertTrue($titles->contains('Любимый вид'));
         $this->assertFalse($titles->contains('Другой вид'));
+    }
+
+    public function test_specific_task_types_have_priority_over_favorite_task_types_filter(): void
+    {
+        $performer = $this->user(User::ROLE_PERFORMER);
+        [$category, $favoriteType] = $this->categoryWithType(['slug' => 'favorite-type']);
+        $selectedType = TaskType::factory()->for($category)->create(['slug' => 'selected-type']);
+
+        PerformerFavoriteTaskType::create(['user_id' => $performer->id, 'task_type_id' => $favoriteType->id]);
+        $this->publishedTask(['category_id' => $category->id, 'task_type_id' => $favoriteType->id, 'title' => 'Из избранного вида']);
+        $this->publishedTask(['category_id' => $category->id, 'task_type_id' => $selectedType->id, 'title' => 'Из выбранного вида']);
+
+        $titles = $this->taskTitles($this->actingAs($performer)->get('/tasks?favorite_types=1&task_types[]=selected-type')->assertOk());
+
+        $this->assertTrue($titles->contains('Из выбранного вида'));
+        $this->assertFalse($titles->contains('Из избранного вида'));
     }
 
     public function test_performer_sees_favorite_summary_on_task_board(): void
@@ -452,6 +572,8 @@ class TaskBoardV2Test extends TestCase
         $this->assertCount(1, $response->inertiaProps('tasks'));
         $this->assertCount(1, $response->inertiaProps('categories'));
         $this->assertCount(1, $response->inertiaProps('taskTypes'));
+        $this->assertStringContainsString('categories', $response->inertiaProps('categories.0.tasks_url'));
+        $this->assertStringContainsString('task_types', $response->inertiaProps('taskTypes.0.tasks_url'));
     }
 
     public function test_performer_favorites_page_can_filter_closed_tasks(): void
@@ -562,13 +684,19 @@ class TaskBoardV2Test extends TestCase
         $this->assertDatabaseCount('moderation_flags', 0);
     }
 
-    public function test_task_board_component_contains_show_all_and_collapse_controls(): void
+    public function test_task_board_component_contains_compact_filters_and_favorite_controls(): void
     {
         $source = file_get_contents(resource_path('js/Pages/Tasks/Index.jsx'));
 
-        $this->assertStringContainsString('Показать все', $source);
-        $this->assertStringContainsString('Свернуть', $source);
-        $this->assertStringContainsString('Мои избранные направления', $source);
+        $this->assertStringContainsString('Найти категорию', $source);
+        $this->assertStringContainsString('Найти вид задания', $source);
+        $this->assertStringContainsString('Добавить выбранные виды в избранное', $source);
+        $this->assertStringContainsString('Сбросить фильтры', $source);
+        $this->assertStringContainsString('task-filter-categories', $source);
+        $this->assertStringContainsString('task-filter-types', $source);
+        $this->assertStringNotContainsString('DirectionPanel', $source);
+        $this->assertStringNotContainsString('Показать все', $source);
+        $this->assertStringNotContainsString('Свернуть', $source);
     }
 
     public function test_task_seeders_create_30_to_50_published_demo_tasks_with_task_types(): void

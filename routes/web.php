@@ -31,6 +31,7 @@ use App\Http\Controllers\Order\DisputeMessageController;
 use App\Http\Controllers\Order\OrderFileController;
 use App\Http\Controllers\Order\OrderMessageController;
 use App\Http\Controllers\Order\OrderWorkspaceController;
+use App\Http\Controllers\Performer\BulkTaskTypeFavoriteController;
 use App\Http\Controllers\Performer\CategoryFavoriteController;
 use App\Http\Controllers\Performer\PerformerFinanceController;
 use App\Http\Controllers\Performer\PerformerFavoriteController;
@@ -230,6 +231,7 @@ Route::middleware('auth')->group(function (): void {
     Route::delete('/tasks/{task}/favorite', [TaskFavoriteController::class, 'destroy'])->name('tasks.favorite.destroy');
     Route::post('/categories/{category}/favorite', [CategoryFavoriteController::class, 'store'])->name('categories.favorite.store');
     Route::delete('/categories/{category}/favorite', [CategoryFavoriteController::class, 'destroy'])->name('categories.favorite.destroy');
+    Route::post('/task-types/favorite/bulk', BulkTaskTypeFavoriteController::class)->name('task-types.favorite.bulk');
     Route::post('/task-types/{taskType}/favorite', [TaskTypeFavoriteController::class, 'store'])->name('task-types.favorite.store');
     Route::delete('/task-types/{taskType}/favorite', [TaskTypeFavoriteController::class, 'destroy'])->name('task-types.favorite.destroy');
 

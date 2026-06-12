@@ -2,11 +2,13 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
 const severityClasses = {
-    info: 'border-blue-200 bg-blue-50 text-blue-800',
-    success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    warning: 'border-amber-200 bg-amber-50 text-amber-800',
-    danger: 'border-red-200 bg-red-50 text-red-800',
+    info: 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-100',
+    success: 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-100',
+    warning: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100',
+    danger: 'border-red-200 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-100',
 };
+
+const focusClass = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950';
 
 const iconLabels = {
     service: 'US',
@@ -28,9 +30,9 @@ export default function Index({ items = [], unreadCount = 0 }) {
             <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                     <div>
-                        <p className="text-sm font-semibold uppercase text-blue-700">Активность</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Уведомления</h1>
-                        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+                        <p className="text-sm font-semibold uppercase text-blue-700 dark:text-blue-300">Активность</p>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">Уведомления</h1>
+                        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
                             Здесь собраны события по услугам, заданиям, заказам, сообщениям и спорам внутри Таскоры.
                         </p>
                     </div>
@@ -40,7 +42,7 @@ export default function Index({ items = [], unreadCount = 0 }) {
                             href="/notifications/read-all"
                             method="post"
                             as="button"
-                            className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+                            className={`rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 ${focusClass}`}
                         >
                             Отметить все прочитанными
                         </Link>
@@ -54,8 +56,8 @@ export default function Index({ items = [], unreadCount = 0 }) {
                                 key={notification.id}
                                 className={`rounded-lg border p-5 shadow-sm ${
                                     notification.is_read
-                                        ? 'border-slate-200 bg-white'
-                                        : 'border-blue-200 bg-blue-50/60'
+                                        ? 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'
+                                        : 'border-blue-200 bg-blue-50/70 dark:border-blue-700 dark:bg-blue-950/45'
                                 }`}
                             >
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -74,12 +76,12 @@ export default function Index({ items = [], unreadCount = 0 }) {
                                                         Новое
                                                     </span>
                                                 )}
-                                                <span className="text-xs font-semibold uppercase text-slate-500">
+                                                <span className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
                                                     {notification.created_at}
                                                 </span>
                                             </div>
-                                            <h2 className="mt-2 text-lg font-semibold text-slate-950">{notification.title}</h2>
-                                            <p className="mt-2 text-sm leading-6 text-slate-600">{notification.body}</p>
+                                            <h2 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{notification.title}</h2>
+                                            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{notification.body}</p>
                                         </div>
                                     </div>
 
@@ -87,7 +89,7 @@ export default function Index({ items = [], unreadCount = 0 }) {
                                         {notification.url && (
                                             <Link
                                                 href={notification.url}
-                                                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                                                className={`rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800 ${focusClass}`}
                                             >
                                                 Открыть
                                             </Link>
@@ -97,7 +99,7 @@ export default function Index({ items = [], unreadCount = 0 }) {
                                                 href={`/notifications/${notification.id}/read`}
                                                 method="post"
                                                 as="button"
-                                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                                className={`rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 ${focusClass}`}
                                             >
                                                 Отметить прочитанным
                                             </Link>
@@ -108,9 +110,9 @@ export default function Index({ items = [], unreadCount = 0 }) {
                         ))}
                     </div>
                 ) : (
-                    <div className="mt-8 rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
-                        <p className="text-lg font-semibold text-slate-950">Уведомлений пока нет</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <div className="mt-8 rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-900">
+                        <p className="text-lg font-semibold text-slate-950 dark:text-white">Уведомлений пока нет</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
                             Новые события по заказам, заданиям и спорам появятся здесь.
                         </p>
                     </div>

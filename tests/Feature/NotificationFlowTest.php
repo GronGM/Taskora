@@ -34,6 +34,17 @@ class NotificationFlowTest extends TestCase
                 ->where('unreadCount', 0));
     }
 
+    public function test_notifications_page_has_readable_dark_theme_classes(): void
+    {
+        $source = file_get_contents(resource_path('js/Pages/Notifications/Index.jsx'));
+
+        $this->assertStringContainsString('dark:border-slate-800 dark:bg-slate-900', $source);
+        $this->assertStringContainsString('dark:border-blue-700 dark:bg-blue-950/45', $source);
+        $this->assertStringContainsString('dark:text-slate-300', $source);
+        $this->assertStringContainsString('dark:bg-blue-500 dark:hover:bg-blue-400', $source);
+        $this->assertStringContainsString('focus-visible:ring-blue-300', $source);
+    }
+
     public function test_guest_cannot_view_notifications_page(): void
     {
         $this->get(route('notifications.index'))

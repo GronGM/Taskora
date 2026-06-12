@@ -5,7 +5,6 @@ export const THEME_STORAGE_KEY = 'taskora_theme';
 export const themeLabels = {
     light: 'Светлая',
     dark: 'Темная',
-    system: 'Как в системе',
 };
 
 export const themeOptions = Object.entries(themeLabels).map(([value, label]) => ({ value, label }));
@@ -13,64 +12,40 @@ export const themeOptions = Object.entries(themeLabels).map(([value, label]) => 
 const ThemeContext = createContext(null);
 
 function normalizeThemePreference(preference) {
-    return Object.prototype.hasOwnProperty.call(themeLabels, preference) ? preference : 'system';
+    return Object.prototype.hasOwnProperty.call(themeLabels, preference) ? preference : 'light';
 }
 
 function getStoredThemePreference() {
     if (typeof window === 'undefined') {
-        return 'system';
+        return 'light';
     }
 
     try {
         return normalizeThemePreference(window.localStorage.getItem(THEME_STORAGE_KEY));
     } catch {
-        return 'system';
-    }
-}
-
-function getSystemTheme() {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
         return 'light';
     }
-
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-function applyTheme(preference, systemTheme) {
+function applyTheme(preference) {
     if (typeof document === 'undefined') {
         return;
     }
 
-    const resolvedTheme = preference === 'system' ? systemTheme : preference;
     const root = document.documentElement;
 
-    root.classList.toggle('dark', resolvedTheme === 'dark');
+    root.classList.toggle('dark', preference === 'dark');
     root.dataset.themePreference = preference;
-    root.dataset.theme = resolvedTheme;
+    root.dataset.theme = preference;
 }
 
 export function ThemeProvider({ children }) {
     const [preference, setPreference] = useState(getStoredThemePreference);
-    const [systemTheme, setSystemTheme] = useState(getSystemTheme);
-    const resolvedTheme = preference === 'system' ? systemTheme : preference;
+    const resolvedTheme = preference;
 
     useEffect(() => {
-        if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-            return undefined;
-        }
-
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleChange = (event) => setSystemTheme(event.matches ? 'dark' : 'light');
-
-        handleChange(mediaQuery);
-        mediaQuery.addEventListener?.('change', handleChange);
-
-        return () => mediaQuery.removeEventListener?.('change', handleChange);
-    }, []);
-
-    useEffect(() => {
-        applyTheme(preference, systemTheme);
-    }, [preference, systemTheme]);
+        applyTheme(preference);
+    }, [preference]);
 
     useEffect(() => {
         if (typeof window === 'undefined') {

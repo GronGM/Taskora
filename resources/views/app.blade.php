@@ -16,21 +16,18 @@
             (() => {
                 const storageKey = 'taskora_theme';
                 const root = document.documentElement;
-                let preference = 'system';
+                let preference = 'light';
 
                 try {
                     const stored = window.localStorage.getItem(storageKey);
-                    preference = ['light', 'dark', 'system'].includes(stored) ? stored : 'system';
+                    preference = ['light', 'dark'].includes(stored) ? stored : 'light';
                 } catch {
-                    preference = 'system';
+                    preference = 'light';
                 }
 
-                const systemDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
-                const resolvedTheme = preference === 'system' ? (systemDark ? 'dark' : 'light') : preference;
-
-                root.classList.toggle('dark', resolvedTheme === 'dark');
+                root.classList.toggle('dark', preference === 'dark');
                 root.dataset.themePreference = preference;
-                root.dataset.theme = resolvedTheme;
+                root.dataset.theme = preference;
             })();
         </script>
         @viteReactRefresh
