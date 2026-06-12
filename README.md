@@ -889,6 +889,8 @@ Scheduler в production должен запускаться через cron:
 
 Визуальный стиль публичных страниц строится на спокойной светлой/темной палитре, системном font stack с приоритетом Manrope/Inter при наличии локально установленного шрифта и умеренных иконках из `lucide-react`. Внешний CDN для шрифтов не используется; self-hosted font files можно добавить отдельной задачей, если потребуется строгая типографическая консистентность.
 
+Favicon assets лежат в `public`: `favicon.ico`, `favicon-32x32.png`, `favicon-192x192.png` и `apple-touch-icon.png`. Browser favicon используют прозрачный фон и cache-busting в Blade layout; `apple-touch-icon.png` остается отдельным непрозрачным вариантом для iOS, чтобы система не подставляла нежелательный фон.
+
 ## Документация
 
 - [Архитектура](docs/architecture.md)

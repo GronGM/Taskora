@@ -104,13 +104,16 @@ class BetaAccessModeTest extends TestCase
         $this->assertGreaterThan(0, filesize(public_path('favicon-192x192.png')));
         $this->assertFileExists(public_path('apple-touch-icon.png'));
         $this->assertGreaterThan(0, filesize(public_path('apple-touch-icon.png')));
+        $this->assertContains($this->pngColorType(public_path('favicon-32x32.png')), [4, 6]);
+        $this->assertContains($this->pngColorType(public_path('favicon-192x192.png')), [4, 6]);
+        $this->assertSame([16, 32, 48], $this->icoSizes(public_path('favicon.ico')));
 
         $this->get('/login')
             ->assertOk()
-            ->assertSee('favicon.ico', false)
-            ->assertSee('favicon-32x32.png', false)
-            ->assertSee('favicon-192x192.png', false)
-            ->assertSee('apple-touch-icon.png', false)
+            ->assertSee('favicon.ico?v=2', false)
+            ->assertSee('favicon-32x32.png?v=2', false)
+            ->assertSee('favicon-192x192.png?v=2', false)
+            ->assertSee('apple-touch-icon.png?v=2', false)
             ->assertSee('rel="apple-touch-icon"', false);
     }
 
@@ -230,5 +233,45 @@ class BetaAccessModeTest extends TestCase
             'beta.password' => null,
             'beta.cookie_name' => 'taskora_beta_access',
         ]);
+    }
+
+    private function pngColorType(string $path): int
+    {
+        $bytes = file_get_contents($path, false, null, 0, 26);
+
+        $this->assertIsString($bytes);
+        $this->assertStringStartsWith("\x89PNG\r\n\x1A\n", $bytes);
+
+        return ord($bytes[25]);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function icoSizes(string $path): array
+    {
+        $bytes = file_get_contents($path);
+
+        $this->assertIsString($bytes);
+        $this->assertGreaterThanOrEqual(6, strlen($bytes));
+
+        $header = unpack('vreserved/vtype/vcount', substr($bytes, 0, 6));
+
+        $this->assertSame(0, $header['reserved']);
+        $this->assertSame(1, $header['type']);
+
+        $sizes = [];
+
+        for ($index = 0; $index < $header['count']; $index++) {
+            $offset = 6 + ($index * 16);
+            $this->assertGreaterThanOrEqual($offset + 16, strlen($bytes));
+
+            $width = ord($bytes[$offset]);
+            $sizes[] = $width === 0 ? 256 : $width;
+        }
+
+        sort($sizes);
+
+        return $sizes;
     }
 }
