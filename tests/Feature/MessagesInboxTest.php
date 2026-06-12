@@ -8,6 +8,7 @@ use App\Models\DisputeMessage;
 use App\Models\ModerationFlag;
 use App\Models\Order;
 use App\Models\OrderEvent;
+use App\Models\OrderFile;
 use App\Models\OrderMessage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,7 +40,8 @@ class MessagesInboxTest extends TestCase
                 ->component('Messages/Index')
                 ->has('conversations', 1)
                 ->where('conversations.0.type', 'order')
-                ->where('conversations.0.id', $order->id));
+                ->where('conversations.0.id', $order->id)
+                ->where('tabs.1.label', 'Непрочитанные'));
 
         $this->assertSame(['Личный заказ по дизайну'], collect($response->inertiaProps('conversations'))->pluck('title')->all());
     }
@@ -308,17 +310,102 @@ class MessagesInboxTest extends TestCase
         $this->assertStringNotContainsString('reset', $payload);
     }
 
+    public function test_order_conversation_v2_payload_contains_context_without_private_file_paths(): void
+    {
+        [$customer, $performer, $order] = $this->orderScenario([
+            'platform_fee_amount' => 750,
+            'performer_amount' => 4250,
+            'delivery_days' => 5,
+        ], 'Дизайн презентации');
+        OrderMessage::factory()->for($order)->for($performer, 'user')->create(['body' => 'Готовлю первый вариант.']);
+        OrderFile::factory()
+            ->for($order)
+            ->for($customer, 'user')
+            ->create([
+                'original_name' => 'brief.txt',
+                'stored_name' => 'secret-stored-name.txt',
+                'path' => 'orders/'.$order->id.'/secret-stored-name.txt',
+                'size' => 2048,
+            ]);
+        OrderEvent::factory()
+            ->for($order)
+            ->for($customer, 'user')
+            ->create([
+                'type' => OrderEvent::TYPE_FILE_UPLOADED,
+                'payload' => ['file_name' => 'brief.txt'],
+            ]);
+
+        $response = $this->actingAs($customer)
+            ->get(route('messages.orders.show', $order))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Messages/OrderShow')
+                ->where('conversation.key', 'order-'.$order->id)
+                ->where('conversation.type', 'order')
+                ->where('conversation.platform_fee_amount', 750)
+                ->where('conversation.performer_amount', 4250)
+                ->where('conversation.delivery_days', 5)
+                ->where('conversation.files.0.original_name', 'brief.txt')
+                ->where('conversation.files.0.status_label', 'Доступен')
+                ->where('conversation.timeline_events.0.label', 'Файл загружен')
+                ->where('conversation.messages.0.date_label', 'Сегодня')
+                ->has('conversations', 1));
+
+        $payload = json_encode($response->inertiaProps('conversation'), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+
+        $this->assertStringNotContainsString('stored_name', $payload);
+        $this->assertStringNotContainsString('secret-stored-name.txt', $payload);
+        $this->assertStringNotContainsString('orders/'.$order->id, $payload);
+        $this->assertStringNotContainsString('/storage/', $payload);
+    }
+
+    public function test_dispute_conversation_v2_payload_contains_dispute_and_order_context(): void
+    {
+        $moderator = User::factory()->create(['role' => User::ROLE_MODERATOR]);
+        [$customer, , $order] = $this->orderScenario([
+            'status' => Order::STATUS_DISPUTED,
+            'payment_status' => Order::PAYMENT_HELD,
+        ], 'Спорный заказ с файлами');
+        $dispute = $this->createDispute($order, $customer);
+        DisputeMessage::factory()->for($dispute)->for($customer, 'user')->create(['body' => 'Нужно решение по спору.']);
+
+        $this->actingAs($moderator)
+            ->get(route('messages.disputes.show', $dispute))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Messages/DisputeShow')
+                ->where('conversation.key', 'dispute-'.$dispute->id)
+                ->where('conversation.type', 'dispute')
+                ->where('conversation.reason_label', Dispute::reasonLabels()[$dispute->reason])
+                ->where('conversation.order.title', 'Спорный заказ с файлами')
+                ->where('conversation.order.payment_status_label', Order::paymentStatusLabels()[Order::PAYMENT_HELD])
+                ->where('conversation.messages.0.date_label', 'Сегодня')
+                ->has('conversations', 1));
+    }
+
     public function test_messages_navigation_and_ui_source_are_present(): void
     {
         $dashboardLayout = file_get_contents(resource_path('js/Layouts/DashboardLayout.jsx'));
         $publicLayout = file_get_contents(resource_path('js/Layouts/PublicLayout.jsx'));
         $indexPage = file_get_contents(resource_path('js/Pages/Messages/Index.jsx'));
+        $orderPage = file_get_contents(resource_path('js/Pages/Messages/OrderShow.jsx'));
+        $disputePage = file_get_contents(resource_path('js/Pages/Messages/DisputeShow.jsx'));
+        $messengerLayout = file_get_contents(resource_path('js/Pages/Messages/Partials/MessengerLayout.jsx'));
+        $source = $indexPage.$orderPage.$disputePage.$messengerLayout;
 
         $this->assertStringContainsString('/messages', $dashboardLayout);
         $this->assertStringContainsString('Сообщения', $dashboardLayout);
         $this->assertStringContainsString('/messages', $publicLayout);
-        $this->assertStringContainsString('Сбросить фильтры', $indexPage);
-        $this->assertStringContainsString('Непрочитанные', $indexPage);
+        $this->assertStringContainsString('messages-layout', $source);
+        $this->assertStringContainsString('Вкладки сообщений', $source);
+        $this->assertStringContainsString('Поиск по диалогам', $source);
+        $this->assertStringContainsString('Назад к сообщениям', $source);
+        $this->assertStringContainsString('Детали заказа', $source);
+        $this->assertStringContainsString('Работайте и передавайте материалы только внутри Таскоры', $source);
+        $this->assertStringContainsString('Напишите сообщение…', $source);
+        $this->assertStringContainsString('aria-label="Текст сообщения"', $source);
+        $this->assertStringContainsString('Отправить сообщение', $source);
+        $this->assertStringContainsString('role="alert"', $source);
     }
 
     /**

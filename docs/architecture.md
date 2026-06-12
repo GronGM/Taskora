@@ -114,7 +114,16 @@ Frontend-слой темы расположен в `resources/js/Components/Them
 - `conversation_reads` для отметок прочтения по пользователю, типу диалога и id диалога;
 - `MessageDeliveryService`, который переиспользуется старыми workspace/dispute endpoints и новыми `/messages` routes;
 - `ConversationReadService`, который считает unread и обновляет `last_read_at`;
-- `MessageController`, который отдает единый inbox и страницы диалогов.
+- `MessageController`, который отдает единый inbox, страницы диалогов и безопасный контекст заказа/спора для Messages v2.
+
+Messages v2 строится как HTTP/Inertia messenger без realtime-слоя:
+
+- desktop: левая колонка диалогов, центральная лента активного чата, правая панель контекста заказа или спора;
+- tablet/mobile: список диалогов и экран чата не создают horizontal overflow, правая панель становится раскрываемым блоком «Детали»;
+- карточка диалога показывает участника, тип, статус, последний preview, время и unread badge;
+- лента чата показывает safety banner, date separators, системные карточки событий, сообщения текущего пользователя справа и сообщения собеседника слева;
+- composer использует обычный `POST` и показывает validation/ContactGuard errors рядом с полем;
+- последние файлы заказа отображаются только как метаданные `original_name`, `size`, автор, дата и status; скачивание идет через существующие file download routes с проверкой доступа.
 
 Правила доступа:
 

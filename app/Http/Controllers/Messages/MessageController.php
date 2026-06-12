@@ -8,10 +8,13 @@ use App\Http\Requests\Order\StoreOrderMessageRequest;
 use App\Models\Dispute;
 use App\Models\DisputeMessage;
 use App\Models\Order;
+use App\Models\OrderEvent;
+use App\Models\OrderFile;
 use App\Models\OrderMessage;
 use App\Models\User;
 use App\Services\Messages\ConversationReadService;
 use App\Services\Messages\MessageDeliveryService;
+use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -27,38 +30,7 @@ class MessageController extends Controller
 
     public function index(Request $request, ConversationReadService $reads): Response
     {
-        $user = $request->user();
-        $filters = $this->filters($request);
-        $conversations = collect();
-
-        if ($filters['tab'] !== 'disputes') {
-            $conversations = $conversations->merge($this->orderConversations($user, $reads, $filters));
-        }
-
-        if ($filters['tab'] !== 'orders') {
-            $conversations = $conversations->merge($this->disputeConversations($user, $reads, $filters));
-        }
-
-        $conversations = $this->filterConversationPayloads($conversations, $filters);
-        $conversations = $this->sortConversationPayloads($conversations, $filters['sort']);
-        $paginator = $this->paginate($conversations, $request);
-
-        return Inertia::render('Messages/Index', [
-            'conversations' => $paginator->items(),
-            'pagination' => $this->paginationPayload($paginator),
-            'filters' => $filters,
-            'tabs' => [
-                ['value' => 'all', 'label' => 'Все'],
-                ['value' => 'unread', 'label' => 'Непрочитанные'],
-                ['value' => 'orders', 'label' => 'Заказы'],
-                ['value' => 'disputes', 'label' => 'Споры'],
-            ],
-            'orderStatusOptions' => $this->optionPayload(Order::statusLabels()),
-            'sortOptions' => [
-                ['value' => 'newest', 'label' => 'Сначала новые'],
-                ['value' => 'unread', 'label' => 'Сначала непрочитанные'],
-            ],
-        ]);
+        return Inertia::render('Messages/Index', $this->inboxPayload($request, $reads));
     }
 
     public function showOrder(Request $request, Order $order, ConversationReadService $reads): Response
@@ -72,10 +44,13 @@ class MessageController extends Controller
             'performer',
             'activeDispute',
             'orderMessages.user',
+            'orderFiles.user',
+            'orderEvents.user',
         ]);
 
         return Inertia::render('Messages/OrderShow', [
             'conversation' => $this->orderDetailPayload($request->user(), $order),
+            ...$this->inboxPayload($request, $reads),
         ]);
     }
 
@@ -112,11 +87,53 @@ class MessageController extends Controller
             'messages.user',
             'order.customer',
             'order.performer',
+            'order.orderFiles.user',
+            'order.orderEvents.user',
         ]);
 
         return Inertia::render('Messages/DisputeShow', [
             'conversation' => $this->disputeDetailPayload($request->user(), $dispute),
+            ...$this->inboxPayload($request, $reads),
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function inboxPayload(Request $request, ConversationReadService $reads): array
+    {
+        $user = $request->user();
+        $filters = $this->filters($request);
+        $conversations = collect();
+
+        if ($filters['tab'] !== 'disputes') {
+            $conversations = $conversations->merge($this->orderConversations($user, $reads, $filters));
+        }
+
+        if ($filters['tab'] !== 'orders') {
+            $conversations = $conversations->merge($this->disputeConversations($user, $reads, $filters));
+        }
+
+        $conversations = $this->filterConversationPayloads($conversations, $filters);
+        $conversations = $this->sortConversationPayloads($conversations, $filters['sort']);
+        $paginator = $this->paginate($conversations, $request);
+
+        return [
+            'conversations' => $paginator->items(),
+            'pagination' => $this->paginationPayload($paginator),
+            'filters' => $filters,
+            'tabs' => [
+                ['value' => 'all', 'label' => 'Все'],
+                ['value' => 'unread', 'label' => 'Непрочитанные'],
+                ['value' => 'orders', 'label' => 'Заказы'],
+                ['value' => 'disputes', 'label' => 'Споры'],
+            ],
+            'orderStatusOptions' => $this->optionPayload(Order::statusLabels()),
+            'sortOptions' => [
+                ['value' => 'newest', 'label' => 'Сначала новые'],
+                ['value' => 'unread', 'label' => 'Сначала непрочитанные'],
+            ],
+        ];
     }
 
     public function storeDispute(
@@ -238,6 +255,7 @@ class MessageController extends Controller
         $lastActivity = $latest?->created_at ?? $order->updated_at ?? $order->created_at;
 
         return [
+            'key' => 'order-'.$order->id,
             'type' => 'order',
             'type_label' => 'Заказ',
             'id' => $order->id,
@@ -246,10 +264,12 @@ class MessageController extends Controller
             'participant' => $participant,
             'status' => $order->status,
             'status_label' => Order::statusLabels()[$order->status] ?? $order->status,
+            'payment_status' => $order->payment_status,
             'payment_status_label' => Order::paymentStatusLabels()[$order->payment_status] ?? $order->payment_status,
             'last_message' => $latest ? Str::limit($latest->body, 180) : 'Сообщений пока нет.',
             'last_message_author' => $latest ? $this->orderRoleLabel($latest->user, $order) : null,
             'last_message_at' => $lastActivity?->format('d.m.Y H:i'),
+            'last_message_time' => $this->messageTimeLabel($lastActivity),
             'last_activity_ts' => $lastActivity?->getTimestamp() ?? 0,
             'unread_count' => $reads->unreadOrderCount($user, $order),
             'url' => route('messages.orders.show', $order),
@@ -278,6 +298,7 @@ class MessageController extends Controller
         $lastActivity = $latest?->created_at ?? $dispute->updated_at ?? $dispute->created_at;
 
         return [
+            'key' => 'dispute-'.$dispute->id,
             'type' => 'dispute',
             'type_label' => 'Спор',
             'id' => $dispute->id,
@@ -287,10 +308,12 @@ class MessageController extends Controller
             'status' => $order->status,
             'status_label' => Order::statusLabels()[$order->status] ?? $order->status,
             'dispute_status_label' => Dispute::statusLabels()[$dispute->status] ?? $dispute->status,
+            'payment_status' => $order->payment_status,
             'payment_status_label' => Order::paymentStatusLabels()[$order->payment_status] ?? $order->payment_status,
             'last_message' => $latest ? Str::limit($latest->body, 180) : 'Сообщений пока нет.',
             'last_message_author' => $latest ? ($latest->is_system ? 'Система' : $this->orderRoleLabel($latest->user, $order)) : null,
             'last_message_at' => $lastActivity?->format('d.m.Y H:i'),
+            'last_message_time' => $this->messageTimeLabel($lastActivity),
             'last_activity_ts' => $lastActivity?->getTimestamp() ?? 0,
             'unread_count' => $reads->unreadDisputeCount($user, $dispute),
             'url' => route('messages.disputes.show', $dispute),
@@ -391,14 +414,28 @@ class MessageController extends Controller
     private function orderDetailPayload(User $user, Order $order): array
     {
         return [
+            'key' => 'order-'.$order->id,
+            'type' => 'order',
+            'type_label' => 'Заказ',
             'id' => $order->id,
             'title' => $order->title,
+            'subtitle' => $order->source_type === Order::SOURCE_TASK_OFFER ? 'Заказ из отклика' : 'Заказ из услуги',
             'description' => $order->description,
             'status' => $order->status,
             'status_label' => Order::statusLabels()[$order->status] ?? $order->status,
+            'payment_status' => $order->payment_status,
             'payment_status_label' => Order::paymentStatusLabels()[$order->payment_status] ?? $order->payment_status,
             'source_label' => Order::sourceTypeLabels()[$order->source_type] ?? $order->source_type,
             'price' => $order->price,
+            'platform_fee_amount' => $order->platform_fee_amount,
+            'platform_fee_percent' => $order->platform_fee_percent,
+            'performer_amount' => $order->performer_amount,
+            'delivery_days' => $order->delivery_days,
+            'created_at' => $this->formatDate($order->created_at),
+            'started_at' => $this->formatDate($order->started_at),
+            'submitted_at' => $this->formatDate($order->submitted_at),
+            'review_hold_until' => $this->formatDate($order->review_hold_until),
+            'completed_at' => $this->formatDate($order->completed_at),
             'participant' => $this->otherOrderParticipant($user, $order),
             'customer' => $this->userPayload($order->customer),
             'performer' => $this->userPayload($order->performer),
@@ -409,7 +446,9 @@ class MessageController extends Controller
             'mark_read_url' => route('messages.orders.mark-read', $order),
             'can_reply' => Gate::allows('sendMessage', $order),
             'messages' => $order->orderMessages->map(fn (OrderMessage $message): array => $this->orderMessagePayload($user, $message, $order))->values(),
-            'warning' => 'Не передавайте контакты, ссылки на оплату и договоренности вне Таскоры. Сообщения проходят защитную проверку ContactGuard.',
+            'files' => $this->filePayloads($user, $order),
+            'timeline_events' => $this->eventPayloads($order),
+            'warning' => 'Работайте и передавайте материалы только внутри Таскоры. Не отправляйте контакты, мессенджеры и платежные реквизиты.',
         ];
     }
 
@@ -421,6 +460,9 @@ class MessageController extends Controller
         $order = $dispute->order;
 
         return [
+            'key' => 'dispute-'.$dispute->id,
+            'type' => 'dispute',
+            'type_label' => 'Спор',
             'id' => $dispute->id,
             'status' => $dispute->status,
             'status_label' => Dispute::statusLabels()[$dispute->status] ?? $dispute->status,
@@ -428,12 +470,22 @@ class MessageController extends Controller
             'description' => $dispute->description,
             'resolution_label' => $dispute->resolution ? (Dispute::resolutionLabels()[$dispute->resolution] ?? $dispute->resolution) : null,
             'moderator_comment' => $dispute->moderator_comment,
+            'created_at' => $this->formatDate($dispute->created_at),
+            'resolved_at' => $this->formatDate($dispute->resolved_at),
             'order' => [
                 'id' => $order->id,
                 'title' => $order->title,
+                'description' => $order->description,
+                'status' => $order->status,
                 'status_label' => Order::statusLabels()[$order->status] ?? $order->status,
+                'payment_status' => $order->payment_status,
                 'payment_status_label' => Order::paymentStatusLabels()[$order->payment_status] ?? $order->payment_status,
                 'price' => $order->price,
+                'platform_fee_amount' => $order->platform_fee_amount,
+                'platform_fee_percent' => $order->platform_fee_percent,
+                'performer_amount' => $order->performer_amount,
+                'delivery_days' => $order->delivery_days,
+                'review_hold_until' => $this->formatDate($order->review_hold_until),
                 'workspace_url' => $this->workspaceUrlFor($user, $order),
                 'order_url' => $this->orderUrlFor($user, $order),
             ],
@@ -447,7 +499,9 @@ class MessageController extends Controller
             'mark_read_url' => route('messages.disputes.mark-read', $dispute),
             'can_reply' => Gate::allows('message', $dispute),
             'messages' => $dispute->messages->map(fn (DisputeMessage $message): array => $this->disputeMessagePayload($user, $message, $order))->values(),
-            'warning' => 'Не передавайте контакты, ссылки на оплату и договоренности вне Таскоры. Спор рассматривается внутри платформы.',
+            'files' => $this->filePayloads($user, $order),
+            'timeline_events' => $this->eventPayloads($order),
+            'warning' => 'Работайте и передавайте материалы только внутри Таскоры. Не отправляйте контакты, мессенджеры и платежные реквизиты.',
         ];
     }
 
@@ -464,6 +518,8 @@ class MessageController extends Controller
             'is_own' => $message->user_id === $viewer->id,
             'is_system' => $message->type === OrderMessage::TYPE_SYSTEM_MESSAGE,
             'created_at' => $message->created_at?->format('d.m.Y H:i'),
+            'date_label' => $this->messageDateLabel($message->created_at),
+            'time_label' => $this->messageTimeLabel($message->created_at),
         ];
     }
 
@@ -480,7 +536,133 @@ class MessageController extends Controller
             'is_own' => $message->user_id === $viewer->id,
             'is_system' => $message->is_system,
             'created_at' => $message->created_at?->format('d.m.Y H:i'),
+            'date_label' => $this->messageDateLabel($message->created_at),
+            'time_label' => $this->messageTimeLabel($message->created_at),
         ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function filePayloads(User $user, Order $order): array
+    {
+        return $order->orderFiles
+            ->take(6)
+            ->map(fn (OrderFile $file): array => [
+                'id' => $file->id,
+                'original_name' => $file->original_name,
+                'mime_type' => $file->mime_type,
+                'size' => $file->size,
+                'status' => $file->status,
+                'status_label' => $this->fileStatusLabel($file->status),
+                'moderation_status' => $file->moderation_status,
+                'author' => $file->user?->name ?? 'Система',
+                'author_role' => $this->orderRoleLabel($file->user, $order),
+                'created_at' => $this->formatDate($file->created_at),
+                'download_url' => $this->fileDownloadUrlFor($user, $order, $file),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function fileDownloadUrlFor(User $user, Order $order, OrderFile $file): ?string
+    {
+        if ($file->status !== OrderFile::STATUS_AVAILABLE) {
+            return null;
+        }
+
+        if ($order->customer_id === $user->id) {
+            return route('customer.orders.files.download', [$order, $file]);
+        }
+
+        if ($order->performer_id === $user->id) {
+            return route('performer.orders.files.download', [$order, $file]);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function eventPayloads(Order $order): array
+    {
+        return $order->orderEvents
+            ->filter(fn (OrderEvent $event): bool => in_array($event->type, array_keys($this->eventLabels()), true))
+            ->take(-6)
+            ->map(fn (OrderEvent $event): array => [
+                'id' => $event->id,
+                'type' => $event->type,
+                'label' => $this->eventLabels()[$event->type] ?? $event->type,
+                'summary' => $this->eventSummary($event),
+                'actor' => $event->user?->name ?? 'Система',
+                'actor_role' => $this->orderRoleLabel($event->user, $order),
+                'created_at' => $this->formatDate($event->created_at),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function fileStatusLabel(string $status): string
+    {
+        return match ($status) {
+            OrderFile::STATUS_AVAILABLE => 'Доступен',
+            OrderFile::STATUS_HIDDEN => 'Скрыт',
+            OrderFile::STATUS_DELETED => 'Удален',
+            default => $status,
+        };
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function eventLabels(): array
+    {
+        return [
+            OrderEvent::TYPE_ORDER_CREATED => 'Заказ создан',
+            OrderEvent::TYPE_PAYMENT_STUB_PAID => 'Оплата заглушкой',
+            OrderEvent::TYPE_WORK_SUBMITTED => 'Работа отправлена',
+            OrderEvent::TYPE_REVIEW_HOLD_STARTED => 'Период проверки',
+            OrderEvent::TYPE_REVISION_REQUESTED => 'Запрошена доработка',
+            OrderEvent::TYPE_ORDER_COMPLETED => 'Заказ завершен',
+            OrderEvent::TYPE_FUNDS_RELEASED => 'Оплата разблокирована',
+            OrderEvent::TYPE_DISPUTE_OPENED => 'Открыт спор',
+            OrderEvent::TYPE_DISPUTE_UNDER_REVIEW => 'Спор в работе',
+            OrderEvent::TYPE_DISPUTE_RESOLVED => 'Спор решен',
+            OrderEvent::TYPE_FUNDS_REFUNDED => 'Средства возвращены',
+            OrderEvent::TYPE_REVISION_REQUESTED_BY_MODERATOR => 'Доработка по решению модератора',
+            OrderEvent::TYPE_FILE_UPLOADED => 'Файл загружен',
+            OrderEvent::TYPE_CONTACT_BLOCKED => 'Контакты заблокированы',
+        ];
+    }
+
+    private function eventSummary(OrderEvent $event): string
+    {
+        $payload = $event->payload ?? [];
+
+        return match ($event->type) {
+            OrderEvent::TYPE_ORDER_CREATED => 'Сделка создана, переписка привязана к заказу.',
+            OrderEvent::TYPE_PAYMENT_STUB_PAID => 'Заказчик отметил оплату через локальную заглушку.',
+            OrderEvent::TYPE_WORK_SUBMITTED => 'Исполнитель отправил работу на проверку.',
+            OrderEvent::TYPE_REVIEW_HOLD_STARTED => isset($payload['review_hold_until'])
+                ? 'Период проверки действует до '.$payload['review_hold_until'].'.'
+                : 'Запущен период проверки результата.',
+            OrderEvent::TYPE_REVISION_REQUESTED => filled($payload['revision_comment'] ?? null)
+                ? 'Заказчик запросил доработку: '.$payload['revision_comment']
+                : 'Заказчик запросил доработку.',
+            OrderEvent::TYPE_ORDER_COMPLETED => 'Заказ завершен.',
+            OrderEvent::TYPE_FUNDS_RELEASED => 'Оплата разблокирована исполнителю.',
+            OrderEvent::TYPE_DISPUTE_OPENED => 'По заказу открыт спор.',
+            OrderEvent::TYPE_DISPUTE_UNDER_REVIEW => 'Модератор взял спор в работу.',
+            OrderEvent::TYPE_DISPUTE_RESOLVED => 'Спор решен модератором.',
+            OrderEvent::TYPE_FUNDS_REFUNDED => 'Средства возвращены заказчику.',
+            OrderEvent::TYPE_REVISION_REQUESTED_BY_MODERATOR => 'Модератор вернул заказ на доработку.',
+            OrderEvent::TYPE_FILE_UPLOADED => isset($payload['file_name'])
+                ? 'Загружен файл: '.$payload['file_name']
+                : 'В рабочую область добавлен файл.',
+            OrderEvent::TYPE_CONTACT_BLOCKED => 'ContactGuard заблокировал контактные данные.',
+            default => 'Системное событие заказа.',
+        };
     }
 
     /**
@@ -545,6 +727,33 @@ class MessageController extends Controller
     private function userRoleLabel(User $user): string
     {
         return User::roleLabels()[$user->role] ?? 'Пользователь';
+    }
+
+    private function formatDate(?CarbonInterface $date): ?string
+    {
+        return $date?->format('d.m.Y H:i');
+    }
+
+    private function messageDateLabel(?CarbonInterface $date): ?string
+    {
+        if (! $date) {
+            return null;
+        }
+
+        if ($date->isToday()) {
+            return 'Сегодня';
+        }
+
+        if ($date->isYesterday()) {
+            return 'Вчера';
+        }
+
+        return $date->format('d.m.Y');
+    }
+
+    private function messageTimeLabel(?CarbonInterface $date): ?string
+    {
+        return $date?->format('H:i');
     }
 
     private function workspaceUrlFor(User $user, Order $order): ?string
