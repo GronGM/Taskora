@@ -38,33 +38,33 @@ export default function Home({ categories = [], services = [] }) {
             <Head title="Главная" />
 
             <section className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
-                <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-20">
+                <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10 lg:px-8 lg:py-20">
                     <div className="flex flex-col justify-center">
-                        <div className="mb-6 inline-flex w-fit items-center rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
+                        <div className="mb-4 inline-flex w-fit items-center rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200 sm:mb-6">
                             Маркетплейс задач и услуг
                         </div>
-                        <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
+                        <h1 className="max-w-4xl text-3xl font-semibold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
                             Найдите исполнителя для задачи — быстро, понятно и безопасно
                         </h1>
-                        <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+                        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:mt-6 sm:text-lg sm:leading-8">
                             Разместите задание или выберите готовую услугу. Таскора помогает договориться, вести заказ, обмениваться файлами и решать спорные ситуации внутри одной платформы.
                         </p>
-                        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                        <div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-3">
                             <Link
                                 href="/customer/tasks/create"
-                                className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950"
+                                className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950 sm:py-3"
                             >
                                 Разместить задание
                             </Link>
                             <Link
                                 href="/catalog"
-                                className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950"
+                                className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950 sm:py-3"
                             >
                                 Найти услугу
                             </Link>
                             <Link
                                 href="/register"
-                                className="inline-flex justify-center rounded-md px-5 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-blue-200 dark:hover:bg-blue-950 dark:hover:text-blue-100 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950"
+                                className="inline-flex justify-center rounded-md px-5 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-blue-200 dark:hover:bg-blue-950 dark:hover:text-blue-100 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950 sm:py-3"
                             >
                                 Стать исполнителем
                             </Link>

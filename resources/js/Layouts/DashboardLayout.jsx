@@ -20,12 +20,12 @@ export default function DashboardLayout({ children }) {
             <TestModeBanner />
             <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
                 <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between gap-4">
-                        <Link href="/" className="flex items-center gap-3" aria-label="Таскора">
+                    <div className="flex min-w-0 items-center justify-between gap-4">
+                        <Link href="/" className="flex min-w-0 items-center gap-3" aria-label="Таскора">
                             <span className="grid h-10 w-10 place-items-center rounded-md bg-blue-600" aria-hidden="true">
                                 <span className="taskora-logo-mark h-4 w-4 rounded-sm bg-white" />
                             </span>
-                            <span className="text-xl font-semibold tracking-normal">Таскора</span>
+                            <span className="truncate text-xl font-semibold tracking-normal">Таскора</span>
                         </Link>
 
                         <div className="text-right sm:hidden">
@@ -34,7 +34,7 @@ export default function DashboardLayout({ children }) {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">
                         <div className="hidden text-right md:block">
                             <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
                             <p className="text-xs text-slate-500">{roleLabels[user?.role] ?? 'Пользователь'}</p>

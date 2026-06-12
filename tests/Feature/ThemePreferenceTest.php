@@ -42,6 +42,10 @@ class ThemePreferenceTest extends TestCase
         $this->assertStringContainsString('data-testid="public-mobile-menu"', $publicLayout);
         $this->assertStringContainsString('aria-expanded={isMobileMenuOpen}', $publicLayout);
         $this->assertStringContainsString('Меню', $publicLayout);
+        $this->assertStringContainsString('hidden items-center gap-1 lg:flex', $publicLayout);
+        $this->assertStringContainsString('lg:hidden', $publicLayout);
+        $this->assertStringNotContainsString('hidden items-center gap-1 md:flex', $publicLayout);
+        $this->assertStringNotContainsString('md:hidden', $publicLayout);
         $this->assertStringNotContainsString('overflow-x-auto', $publicLayout);
     }
 
@@ -51,6 +55,8 @@ class ThemePreferenceTest extends TestCase
         $providerSource = file_get_contents(resource_path('js/Components/Theme/ThemeProvider.jsx'));
 
         $this->assertStringContainsString('aria-label', $toggleSource);
+        $this->assertStringContainsString('data-testid="theme-toggle"', $toggleSource);
+        $this->assertStringContainsString('data-testid="theme-toggle-select"', $toggleSource);
         $this->assertStringContainsString('Тема оформления', $toggleSource);
         $this->assertStringContainsString('Светлая', $providerSource);
         $this->assertStringContainsString('Темная', $providerSource);

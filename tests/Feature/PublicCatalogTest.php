@@ -144,6 +144,10 @@ class PublicCatalogTest extends TestCase
         $this->assertStringContainsString('Разместить задание', $source);
         $this->assertStringContainsString('Найти услугу', $source);
         $this->assertStringContainsString('Стать исполнителем', $source);
+        $this->assertStringContainsString('px-4 py-10 sm:px-6 sm:py-14', $source);
+        $this->assertStringContainsString('text-3xl font-semibold leading-tight', $source);
+        $this->assertStringContainsString('mt-6 flex flex-col gap-2 sm:mt-8', $source);
+        $this->assertStringContainsString('sm:py-3', $source);
         $this->assertStringContainsString("import { MessagesSquare, Search, ShieldCheck, Star } from 'lucide-react';", $source);
         $this->assertStringNotContainsString('Премиальная основа для сервиса', $source);
     }

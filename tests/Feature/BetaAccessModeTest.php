@@ -110,10 +110,10 @@ class BetaAccessModeTest extends TestCase
 
         $this->get('/login')
             ->assertOk()
-            ->assertSee('favicon.ico?v=2', false)
-            ->assertSee('favicon-32x32.png?v=2', false)
-            ->assertSee('favicon-192x192.png?v=2', false)
-            ->assertSee('apple-touch-icon.png?v=2', false)
+            ->assertSee('favicon.ico?v=3', false)
+            ->assertSee('favicon-32x32.png?v=3', false)
+            ->assertSee('favicon-192x192.png?v=3', false)
+            ->assertSee('apple-touch-icon.png?v=3', false)
             ->assertSee('rel="apple-touch-icon"', false);
     }
 
