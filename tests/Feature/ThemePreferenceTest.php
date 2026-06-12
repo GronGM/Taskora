@@ -51,15 +51,25 @@ class ThemePreferenceTest extends TestCase
         $this->assertStringNotContainsString('overflow-x-auto', $publicLayout);
     }
 
-    public function test_theme_toggle_contains_accessible_russian_options(): void
+    public function test_theme_toggle_is_accessible_switch_without_dropdown(): void
     {
         $toggleSource = file_get_contents(resource_path('js/Components/Theme/ThemeToggle.jsx'));
         $providerSource = file_get_contents(resource_path('js/Components/Theme/ThemeProvider.jsx'));
 
         $this->assertStringContainsString('aria-label', $toggleSource);
+        $this->assertStringContainsString('role="switch"', $toggleSource);
+        $this->assertStringContainsString('aria-checked={isDark}', $toggleSource);
         $this->assertStringContainsString('data-testid="theme-toggle"', $toggleSource);
-        $this->assertStringContainsString('data-testid="theme-toggle-select"', $toggleSource);
-        $this->assertStringContainsString('Тема оформления', $toggleSource);
+        $this->assertStringContainsString('data-testid="theme-toggle-button"', $toggleSource);
+        $this->assertStringContainsString('data-theme-toggle="switch"', $toggleSource);
+        $this->assertStringContainsString('type="button"', $toggleSource);
+        $this->assertStringContainsString('Включить темную тему', $toggleSource);
+        $this->assertStringContainsString('Включить светлую тему', $toggleSource);
+        $this->assertStringContainsString('Sun', $toggleSource);
+        $this->assertStringContainsString('Moon', $toggleSource);
+        $this->assertStringNotContainsString('<select', $toggleSource);
+        $this->assertStringNotContainsString('data-testid="theme-toggle-select"', $toggleSource);
+        $this->assertStringNotContainsString('Как в системе', $toggleSource);
         $this->assertStringContainsString('Светлая', $providerSource);
         $this->assertStringContainsString('Темная', $providerSource);
         $this->assertStringNotContainsString('Как в системе', $providerSource);
