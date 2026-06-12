@@ -92,6 +92,28 @@ class BetaAccessModeTest extends TestCase
         $this->get('/favicon.ico')->assertNotFound();
     }
 
+    public function test_app_layout_links_favicon_assets(): void
+    {
+        $this->disableBetaAccess();
+
+        $this->assertFileExists(public_path('favicon.ico'));
+        $this->assertGreaterThan(0, filesize(public_path('favicon.ico')));
+        $this->assertFileExists(public_path('favicon-32x32.png'));
+        $this->assertGreaterThan(0, filesize(public_path('favicon-32x32.png')));
+        $this->assertFileExists(public_path('favicon-192x192.png'));
+        $this->assertGreaterThan(0, filesize(public_path('favicon-192x192.png')));
+        $this->assertFileExists(public_path('apple-touch-icon.png'));
+        $this->assertGreaterThan(0, filesize(public_path('apple-touch-icon.png')));
+
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('favicon.ico', false)
+            ->assertSee('favicon-32x32.png', false)
+            ->assertSee('favicon-192x192.png', false)
+            ->assertSee('apple-touch-icon.png', false)
+            ->assertSee('rel="apple-touch-icon"', false);
+    }
+
     public function test_laravel_404_pages_are_not_replaced_by_beta_gate(): void
     {
         $this->enableBetaAccess();
