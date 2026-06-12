@@ -36,10 +36,13 @@ export function MessengerLayout({
     details,
 }) {
     const hasActiveConversation = Boolean(activeKey);
+    const layoutColumns = hasActiveConversation
+        ? 'md:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_320px]'
+        : 'md:grid-cols-[320px_minmax(0,1fr)]';
 
     return (
         <section className="mx-auto max-w-[1500px] px-3 py-4 sm:px-4 lg:px-6" data-testid="messages-layout">
-            <div className="grid min-w-0 gap-4 md:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_320px]">
+            <div className={`grid min-w-0 gap-4 ${layoutColumns}`}>
                 <aside className={`${hasActiveConversation ? 'hidden md:flex' : 'flex'} min-w-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950`} data-testid="messages-conversation-list">
                     <ConversationListPanel
                         conversations={conversations}
@@ -56,24 +59,36 @@ export function MessengerLayout({
                     {children}
                 </main>
 
-                <aside className="hidden min-w-0 xl:block">
-                    {details}
-                </aside>
+                {details && (
+                    <aside className="hidden min-w-0 xl:block">
+                        {details}
+                    </aside>
+                )}
             </div>
         </section>
     );
 }
 
-export function InboxEmptyState() {
+export function InboxEmptyState({ firstConversation = null }) {
     return (
         <div className="flex min-h-[620px] flex-col items-center justify-center px-6 py-12 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-blue-50 text-blue-700 ring-1 ring-blue-100 dark:bg-blue-950 dark:text-blue-200 dark:ring-blue-800">
                 <MessageCircle className="h-7 w-7" aria-hidden="true" />
             </div>
-            <p className="mt-5 text-xl font-semibold text-slate-950 dark:text-white">Выберите диалог</p>
+            <p className="mt-5 text-xl font-semibold text-slate-950 dark:text-white">Выберите переписку</p>
             <p className="mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Слева собраны заказы и споры. Откройте переписку, чтобы увидеть сообщения, файлы и контекст сделки.
+                Откройте заказ или спор, чтобы продолжить общение и видеть детали сделки.
             </p>
+            <div className="mt-6 grid w-full max-w-2xl gap-3 text-left sm:grid-cols-3">
+                <PlaceholderHint title="Заказы" text="Переписки по активным заказам и рабочим областям." />
+                <PlaceholderHint title="Споры" text="Обсуждения с участием модератора." />
+                <PlaceholderHint title="Непрочитанные" text="Новые сообщения, которые требуют внимания." />
+            </div>
+            {firstConversation?.url && (
+                <Link href={firstConversation.url} className={`mt-6 inline-flex rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 ${focusClass}`}>
+                    Открыть последний диалог
+                </Link>
+            )}
         </div>
     );
 }
@@ -111,6 +126,9 @@ export function ConversationDetails({ conversation, compact = false }) {
 }
 
 function ConversationListPanel({ conversations, pagination, filters, tabs, orderStatusOptions, sortOptions, activeKey }) {
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const hasActiveFilters = Number(filters.active_count ?? 0) > 0;
+
     return (
         <>
             <div className="border-b border-slate-200 p-4 dark:border-slate-800">
@@ -120,9 +138,9 @@ function ConversationListPanel({ conversations, pagination, filters, tabs, order
                         <h1 className="text-2xl font-semibold tracking-normal text-slate-950 dark:text-white">Сообщения</h1>
                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Заказы и споры</p>
                     </div>
-                    {filters.active_count > 0 && (
-                        <Link href="/messages" className={`shrink-0 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900 ${focusClass}`}>
-                            Сбросить
+                    {hasActiveFilters && (
+                        <Link href="/messages" className={`hidden shrink-0 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900 sm:inline-flex ${focusClass}`}>
+                            Сбросить фильтры
                         </Link>
                     )}
                 </div>
@@ -143,7 +161,35 @@ function ConversationListPanel({ conversations, pagination, filters, tabs, order
                     ))}
                 </div>
 
-                <form action="/messages" method="get" className="mt-4 space-y-3">
+                <div className="mt-4 flex items-center justify-between gap-2 md:hidden">
+                    <button
+                        type="button"
+                        className={`inline-flex min-h-10 items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-900 ${focusClass}`}
+                        aria-expanded={filtersOpen}
+                        aria-controls="messages-filter-panel"
+                        data-testid="messages-filters-toggle"
+                        onClick={() => setFiltersOpen((open) => !open)}
+                    >
+                        {filtersOpen ? 'Скрыть фильтры' : 'Показать фильтры'}
+                        {hasActiveFilters && <span className="ml-1 text-blue-700 dark:text-blue-300">· {filters.active_count}</span>}
+                    </button>
+                    {hasActiveFilters && (
+                        <Link href="/messages" className={`shrink-0 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900 ${focusClass}`}>
+                            Сбросить фильтры
+                        </Link>
+                    )}
+                </div>
+
+                {hasActiveFilters && (
+                    <div className="mt-3 flex flex-wrap gap-2" aria-label="Активные фильтры">
+                        {filters.q && <Chip>Поиск: {filters.q}</Chip>}
+                        {filters.status && <Chip>Статус: {labelFor(orderStatusOptions, filters.status)}</Chip>}
+                        {filters.sort !== 'newest' && <Chip>Сортировка: {labelFor(sortOptions, filters.sort)}</Chip>}
+                        {filters.tab !== 'all' && <Chip>Раздел: {labelFor(tabs, filters.tab)}</Chip>}
+                    </div>
+                )}
+
+                <form id="messages-filter-panel" action="/messages" method="get" className={`${filtersOpen ? 'block' : 'hidden'} mt-4 space-y-3 md:block`}>
                     {filters.tab !== 'all' && <input type="hidden" name="tab" value={filters.tab} />}
                     <label className="block">
                         <span className="text-sm font-semibold text-slate-900 dark:text-white">Поиск по диалогам</span>
@@ -166,15 +212,6 @@ function ConversationListPanel({ conversations, pagination, filters, tabs, order
                         Показать
                     </button>
                 </form>
-
-                {filters.active_count > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2" aria-label="Активные фильтры">
-                        {filters.q && <Chip>Поиск: {filters.q}</Chip>}
-                        {filters.status && <Chip>Статус: {labelFor(orderStatusOptions, filters.status)}</Chip>}
-                        {filters.sort !== 'newest' && <Chip>Сортировка: {labelFor(sortOptions, filters.sort)}</Chip>}
-                        {filters.tab !== 'all' && <Chip>Раздел: {labelFor(tabs, filters.tab)}</Chip>}
-                    </div>
-                )}
             </div>
 
             <div className="min-h-[420px] flex-1 overflow-y-auto p-2">
@@ -185,12 +222,7 @@ function ConversationListPanel({ conversations, pagination, filters, tabs, order
                         ))}
                     </div>
                 ) : (
-                    <div className="rounded-lg border border-dashed border-slate-300 p-6 text-center dark:border-slate-700">
-                        <p className="font-semibold text-slate-950 dark:text-white">У вас пока нет переписок.</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                            Когда появится заказ или спор, диалог появится здесь.
-                        </p>
-                    </div>
+                    <ConversationListEmptyState hasActiveFilters={hasActiveFilters} />
                 )}
             </div>
 
@@ -204,6 +236,26 @@ function ConversationListPanel({ conversations, pagination, filters, tabs, order
                 </div>
             )}
         </>
+    );
+}
+
+function ConversationListEmptyState({ hasActiveFilters }) {
+    return (
+        <div className="rounded-lg border border-dashed border-slate-300 p-6 text-center dark:border-slate-700">
+            <p className="font-semibold text-slate-950 dark:text-white">
+                {hasActiveFilters ? 'Диалогов по этому запросу нет.' : 'У вас пока нет переписок.'}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                {hasActiveFilters
+                    ? 'Попробуйте изменить запрос или сбросить фильтры.'
+                    : 'Когда появится заказ или спор, диалог появится здесь.'}
+            </p>
+            {hasActiveFilters && (
+                <Link href="/messages" className={`mt-4 inline-flex rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900 ${focusClass}`}>
+                    Сбросить фильтры
+                </Link>
+            )}
+        </div>
     );
 }
 
@@ -257,7 +309,7 @@ function ConversationHeader({ conversation }) {
 
     return (
         <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-3 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 sm:px-5">
-            <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex min-w-0 flex-col gap-3">
                 <div className="min-w-0">
                     <Link href="/messages" className={`mb-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900 md:hidden dark:text-blue-300 dark:hover:text-blue-100 ${focusClass}`} data-testid="messages-mobile-back">
                         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -268,17 +320,26 @@ function ConversationHeader({ conversation }) {
                         <Badge tone="slate">{isDispute ? conversation.status_label : conversation.status_label}</Badge>
                         {!isDispute && <Badge tone="blue">{conversation.payment_status_label}</Badge>}
                     </div>
-                    <h1 className="mt-2 break-words text-xl font-semibold tracking-normal text-slate-950 dark:text-white sm:text-2xl">{orderTitle}</h1>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    <h1 className="mt-2 line-clamp-2 min-w-0 break-words text-xl font-semibold tracking-normal text-slate-950 [overflow-wrap:anywhere] dark:text-white sm:text-2xl lg:line-clamp-none" title={orderTitle}>{orderTitle}</h1>
+                    <p className="mt-1 break-words text-sm text-slate-600 dark:text-slate-300">
                         {isDispute ? `${conversation.reason_label} · ${conversation.order.payment_status_label}` : `${conversation.participant.role_label}: ${conversation.participant.name}`}
                     </p>
                 </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
+                <div className="flex min-w-0 flex-wrap gap-2">
                     {primaryUrl && <ActionLink href={primaryUrl}>{isDispute ? 'Открыть спор' : 'Открыть заказ'}</ActionLink>}
                     {conversation.workspace_url && <ActionLink href={conversation.workspace_url} variant="dark">Открыть рабочую область</ActionLink>}
                 </div>
             </div>
         </header>
+    );
+}
+
+function PlaceholderHint({ title, text }) {
+    return (
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-sm font-semibold text-slate-950 dark:text-white">{title}</p>
+            <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{text}</p>
+        </div>
     );
 }
 
@@ -723,7 +784,7 @@ function ActionLink({ href, children, variant = 'light' }) {
         : 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800';
 
     return (
-        <Link href={href} className={`inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold transition ${classes} ${focusClass}`}>
+        <Link href={href} className={`inline-flex max-w-full items-center justify-center rounded-md px-3 py-2 text-center text-sm font-semibold transition ${classes} ${focusClass}`}>
             {children}
         </Link>
     );

@@ -15,7 +15,7 @@ export default function Index({ conversations = [], pagination = {}, filters = {
                 orderStatusOptions={orderStatusOptions}
                 sortOptions={sortOptions}
             >
-                <InboxEmptyState />
+                <InboxEmptyState firstConversation={conversations[0] ?? null} />
             </MessengerLayout>
         </DashboardLayout>
     );

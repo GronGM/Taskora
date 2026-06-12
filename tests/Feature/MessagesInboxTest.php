@@ -281,6 +281,29 @@ class MessagesInboxTest extends TestCase
         $this->assertGreaterThan(0, $unreadResponse->inertiaProps('conversations.0.unread_count'));
     }
 
+    public function test_inbox_empty_state_props_distinguish_no_dialogs_and_filtered_results(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $emptyResponse = $this->actingAs($admin)
+            ->get(route('messages.index'))
+            ->assertOk();
+
+        $this->assertSame([], $emptyResponse->inertiaProps('conversations'));
+        $this->assertSame(0, $emptyResponse->inertiaProps('filters.active_count'));
+
+        [$customer, $performer, $order] = $this->orderScenario(title: 'Длинный заказ для проверки поиска');
+        OrderMessage::factory()->for($order)->for($performer, 'user')->create(['body' => 'Есть активный диалог']);
+
+        $filteredResponse = $this->actingAs($customer)
+            ->get(route('messages.index', ['q' => 'нет-такого-диалога']))
+            ->assertOk();
+
+        $this->assertSame([], $filteredResponse->inertiaProps('conversations'));
+        $this->assertSame('нет-такого-диалога', $filteredResponse->inertiaProps('filters.q'));
+        $this->assertSame(1, $filteredResponse->inertiaProps('filters.active_count'));
+    }
+
     public function test_customer_search_does_not_match_participant_email(): void
     {
         [$customer, $performer, $order] = $this->orderScenario(title: 'Заказ с приватным email');
@@ -399,6 +422,14 @@ class MessagesInboxTest extends TestCase
         $this->assertStringContainsString('messages-layout', $source);
         $this->assertStringContainsString('Вкладки сообщений', $source);
         $this->assertStringContainsString('Поиск по диалогам', $source);
+        $this->assertStringContainsString('messages-filters-toggle', $source);
+        $this->assertStringContainsString('Показать фильтры', $source);
+        $this->assertStringContainsString('Скрыть фильтры', $source);
+        $this->assertStringContainsString('Сбросить фильтры', $source);
+        $this->assertStringContainsString('Диалогов по этому запросу нет.', $source);
+        $this->assertStringContainsString('У вас пока нет переписок.', $source);
+        $this->assertStringContainsString('Выберите переписку', $source);
+        $this->assertStringContainsString('Открыть последний диалог', $source);
         $this->assertStringContainsString('Назад к сообщениям', $source);
         $this->assertStringContainsString('Детали заказа', $source);
         $this->assertStringContainsString('Работайте и передавайте материалы только внутри Таскоры', $source);
