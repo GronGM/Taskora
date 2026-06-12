@@ -63,6 +63,10 @@ class ThemePreferenceTest extends TestCase
         $this->assertStringContainsString('data-testid="theme-toggle-button"', $toggleSource);
         $this->assertStringContainsString('data-theme-toggle="switch"', $toggleSource);
         $this->assertStringContainsString('type="button"', $toggleSource);
+        $this->assertStringContainsString('h-10', $toggleSource);
+        $this->assertStringContainsString('w-[4.5rem]', $toggleSource);
+        $this->assertStringContainsString('inset-x-1', $toggleSource);
+        $this->assertStringContainsString('h-9', $toggleSource);
         $this->assertStringContainsString('Включить темную тему', $toggleSource);
         $this->assertStringContainsString('Включить светлую тему', $toggleSource);
         $this->assertStringContainsString('Sun', $toggleSource);
