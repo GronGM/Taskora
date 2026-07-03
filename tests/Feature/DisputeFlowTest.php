@@ -44,6 +44,30 @@ class DisputeFlowTest extends TestCase
         $this->assertSame($performer->id, $dispute->opened_by);
     }
 
+    public function test_dispute_with_contacts_in_description_is_blocked_by_contact_guard(): void
+    {
+        [$customer, , $order] = $this->orderScenario();
+
+        $this->actingAs($customer)
+            ->from(route('customer.orders.disputes.create', $order))
+            ->post(route('customer.orders.disputes.store', $order), [
+                'reason' => Dispute::REASON_POOR_QUALITY,
+                'description' => 'Исполнитель пропал, свяжитесь со мной по телефону +7 912 345-67-89.',
+            ])
+            ->assertRedirect(route('customer.orders.disputes.create', $order))
+            ->assertSessionHasErrors('description');
+
+        $this->assertDatabaseCount('disputes', 0);
+        $this->assertSame(Order::STATUS_IN_PROGRESS, $order->refresh()->status);
+        $this->assertDatabaseHas('moderation_flags', [
+            'user_id' => $customer->id,
+            'entity_type' => Order::class,
+            'entity_id' => $order->id,
+            'reason' => 'contact_detected_in_dispute_description',
+            'status' => ModerationFlag::STATUS_OPEN,
+        ]);
+    }
+
     public function test_guest_cannot_open_dispute(): void
     {
         [, , $order] = $this->orderScenario();

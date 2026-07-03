@@ -3,10 +3,14 @@
 namespace App\Http\Requests\Order;
 
 use App\Models\Dispute;
+use App\Models\ModerationFlag;
 use App\Models\Order;
+use App\Services\Moderation\ContactGuard;
+use App\Services\Moderation\ContactGuardResult;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreDisputeRequest extends FormRequest
 {
@@ -51,5 +55,42 @@ class StoreDisputeRequest extends FormRequest
             'reason' => 'причина спора',
             'description' => 'описание проблемы',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            $result = app(ContactGuard::class)->check($this->input('description'));
+
+            if (! $result->failedCheck()) {
+                return;
+            }
+
+            $this->recordModerationFlag($result);
+
+            $validator->errors()->add(
+                'description',
+                'В описании спора обнаружены контактные данные или предложение перейти вне Таскоры. Уберите контакты: спор рассматривается внутри платформы.',
+            );
+        });
+    }
+
+    private function recordModerationFlag(ContactGuardResult $result): void
+    {
+        $order = $this->route('order');
+
+        ModerationFlag::create([
+            'user_id' => $this->user()?->id,
+            'entity_type' => Order::class,
+            'entity_id' => $order instanceof Order ? $order->id : null,
+            'reason' => 'contact_detected_in_dispute_description',
+            'matched_type' => $result->matchedType,
+            'matched_value' => $result->matchedValue,
+            'status' => ModerationFlag::STATUS_OPEN,
+        ]);
     }
 }

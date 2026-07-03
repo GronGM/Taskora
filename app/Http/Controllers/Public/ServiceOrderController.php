@@ -78,7 +78,7 @@ class ServiceOrderController extends Controller
 
     private function feePercent(): float
     {
-        return (float) env('TASKORA_PLATFORM_FEE_PERCENT', 15);
+        return (float) config('payments.platform_fee_percent', 15);
     }
 
     private function reviewHoldDays(Request $request): int

@@ -380,6 +380,74 @@ class OrderLifecycleTest extends TestCase
         $this->assertSame(8500, $order->performer_amount);
     }
 
+    public function test_platform_fee_percent_is_read_from_config_not_env(): void
+    {
+        config(['payments.platform_fee_percent' => 10]);
+
+        [$customer, $service, $package] = $this->serviceScenario(packagePrice: 10000);
+
+        $this->actingAs($customer)
+            ->post(route('services.order.store', $service), ['package_id' => $package->id]);
+
+        $order = Order::firstOrFail();
+
+        $this->assertSame(10.0, (float) $order->platform_fee_percent);
+        $this->assertSame(1000, $order->platform_fee_amount);
+        $this->assertSame(9000, $order->performer_amount);
+    }
+
+    public function test_accepted_offer_fee_percent_is_read_from_config(): void
+    {
+        config(['payments.platform_fee_percent' => 20]);
+
+        [$customer, $offer] = $this->offerScenario();
+
+        $this->actingAs($customer)
+            ->post(route('customer.task-offers.accept', $offer));
+
+        $order = Order::firstOrFail();
+
+        $this->assertSame(20.0, (float) $order->platform_fee_percent);
+        $this->assertSame(1400, $order->platform_fee_amount);
+        $this->assertSame(5600, $order->performer_amount);
+    }
+
+    public function test_submit_work_with_contacts_is_blocked_by_contact_guard(): void
+    {
+        [$performer, $order] = $this->inProgressOrderForPerformer();
+
+        $this->actingAs($performer)
+            ->from(route('performer.orders.show', $order))
+            ->post(route('performer.orders.submit-work', $order), [
+                'message' => 'Работа готова, напиши в тг @my_super_nick за исходниками.',
+            ])
+            ->assertRedirect(route('performer.orders.show', $order))
+            ->assertSessionHasErrors('message');
+
+        $this->assertDatabaseCount('order_submissions', 0);
+        $this->assertSame(Order::STATUS_IN_PROGRESS, $order->refresh()->status);
+        $this->assertDatabaseHas('moderation_flags', [
+            'user_id' => $performer->id,
+            'entity_type' => Order::class,
+            'entity_id' => $order->id,
+            'reason' => 'contact_detected_in_work_submission',
+            'status' => ModerationFlag::STATUS_OPEN,
+        ]);
+    }
+
+    public function test_submit_work_without_contacts_passes_contact_guard(): void
+    {
+        [$performer, $order] = $this->inProgressOrderForPerformer();
+
+        $this->actingAs($performer)
+            ->post(route('performer.orders.submit-work', $order), [
+                'message' => 'Работа готова, файлы приложены в рабочей области.',
+            ]);
+
+        $this->assertSame(Order::STATUS_SUBMITTED_FOR_REVIEW, $order->refresh()->status);
+        $this->assertDatabaseCount('moderation_flags', 0);
+    }
+
     public function test_dashboard_links_to_orders_are_displayed(): void
     {
         $customerDashboard = file_get_contents(resource_path('js/Pages/Dashboards/Customer.jsx'));
