@@ -352,7 +352,7 @@ class TaskBoardController extends Controller
             'slug' => $task->slug,
             'url' => $task->url,
             'excerpt' => Str::limit($task->description, 170),
-            'budget_label' => $this->budgetLabel($task),
+            'budget_label' => $task->budget_label,
             'deadline_at' => $deadline?->format('d.m.Y'),
             'deadline_iso' => $deadline?->toDateString(),
             'offers_count' => $task->offers_count,
@@ -432,20 +432,4 @@ class TaskBoardController extends Controller
         return $user->favoriteTaskTypes()->pluck('task_type_id');
     }
 
-    private function budgetLabel(Task $task): string
-    {
-        if ($task->budget_min && $task->budget_max) {
-            return number_format($task->budget_min, 0, ',', ' ').' - '.number_format($task->budget_max, 0, ',', ' ').' ₽';
-        }
-
-        if ($task->budget_min) {
-            return 'от '.number_format($task->budget_min, 0, ',', ' ').' ₽';
-        }
-
-        if ($task->budget_max) {
-            return 'до '.number_format($task->budget_max, 0, ',', ' ').' ₽';
-        }
-
-        return 'Бюджет обсуждается';
-    }
 }

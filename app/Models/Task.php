@@ -109,4 +109,25 @@ class Task extends Model
     {
         return Attribute::get(fn (): string => "/tasks/{$this->slug}");
     }
+
+    protected function budgetLabel(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $format = fn (int $amount): string => number_format($amount, 0, ',', ' ');
+
+            if ($this->budget_min && $this->budget_max) {
+                return $format($this->budget_min).' - '.$format($this->budget_max).' ₽';
+            }
+
+            if ($this->budget_min) {
+                return 'от '.$format($this->budget_min).' ₽';
+            }
+
+            if ($this->budget_max) {
+                return 'до '.$format($this->budget_max).' ₽';
+            }
+
+            return 'Бюджет обсуждается';
+        });
+    }
 }
