@@ -63,6 +63,45 @@ class TaskBoardV2Test extends TestCase
         $this->assertSame($taskType->name, $payload['task_type']['name']);
     }
 
+    public function test_task_board_is_paginated_by_twenty(): void
+    {
+        $category = Category::factory()->create();
+
+        foreach (range(1, 25) as $i) {
+            $this->publishedTask(['category_id' => $category->id, 'title' => "Задание номер {$i}"]);
+        }
+
+        $firstPage = $this->get('/tasks')->assertOk();
+        $this->assertCount(20, $firstPage->inertiaProps('tasks'));
+
+        $pagination = $firstPage->inertiaProps('pagination');
+        $this->assertSame(25, $pagination['total']);
+        $this->assertSame(2, $pagination['last_page']);
+        $this->assertNotNull($pagination['next_page_url']);
+
+        $secondPage = $this->get('/tasks?page=2')->assertOk();
+        $this->assertCount(5, $secondPage->inertiaProps('tasks'));
+        $this->assertNotNull($secondPage->inertiaProps('pagination')['prev_page_url']);
+    }
+
+    public function test_task_board_pagination_keeps_filters_in_page_links(): void
+    {
+        $matching = Category::factory()->create(['slug' => 'paged-category']);
+        $other = Category::factory()->create(['slug' => 'other-category']);
+
+        foreach (range(1, 21) as $i) {
+            $this->publishedTask(['category_id' => $matching->id, 'title' => "Подходит {$i}"]);
+        }
+        $this->publishedTask(['category_id' => $other->id, 'title' => 'Лишнее задание']);
+
+        $response = $this->get('/tasks?categories[]=paged-category')->assertOk();
+        $pagination = $response->inertiaProps('pagination');
+
+        $this->assertSame(21, $pagination['total']);
+        $this->assertStringContainsString('paged-category', $pagination['next_page_url']);
+        $this->assertStringContainsString('page=2', $pagination['next_page_url']);
+    }
+
     public function test_task_board_filters_by_category(): void
     {
         $first = Category::factory()->create(['slug' => 'first-category']);

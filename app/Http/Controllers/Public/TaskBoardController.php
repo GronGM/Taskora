@@ -72,15 +72,25 @@ class TaskBoardController extends Controller
 
         $this->applySort($tasksQuery, $filters['sort']);
 
-        $tasks = $tasksQuery
-            ->get()
-            ->map(fn (Task $task): array => $this->taskCard($task, $user, $favoriteTaskIds));
+        $paginator = $tasksQuery->paginate(20)->withQueryString();
+
+        $tasks = collect($paginator->items())
+            ->map(fn (Task $task): array => $this->taskCard($task, $user, $favoriteTaskIds))
+            ->values();
 
         return Inertia::render('Tasks/Index', [
             'categories' => $categoryPayloads,
             'taskTypes' => $taskTypePayloads,
             'popularTaskTypes' => $taskTypePayloads->sortByDesc('task_count')->take(10)->values(),
             'tasks' => $tasks,
+            'pagination' => [
+                'total' => $paginator->total(),
+                'per_page' => $paginator->perPage(),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'prev_page_url' => $paginator->previousPageUrl(),
+                'next_page_url' => $paginator->nextPageUrl(),
+            ],
             'filters' => $filters,
             'activeCategory' => $activeCategories->first() ? $this->categoryPayload($activeCategories->first(), $user, $favoriteCategoryIds) : null,
             'activeTaskType' => $activeTaskTypes->first() ? $this->taskTypePayload($activeTaskTypes->first(), $user, $favoriteTaskTypeIds) : null,
@@ -240,6 +250,33 @@ class TaskBoardController extends Controller
         };
     }
 
+    /**
+     * @var \Illuminate\Support\Collection<int, int>|null
+     */
+    private $categoryTaskCounts = null;
+
+    /**
+     * @var \Illuminate\Support\Collection<int, int>|null
+     */
+    private $taskTypeTaskCounts = null;
+
+    private function categoryTaskCounts()
+    {
+        return $this->categoryTaskCounts ??= Task::published()
+            ->selectRaw('category_id, count(*) as task_count')
+            ->groupBy('category_id')
+            ->pluck('task_count', 'category_id');
+    }
+
+    private function taskTypeTaskCounts()
+    {
+        return $this->taskTypeTaskCounts ??= Task::published()
+            ->whereNotNull('task_type_id')
+            ->selectRaw('task_type_id, count(*) as task_count')
+            ->groupBy('task_type_id')
+            ->pluck('task_count', 'task_type_id');
+    }
+
     private function categories(?User $user, $favoriteCategoryIds)
     {
         return Category::query()
@@ -269,7 +306,11 @@ class TaskBoardController extends Controller
 
     private function categoryPayload(Category $category, ?User $user, $favoriteCategoryIds): array
     {
-        $categoryIds = [$category->id, ...$category->children()->pluck('id')->all()];
+        $childIds = $category->relationLoaded('children')
+            ? $category->children->pluck('id')->all()
+            : $category->children()->pluck('id')->all();
+        $categoryIds = [$category->id, ...$childIds];
+        $counts = $this->categoryTaskCounts();
 
         return [
             'id' => $category->id,
@@ -277,7 +318,7 @@ class TaskBoardController extends Controller
             'name' => $category->name,
             'slug' => $category->slug,
             'description' => $category->description,
-            'task_count' => Task::published()->whereIn('category_id', $categoryIds)->count(),
+            'task_count' => (int) collect($categoryIds)->sum(fn (int $id): int => (int) ($counts[$id] ?? 0)),
             'tasks_url' => route('tasks', ['categories' => [$category->slug]]),
             'is_favorited' => $favoriteCategoryIds->contains($category->id),
             'can_favorite' => $user?->isPerformer() === true,
@@ -298,7 +339,7 @@ class TaskBoardController extends Controller
                 'name' => $taskType->category?->name,
                 'slug' => $taskType->category?->slug,
             ],
-            'task_count' => Task::published()->where('task_type_id', $taskType->id)->count(),
+            'task_count' => (int) ($this->taskTypeTaskCounts()[$taskType->id] ?? 0),
             'tasks_url' => route('tasks', ['task_types' => [$taskType->slug]]),
             'is_favorited' => $favoriteTaskTypeIds->contains($taskType->id),
             'can_favorite' => $user?->isPerformer() === true,
