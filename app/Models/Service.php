@@ -31,6 +31,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Service extends Model
 {
+    protected static function booted(): void
+    {
+        static::saving(function (Service $service): void {
+            $service->search_title = \App\Services\Search\RelevanceSearch::normalize($service->title);
+            $service->search_text = \App\Services\Search\RelevanceSearch::normalize($service->short_description, $service->description);
+        });
+    }
+
     /** @use HasFactory<ServiceFactory> */
     use HasFactory;
 

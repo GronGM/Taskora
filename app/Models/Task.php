@@ -27,6 +27,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Task extends Model
 {
+    protected static function booted(): void
+    {
+        static::saving(function (Task $task): void {
+            $task->search_title = \App\Services\Search\RelevanceSearch::normalize($task->title);
+            $task->search_text = \App\Services\Search\RelevanceSearch::normalize($task->description);
+        });
+    }
+
     /** @use HasFactory<TaskFactory> */
     use HasFactory;
 

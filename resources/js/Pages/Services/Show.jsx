@@ -1,9 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
+import ServiceCard from '../../Components/ServiceCard';
 import PublicLayout from '../../Layouts/PublicLayout';
 
 const currency = new Intl.NumberFormat('ru-RU');
 
-export default function Show({ service }) {
+export default function Show({ service, similarServices = [] }) {
     const hasReviews = service.reviews_count > 0;
 
     return (
@@ -148,6 +149,22 @@ export default function Show({ service }) {
                     </div>
                 </aside>
             </section>
+
+            {similarServices.length > 0 && (
+                <section className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
+                    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+                        <h2 className="text-2xl font-semibold text-slate-950 dark:text-slate-100">Похожие услуги</h2>
+                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                            Другие опубликованные услуги в категории «{service.category.name}».
+                        </p>
+                        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            {similarServices.map((similar) => (
+                                <ServiceCard key={similar.id} service={similar} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
         </PublicLayout>
     );
 }

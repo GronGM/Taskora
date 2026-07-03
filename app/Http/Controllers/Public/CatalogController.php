@@ -9,6 +9,7 @@ use App\Models\PerformerProfile;
 use App\Models\Review;
 use App\Models\Service;
 use App\Models\User;
+use App\Services\Search\RelevanceSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,16 +30,7 @@ class CatalogController extends Controller
 
         $services = $this->publishedServicesQuery()
             ->when($activeCategory, fn (Builder $query) => $this->applyCategoryFilter($query, $activeCategory))
-            ->when($request->filled('search'), function (Builder $query) use ($request): void {
-                $search = trim($request->string('search')->toString());
-
-                $query->where(function (Builder $query) use ($search): void {
-                    $query
-                        ->where('title', 'like', "%{$search}%")
-                        ->orWhere('short_description', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                });
-            })
+            ->when($request->filled('search'), fn (Builder $query) => app(RelevanceSearch::class)->apply($query, trim($request->string('search')->toString())))
             ->orderByDesc('is_featured')
             ->orderByDesc('orders_count')
             ->get()
@@ -95,7 +87,18 @@ class CatalogController extends Controller
                 ->limit(5),
         ]);
 
+        $similarServices = $this->publishedServicesQuery()
+            ->whereKeyNot($service->id)
+            ->where('category_id', $service->category_id)
+            ->orderByDesc('rating')
+            ->orderByDesc('orders_count')
+            ->latest()
+            ->limit(4)
+            ->get()
+            ->map(fn (Service $similar): array => $this->serviceCard($similar));
+
         return Inertia::render('Services/Show', [
+            'similarServices' => $similarServices,
             'service' => [
                 ...$this->serviceCard($service),
                 'description' => $service->description,

@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Task;
 use App\Models\TaskType;
 use App\Models\User;
+use App\Services\Search\RelevanceSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -36,15 +37,7 @@ class TaskBoardController extends Controller
             ->with(['category', 'taskType.category', 'customer'])
             ->when($selectedCategoryFilterIds->isNotEmpty(), fn (Builder $query) => $query->whereIn('category_id', $selectedCategoryFilterIds))
             ->when($selectedTaskTypeIds->isNotEmpty(), fn (Builder $query) => $query->whereIn('task_type_id', $selectedTaskTypeIds))
-            ->when($filters['q'] !== '', function (Builder $query) use ($filters): void {
-                $search = $filters['q'];
-
-                $query->where(function (Builder $query) use ($search): void {
-                    $query
-                        ->where('title', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                });
-            })
+            ->when($filters['q'] !== '', fn (Builder $query) => app(RelevanceSearch::class)->apply($query, $filters['q']))
             ->when($filters['budget_min'] !== null, function (Builder $query) use ($filters): void {
                 $query->where(function (Builder $query) use ($filters): void {
                     $query
