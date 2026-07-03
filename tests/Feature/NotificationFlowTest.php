@@ -9,6 +9,7 @@ use App\Models\ServicePackage;
 use App\Models\Task;
 use App\Models\TaskOffer;
 use App\Models\User;
+use App\Notifications\PlatformNotification;
 use App\Services\Notifications\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -128,6 +129,82 @@ class NotificationFlowTest extends TestCase
             ->assertRedirect();
 
         $this->assertNotification($performer, 'service.rejected');
+    }
+
+    public function test_key_event_notification_uses_mail_and_database_channels(): void
+    {
+        config(['notifications.email_enabled' => true]);
+        $user = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+
+        foreach (PlatformNotification::EMAIL_EVENT_TYPES as $eventType) {
+            $notification = new PlatformNotification($eventType, 'Заголовок', 'Текст уведомления.');
+
+            $this->assertSame(['database', 'mail'], $notification->via($user), $eventType);
+        }
+    }
+
+    public function test_non_key_event_notification_uses_database_channel_only(): void
+    {
+        config(['notifications.email_enabled' => true]);
+        $user = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+
+        $notification = new PlatformNotification('review.published', 'Заголовок', 'Текст.');
+
+        $this->assertSame(['database'], $notification->via($user));
+    }
+
+    public function test_email_channel_is_disabled_by_config(): void
+    {
+        config(['notifications.email_enabled' => false]);
+        $user = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+
+        $notification = new PlatformNotification('task_offer.created', 'Заголовок', 'Текст.');
+
+        $this->assertSame(['database'], $notification->via($user));
+    }
+
+    public function test_mail_message_contains_subject_body_and_action(): void
+    {
+        config(['notifications.email_enabled' => true]);
+        $user = User::factory()->create(['role' => User::ROLE_CUSTOMER, 'name' => 'Мария']);
+
+        $notification = new PlatformNotification(
+            'task_offer.created',
+            'Новый отклик на задание',
+            'Исполнитель отправил отклик на задание «Сделать презентацию».',
+            '/customer/tasks/1',
+        );
+
+        $mail = $notification->toMail($user);
+
+        $this->assertSame('Таскора: Новый отклик на задание', $mail->subject);
+        $this->assertSame('Здравствуйте, Мария!', $mail->greeting);
+        $this->assertSame('Открыть на Таскоре', $mail->actionText);
+        $this->assertStringStartsWith('http', $mail->actionUrl);
+        $this->assertContains('Исполнитель отправил отклик на задание «Сделать презентацию».', $mail->introLines);
+    }
+
+    public function test_new_task_offer_sends_email_notification_to_customer(): void
+    {
+        config(['notifications.email_enabled' => true]);
+        \Illuminate\Support\Facades\Notification::fake();
+
+        [$customer, $performer, $task] = $this->taskScenario();
+
+        $this->actingAs($performer)
+            ->post(route('tasks.offers.store', $task), [
+                'message' => 'Готов выполнить задачу внутри платформы.',
+                'price' => 5000,
+                'delivery_days' => 3,
+            ])
+            ->assertRedirect();
+
+        \Illuminate\Support\Facades\Notification::assertSentTo(
+            $customer,
+            PlatformNotification::class,
+            fn (PlatformNotification $notification, array $channels): bool => in_array('mail', $channels, true)
+                && in_array('database', $channels, true),
+        );
     }
 
     public function test_new_task_offer_creates_notification_for_customer(): void
