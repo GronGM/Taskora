@@ -51,6 +51,25 @@ class TaskOfferController extends Controller
     public function store(StoreTaskOfferRequest $request, Task $task, NotificationService $notifications): RedirectResponse
     {
         $offer = DB::transaction(function () use ($request, $task): TaskOffer {
+            $existing = TaskOffer::query()
+                ->where('task_id', $task->id)
+                ->where('user_id', $request->user()->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($existing) {
+                abort_unless($existing->status === TaskOffer::STATUS_WITHDRAWN, 403);
+
+                $existing->update([
+                    ...$request->offerData(),
+                    'status' => TaskOffer::STATUS_SUBMITTED,
+                ]);
+
+                $task->increment('offers_count');
+
+                return $existing;
+            }
+
             $offer = TaskOffer::create([
                 ...$request->offerData(),
                 'task_id' => $task->id,

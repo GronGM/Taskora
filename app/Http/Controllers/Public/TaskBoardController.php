@@ -120,7 +120,8 @@ class TaskBoardController extends Controller
                 'views_count' => $task->views_count,
                 'offer_url' => route('tasks.offers.store', $task),
             ],
-            'canOffer' => $user?->isPerformer() === true && ! $existingOffer,
+            'canOffer' => $user?->isPerformer() === true
+                && (! $existingOffer || $existingOffer->status === \App\Models\TaskOffer::STATUS_WITHDRAWN),
             'existingOffer' => $existingOffer ? [
                 'status' => $existingOffer->status,
             ] : null,

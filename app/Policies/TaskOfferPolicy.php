@@ -18,7 +18,10 @@ class TaskOfferPolicy
         return $user->isPerformer()
             && $task->status === Task::STATUS_PUBLISHED
             && $task->user_id !== $user->id
-            && ! $task->offers()->where('user_id', $user->id)->exists();
+            && ! $task->offers()
+                ->where('user_id', $user->id)
+                ->where('status', '!=', TaskOffer::STATUS_WITHDRAWN)
+                ->exists();
     }
 
     public function withdraw(User $user, TaskOffer $offer): bool

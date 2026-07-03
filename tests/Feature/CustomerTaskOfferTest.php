@@ -210,6 +210,42 @@ class CustomerTaskOfferTest extends TestCase
         $this->assertSame(1, $task->offers()->count());
     }
 
+    public function test_performer_can_offer_again_after_withdrawing_own_offer(): void
+    {
+        $performer = User::factory()->create(['role' => User::ROLE_PERFORMER]);
+        $task = Task::factory()->create(['status' => Task::STATUS_PUBLISHED, 'offers_count' => 1]);
+        $offer = TaskOffer::factory()->for($task)->for($performer, 'performer')->create();
+
+        $this->actingAs($performer)
+            ->post(route('performer.task-offers.withdraw', $offer));
+
+        $this->assertSame(0, $task->refresh()->offers_count);
+
+        $this->actingAs($performer)
+            ->post(route('tasks.offers.store', $task), $this->validOfferPayload())
+            ->assertRedirect(route('performer.offers.index'));
+
+        $offer->refresh();
+        $this->assertSame(TaskOffer::STATUS_SUBMITTED, $offer->status);
+        $this->assertSame(1, $task->refresh()->offers_count);
+        $this->assertSame(1, $task->offers()->count());
+    }
+
+    public function test_performer_cannot_offer_again_after_rejection(): void
+    {
+        $performer = User::factory()->create(['role' => User::ROLE_PERFORMER]);
+        $task = Task::factory()->create(['status' => Task::STATUS_PUBLISHED]);
+        TaskOffer::factory()->for($task)->for($performer, 'performer')->create([
+            'status' => TaskOffer::STATUS_REJECTED,
+        ]);
+
+        $this->actingAs($performer)
+            ->post(route('tasks.offers.store', $task), $this->validOfferPayload())
+            ->assertForbidden();
+
+        $this->assertSame(1, $task->offers()->count());
+    }
+
     public function test_customer_cannot_offer_on_task(): void
     {
         $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);

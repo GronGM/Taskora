@@ -104,6 +104,29 @@ class PaymentHoldFlowTest extends TestCase
         $this->assertSame(Order::STATUS_COMPLETED, $order->refresh()->status);
     }
 
+    public function test_repeated_mark_paid_is_forbidden_and_does_not_duplicate_hold(): void
+    {
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        $order = Order::factory()->for($customer, 'customer')->create([
+            'status' => Order::STATUS_AWAITING_PAYMENT,
+            'payment_status' => Order::PAYMENT_UNPAID,
+        ]);
+
+        $this->actingAs($customer)
+            ->post(route('customer.orders.mark-paid', $order))
+            ->assertRedirect(route('customer.orders.show', $order));
+
+        $this->actingAs($customer)
+            ->post(route('customer.orders.mark-paid', $order))
+            ->assertForbidden();
+
+        $order->refresh();
+        $this->assertSame(Order::STATUS_IN_PROGRESS, $order->status);
+        $this->assertSame(Order::PAYMENT_HELD, $order->payment_status);
+        $this->assertSame(1, $order->paymentOperations()->where('type', \App\Models\PaymentOperation::TYPE_PAYMENT_HOLD)->count());
+        $this->assertSame(1, \App\Models\OrderEvent::query()->where('order_id', $order->id)->where('type', \App\Models\OrderEvent::TYPE_PAYMENT_STUB_PAID)->count());
+    }
+
     public function test_submit_work_starts_review_hold(): void
     {
         [$performer, $order] = $this->orderForPerformer([

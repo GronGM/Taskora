@@ -55,24 +55,34 @@ class CustomerOrderController extends Controller
         Gate::authorize('markPaid', $order);
         $user = request()->user();
 
-        DB::transaction(function () use ($order, $events, $ledger, $user): void {
-            $order->update([
+        $applied = DB::transaction(function () use ($order, $events, $ledger, $user): bool {
+            $fresh = Order::query()->whereKey($order->getKey())->lockForUpdate()->firstOrFail();
+
+            if ($fresh->status !== Order::STATUS_AWAITING_PAYMENT || $fresh->payment_status !== Order::PAYMENT_UNPAID) {
+                return false;
+            }
+
+            $fresh->update([
                 'payment_status' => Order::PAYMENT_HELD,
                 'status' => Order::STATUS_IN_PROGRESS,
                 'started_at' => now(),
             ]);
 
-            $ledger->recordStubHold($order, $user);
+            $ledger->recordStubHold($fresh, $user);
 
-            $events->paymentStubPaid($order, $user, [
+            $events->paymentStubPaid($fresh, $user, [
                 'payment_status' => Order::PAYMENT_HELD,
                 'status' => Order::STATUS_IN_PROGRESS,
             ]);
+
+            return true;
         });
 
         return redirect()
             ->route('customer.orders.show', $order)
-            ->with('success', 'Оплата отмечена локальной заглушкой. Заказ перешел в работу.');
+            ->with('success', $applied
+                ? 'Оплата отмечена локальной заглушкой. Заказ перешел в работу.'
+                : 'Заказ уже переведен в работу.');
     }
 
     public function requestRevision(RequestRevisionRequest $request, Order $order, OrderEventLogger $events): RedirectResponse

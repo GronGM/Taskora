@@ -32,6 +32,13 @@ class CustomerTaskOfferAcceptController extends Controller
             ->get();
 
         $order = DB::transaction(function () use ($offer, $task, $request, $events, $rejectedOffers): Order {
+            $freshOffer = TaskOffer::query()->whereKey($offer->getKey())->lockForUpdate()->firstOrFail();
+            $freshTask = Task::query()->whereKey($task->getKey())->lockForUpdate()->firstOrFail();
+
+            abort_unless($freshOffer->status === TaskOffer::STATUS_SUBMITTED, 403);
+            abort_if($freshOffer->order()->exists(), 403);
+            abort_if(in_array($freshTask->status, [Task::STATUS_ARCHIVED, Task::STATUS_CLOSED], true), 403);
+
             $feePercent = $this->feePercent();
             $feeAmount = (int) round($offer->price * $feePercent / 100);
 
