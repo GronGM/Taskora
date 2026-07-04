@@ -67,6 +67,40 @@
 }
 
 @layer components {
+    /*
+     * Темный фоллбек для страниц без явных dark:-классов.
+     * Утилиты Tailwind объявлены позже и перекрывают эти правила,
+     * поэтому страницы с явной темной разметкой не затрагиваются.
+     */
+    .dark .bg-white { background-color: rgb(15 23 42); }
+    .dark .bg-slate-50 { background-color: rgb(2 6 23); }
+    .dark .bg-slate-100 { background-color: rgb(30 41 59); }
+    .dark .bg-slate-200 { background-color: rgb(51 65 85); }
+
+    .dark .text-slate-950,
+    .dark .text-slate-900 { color: rgb(241 245 249); }
+    .dark .text-slate-800,
+    .dark .text-slate-700 { color: rgb(203 213 225); }
+    .dark .text-slate-600,
+    .dark .text-slate-500 { color: rgb(148 163 184); }
+
+    .dark .border-slate-100,
+    .dark .border-slate-200 { border-color: rgb(30 41 59); }
+    .dark .border-slate-300 { border-color: rgb(51 65 85); }
+
+    .dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+    .dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: rgb(30 41 59); }
+
+    .dark .ring-slate-200 { --tw-ring-color: rgb(51 65 85); }
+
+    .dark .hover\:bg-slate-50:hover,
+    .dark .hover\:bg-slate-100:hover { background-color: rgb(30 41 59); }
+    .dark .hover\:bg-white:hover { background-color: rgb(15 23 42); }
+    .dark .hover\:text-slate-950:hover,
+    .dark .hover\:text-slate-900:hover { color: rgb(241 245 249); }
+
+    .dark .placeholder\:text-slate-400::placeholder { color: rgb(100 116 139); }
+
     .dark .taskora-logo-mark {
         background-color: rgb(255 255 255) !important;
     }
