@@ -62,6 +62,10 @@ class RoleDashboardController extends Controller
             ]);
 
         return Inertia::render('Dashboards/Performer', [
+            'onboarding' => [
+                'has_services' => $user->services()->exists(),
+                'has_offers' => $user->taskOffers()->exists(),
+            ],
             'recommendedTasks' => [
                 'items' => $tasks,
                 'has_favorites' => $hasFavorites,

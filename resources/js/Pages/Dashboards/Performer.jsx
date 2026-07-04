@@ -11,9 +11,10 @@ const cards = [
     { title: 'Мои отклики', href: '/performer/offers', description: 'Следите за предложениями по заданиям.' },
 ];
 
-export default function Performer({ recommendedTasks = null }) {
+export default function Performer({ recommendedTasks = null, onboarding = null }) {
     const items = recommendedTasks?.items ?? [];
     const hasFavorites = recommendedTasks?.has_favorites === true;
+    const isNewPerformer = onboarding && !onboarding.has_services && !onboarding.has_offers;
 
     return (
         <DashboardLayout>
@@ -21,6 +22,24 @@ export default function Performer({ recommendedTasks = null }) {
             <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <p className="text-sm font-semibold uppercase text-blue-700">Рабочая область</p>
                 <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Кабинет исполнителя</h1>
+
+                {isNewPerformer && (
+                    <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-800 dark:bg-blue-950">
+                        <h2 className="text-xl font-semibold text-slate-950 dark:text-slate-100">Начните зарабатывать на Таскоре</h2>
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700 dark:text-slate-300">
+                            Два пути к первому заказу: создайте услугу-витрину, чтобы заказчики находили вас сами,
+                            или откликайтесь на задания биржи. Новички получают равные шансы — сортировка не только по рейтингу.
+                        </p>
+                        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                            <Link href="/performer/services/create" className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+                                Создать первую услугу
+                            </Link>
+                            <Link href="/tasks" className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                                Смотреть задания
+                            </Link>
+                        </div>
+                    </div>
+                )}
 
                 {recommendedTasks && (
                     <div className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
