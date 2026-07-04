@@ -10,6 +10,7 @@ use App\Models\Review;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\Search\RelevanceSearch;
+use App\Support\PerformerLevel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -308,6 +309,8 @@ class CatalogController extends Controller
             'id' => $user->id,
             'name' => $profile?->display_name ?: $user->name,
             'role' => 'Исполнитель',
+            'level' => $user->performer_level ?? PerformerLevel::NOVICE,
+            'level_label' => PerformerLevel::label($user->performer_level),
             'headline' => $profile?->headline,
             'avatar_url' => $profile?->avatar_url,
             'is_verified' => $profile?->verification_status === PerformerProfile::STATUS_VERIFIED,
@@ -333,6 +336,16 @@ class CatalogController extends Controller
     private function trustBadges(User $user, ?PerformerProfile $profile): array
     {
         $badges = [];
+
+        $badges[] = [
+            'label' => PerformerLevel::label($user->performer_level),
+            'tone' => match ($user->performer_level) {
+                PerformerLevel::EXPERT => 'emerald',
+                PerformerLevel::PRO => 'amber',
+                PerformerLevel::SPECIALIST => 'blue',
+                default => 'slate',
+            },
+        ];
 
         if ($profile?->verification_status === PerformerProfile::STATUS_VERIFIED) {
             $badges[] = ['label' => 'Проверен', 'tone' => 'emerald'];

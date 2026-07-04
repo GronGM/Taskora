@@ -2,10 +2,12 @@
 
 namespace App\Services\Reviews;
 
+use App\Models\Dispute;
 use App\Models\Order;
 use App\Models\Review;
 use App\Models\Service;
 use App\Models\User;
+use App\Support\PerformerLevel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -77,10 +79,19 @@ class ReviewAggregateService
             ->where('payment_status', Order::PAYMENT_RELEASED)
             ->count();
 
+        $rating = ((int) $reviewStats->reviews_count) > 0 ? round((float) $reviewStats->rating, 2) : null;
+
+        $lostDisputesCount = Dispute::query()
+            ->where('resolution', Dispute::RESOLUTION_REFUND_TO_CUSTOMER)
+            ->whereHas('order', fn (Builder $query) => $query->where('performer_id', $performer->id))
+            ->count();
+
         $performer->forceFill([
-            'performer_rating' => ((int) $reviewStats->reviews_count) > 0 ? round((float) $reviewStats->rating, 2) : null,
+            'performer_rating' => $rating,
             'performer_reviews_count' => (int) $reviewStats->reviews_count,
             'performer_completed_orders_count' => $completedOrdersCount,
+            'performer_lost_disputes_count' => $lostDisputesCount,
+            'performer_level' => PerformerLevel::determine($completedOrdersCount, $rating !== null ? (float) $rating : null, $lostDisputesCount),
         ])->save();
     }
 

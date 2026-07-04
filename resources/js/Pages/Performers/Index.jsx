@@ -51,6 +51,9 @@ export default function PerformersIndex({ performers, categories = [], filters =
                                     <div className="min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <p className="text-sm font-semibold uppercase text-blue-700">{performer.role}</p>
+                                            {performer.level_label && (
+                                                <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{performer.level_label}</span>
+                                            )}
                                             {performer.is_verified && (
                                                 <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">Проверен</span>
                                             )}
