@@ -15,9 +15,16 @@ class RoleDashboardController extends Controller
 {
     private const RECOMMENDED_TASKS_LIMIT = 5;
 
-    public function customer(): Response
+    public function customer(Request $request): Response
     {
-        return Inertia::render('Dashboards/Customer');
+        $user = $request->user();
+
+        return Inertia::render('Dashboards/Customer', [
+            'onboarding' => [
+                'has_tasks' => $user->tasks()->exists(),
+                'has_orders' => $user->customerOrders()->exists(),
+            ],
+        ]);
     }
 
     public function performer(Request $request): Response
