@@ -8,6 +8,7 @@ const navigation = [
     { label: 'Каталог', href: '/catalog' },
     { label: 'Задания', href: '/tasks' },
     { label: 'Исполнители', href: '/performers' },
+    { label: 'Как это работает', href: '/how-it-works' },
 ];
 
 export default function PublicLayout({ children }) {

@@ -74,6 +74,8 @@ Route::post('/beta-feedback', [BetaFeedbackController::class, 'store'])
 Route::get('/', HomeController::class)->name('home');
 
 Route::get('/r/{code}', [\App\Http\Controllers\Referrals\ReferralController::class, 'redirect'])->name('referral.redirect');
+Route::get('/how-it-works', [\App\Http\Controllers\Public\HelpController::class, 'howItWorks'])->name('help.how-it-works');
+Route::get('/faq', [\App\Http\Controllers\Public\HelpController::class, 'faq'])->name('help.faq');
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/catalog/{category:slug}', [CatalogController::class, 'category'])->name('catalog.category');
 Route::get('/services/{service:slug}', [CatalogController::class, 'service'])->name('services.show');
