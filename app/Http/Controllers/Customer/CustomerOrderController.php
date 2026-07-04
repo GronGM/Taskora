@@ -50,7 +50,7 @@ class CustomerOrderController extends Controller
         ]);
     }
 
-    public function markPaid(Order $order, OrderEventLogger $events, PaymentLedgerService $ledger): RedirectResponse
+    public function markPaid(Order $order, OrderEventLogger $events, PaymentLedgerService $ledger): RedirectResponse|\Symfony\Component\HttpFoundation\Response
     {
         Gate::authorize('markPaid', $order);
         $user = request()->user();
@@ -70,7 +70,8 @@ class CustomerOrderController extends Controller
                     ->with('error', 'Не удалось начать оплату. Попробуйте еще раз чуть позже.');
             }
 
-            return redirect()->away($confirmationUrl);
+            // Внешний redirect для Inertia: обычный redirect()->away() XHR-запрос молча проглотит.
+            return Inertia::location($confirmationUrl);
         }
 
         $applied = DB::transaction(function () use ($order, $events, $ledger, $user): bool {

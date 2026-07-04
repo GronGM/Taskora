@@ -39,9 +39,16 @@ class YooKassaPaymentTest extends TestCase
         $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
         $order = Order::factory()->for($customer, 'customer')->create(['price' => 5000]);
 
+        // Обычный запрос — 302 на страницу оплаты.
         $this->actingAs($customer)
             ->post(route('customer.orders.mark-paid', $order))
             ->assertRedirect('https://yoomoney.ru/checkout/payments/v2/contract?orderId=pay_123');
+
+        // Inertia-запрос — 409 с X-Inertia-Location (внешний redirect).
+        $this->actingAs($customer)
+            ->post(route('customer.orders.mark-paid', $order), [], ['X-Inertia' => 'true'])
+            ->assertStatus(409)
+            ->assertHeader('X-Inertia-Location', 'https://yoomoney.ru/checkout/payments/v2/contract?orderId=pay_123');
 
         // Заказ не меняется до подтверждения вебхуком.
         $order->refresh();
