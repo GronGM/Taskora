@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'slug',
     'short_description',
     'description',
+    'cover_path',
     'price_from',
     'delivery_days',
     'status',
@@ -106,5 +107,12 @@ class Service extends Model
     protected function url(): Attribute
     {
         return Attribute::get(fn (): string => "/services/{$this->slug}");
+    }
+
+    protected function coverUrl(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->cover_path
+            ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->cover_path)
+            : null);
     }
 }

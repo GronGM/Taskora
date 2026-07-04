@@ -11,6 +11,7 @@ export default function Create({ categories, defaultPackages }) {
         price_from: 1500,
         delivery_days: 3,
         packages: defaultPackages,
+        cover: null,
         submit_for_review: false,
     });
 

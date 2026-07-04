@@ -14,6 +14,9 @@ export default function Show({ service, similarServices = [] }) {
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
                     <div>
+                        {service.cover_url && (
+                            <img src={service.cover_url} alt="" className="mb-6 aspect-[2/1] w-full rounded-lg object-cover shadow-sm" />
+                        )}
                         <Link href={service.category.url} className="text-sm font-semibold text-blue-700 hover:text-blue-800">
                             {service.category.name}
                         </Link>

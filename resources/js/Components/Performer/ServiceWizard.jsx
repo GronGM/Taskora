@@ -100,6 +100,22 @@ export default function ServiceWizard({ form, categories, onSubmit }) {
                                     className={`${inputClass} leading-6`}
                                 />
                             </Field>
+
+                            <Field id="cover" label="Обложка (необязательно)" error={errors.cover} className="lg:col-span-2">
+                                <input
+                                    id="cover"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={(event) => setData('cover', event.target.files[0] ?? null)}
+                                    className="w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                                />
+                                <p className="mt-2 text-xs leading-5 text-slate-500">
+                                    JPG, PNG или WebP до 5 МБ. Карточки с обложкой заметнее в каталоге; рекомендуемое соотношение 2:1.
+                                </p>
+                                {data.cover && (
+                                    <img src={URL.createObjectURL(data.cover)} alt="Превью обложки" className="mt-3 aspect-[2/1] w-full max-w-md rounded-lg object-cover" />
+                                )}
+                            </Field>
                         </div>
                     </section>
                 )}
@@ -135,6 +151,7 @@ export default function ServiceWizard({ form, categories, onSubmit }) {
                             <SummaryRow label="Цена от" value={`${data.price_from} ₽`} />
                             <SummaryRow label="Срок" value={`${data.delivery_days} дн.`} />
                             <SummaryRow label="Пакеты" value={data.packages.map((pack) => pack.name || 'Без названия').join(', ')} />
+                            <SummaryRow label="Обложка" value={data.cover ? data.cover.name : 'Без обложки'} />
                         </dl>
                         <p className="mt-4 whitespace-pre-line border-t border-slate-100 pt-4 text-sm leading-6 text-slate-600">{data.short_description}</p>
                         <p className="mt-4 rounded-md bg-slate-50 p-4 text-xs leading-5 text-slate-500">

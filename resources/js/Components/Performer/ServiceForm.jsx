@@ -90,6 +90,26 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                         />
                     </Field>
 
+                    <Field id="cover" label="Обложка услуги" error={errors.cover} className="lg:col-span-2">
+                        <input
+                            id="cover"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            disabled={disabled}
+                            onChange={(event) => setData('cover', event.target.files[0] ?? null)}
+                            className="w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                            JPG, PNG или WebP до 5 МБ, соотношение 2:1. Замена обложки опубликованной услуги вернет ее на модерацию.
+                        </p>
+                        {data.cover instanceof File && (
+                            <img src={URL.createObjectURL(data.cover)} alt="Превью новой обложки" className="mt-3 aspect-[2/1] w-full max-w-md rounded-lg object-cover" />
+                        )}
+                        {!data.cover && data.current_cover_url && (
+                            <img src={data.current_cover_url} alt="Текущая обложка" className="mt-3 aspect-[2/1] w-full max-w-md rounded-lg object-cover opacity-80" />
+                        )}
+                    </Field>
+
                     <Field id="delivery_days" label="Срок выполнения, дней" error={errors.delivery_days}>
                         <input
                             id="delivery_days"

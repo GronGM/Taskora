@@ -53,6 +53,7 @@ class ModeratorServiceController extends Controller
                 'id' => $service->id,
                 'title' => $service->title,
                 'short_description' => $service->short_description,
+            'cover_url' => $service->cover_url,
                 'description' => $service->description,
                 'price_from' => $service->price_from,
                 'delivery_days' => $service->delivery_days,

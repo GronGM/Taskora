@@ -293,6 +293,7 @@ class CatalogController extends Controller
             'title' => $service->title,
             'slug' => $service->slug,
             'short_description' => $service->short_description,
+            'cover_url' => $service->cover_url,
             'price_from' => $service->price_from,
             'delivery_days' => $service->delivery_days,
             'rating' => $service->reviews_count > 0 ? (float) $service->rating : null,

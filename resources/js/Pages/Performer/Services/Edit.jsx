@@ -21,11 +21,14 @@ export default function Edit({ service, categories, statusLabels }) {
         price_from: service.price_from,
         delivery_days: service.delivery_days,
         packages: service.packages.length > 0 ? service.packages : [],
+        cover: null,
+        current_cover_url: service.cover_url ?? null,
     });
 
     const submit = (event) => {
         event.preventDefault();
-        form.put(`/performer/services/${service.id}`);
+        form.transform((data) => ({ ...data, _method: 'put' }));
+        form.post(`/performer/services/${service.id}`);
     };
 
     return (

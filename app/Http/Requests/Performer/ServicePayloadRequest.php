@@ -24,6 +24,7 @@ abstract class ServicePayloadRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:6000'],
             'price_from' => ['required', 'integer', 'min:100', 'max:10000000'],
             'delivery_days' => ['required', 'integer', 'min:1', 'max:365'],
+            'cover' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'submit_for_review' => ['nullable', 'boolean'],
             'packages' => ['required', 'array', 'min:1', 'max:3'],
             'packages.*.name' => ['required', 'string', 'max:80'],
@@ -83,6 +84,7 @@ abstract class ServicePayloadRequest extends FormRequest
     {
         $fields = [
             'title' => 'Название услуги',
+            'cover' => 'Обложка услуги',
             'short_description' => 'Краткое описание',
             'description' => 'Полное описание',
         ];

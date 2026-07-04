@@ -60,6 +60,10 @@ class PerformerServiceController extends Controller
 
             $this->syncPackages($service, $request->packageData());
 
+            if ($request->hasFile('cover')) {
+                $this->storeCover($service, $request->file('cover'));
+            }
+
             return $service;
         });
 
@@ -85,7 +89,8 @@ class PerformerServiceController extends Controller
 
     public function update(UpdateServiceRequest $request, Service $service): RedirectResponse
     {
-        $importantChanges = $this->hasImportantChanges($service->load('packages'), $request->serviceData(), $request->packageData());
+        $importantChanges = $request->hasFile('cover')
+            || $this->hasImportantChanges($service->load('packages'), $request->serviceData(), $request->packageData());
 
         DB::transaction(function () use ($request, $service, $importantChanges): void {
             $data = $request->serviceData();
@@ -103,6 +108,10 @@ class PerformerServiceController extends Controller
 
             $service->update($data);
             $this->syncPackages($service, $request->packageData());
+
+            if ($request->hasFile('cover')) {
+                $this->storeCover($service, $request->file('cover'));
+            }
         });
 
         return redirect()
@@ -168,6 +177,19 @@ class PerformerServiceController extends Controller
      * @param  array<string, mixed>  $data
      * @param  array<int, array<string, mixed>>  $packages
      */
+    private function storeCover(Service $service, \Illuminate\Http\UploadedFile $file): void
+    {
+        $oldPath = $service->cover_path;
+
+        $service->update([
+            'cover_path' => $file->store("services/{$service->id}", 'public'),
+        ]);
+
+        if ($oldPath && $oldPath !== $service->cover_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+        }
+    }
+
     private function hasImportantChanges(Service $service, array $data, array $packages): bool
     {
         foreach (['title', 'short_description', 'description', 'category_id'] as $field) {
@@ -238,6 +260,7 @@ class PerformerServiceController extends Controller
             'id' => $service->id,
             'title' => $service->title,
             'category_id' => $service->category_id,
+            'cover_url' => $service->cover_url,
             'short_description' => $service->short_description,
             'description' => $service->description,
             'price_from' => $service->price_from,

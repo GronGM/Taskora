@@ -21,7 +21,17 @@ export default function ServiceCard({ service }) {
     const hasReviews = service.reviews_count > 0;
 
     return (
-        <article className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+        <article className="flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+            <Link href={service.url} aria-hidden="true" tabIndex={-1} className="block">
+                {service.cover_url ? (
+                    <img src={service.cover_url} alt="" loading="lazy" className="aspect-[2/1] w-full object-cover" />
+                ) : (
+                    <div className="flex aspect-[2/1] w-full items-end bg-gradient-to-br from-blue-50 via-slate-50 to-blue-100 p-4 dark:from-slate-800 dark:via-slate-900 dark:to-blue-950">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-blue-400 dark:text-blue-300">{service.category.name}</span>
+                    </div>
+                )}
+            </Link>
+            <div className="flex flex-1 flex-col p-6 pt-5">
             <div className="flex items-start justify-between gap-4">
                 <Link
                     href={service.category.url}
@@ -77,6 +87,7 @@ export default function ServiceCard({ service }) {
             >
                 Подробнее
             </Link>
+            </div>
         </article>
     );
 }
