@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Referrals\ReferralController;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +20,20 @@ class RegisteredUserController extends Controller
 
     public function store(RegisterRequest $request): RedirectResponse
     {
-        $user = User::create($request->validated());
+        $referrer = null;
+        $referralCode = (string) $request->cookie(ReferralController::COOKIE_NAME, '');
+
+        if ($referralCode !== '') {
+            $referrer = User::query()
+                ->where('referral_code', $referralCode)
+                ->where('status', '!=', 'blocked')
+                ->first();
+        }
+
+        $user = User::create([
+            ...$request->validated(),
+            'referred_by_id' => $referrer?->id,
+        ]);
 
         Auth::login($user);
 

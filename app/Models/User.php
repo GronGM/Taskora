@@ -25,6 +25,8 @@ use Illuminate\Notifications\Notifiable;
     'last_login_at',
     'last_login_ip',
     'admin_note',
+    'referral_code',
+    'referred_by_id',
     'performer_rating',
     'performer_reviews_count',
     'performer_completed_orders_count',
@@ -146,6 +148,23 @@ class User extends Authenticatable
             self::ROLE_ADMIN => '/admin/dashboard',
             default => '/customer/dashboard',
         };
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user): void {
+            $user->referral_code ??= strtolower(\Illuminate\Support\Str::random(10));
+        });
+    }
+
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(User::class, 'referred_by_id');
+    }
+
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referred_by_id');
     }
 
     public function services(): HasMany

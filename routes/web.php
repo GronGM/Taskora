@@ -73,6 +73,7 @@ Route::post('/beta-feedback', [BetaFeedbackController::class, 'store'])
 
 Route::get('/', HomeController::class)->name('home');
 
+Route::get('/r/{code}', [\App\Http\Controllers\Referrals\ReferralController::class, 'redirect'])->name('referral.redirect');
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/catalog/{category:slug}', [CatalogController::class, 'category'])->name('catalog.category');
 Route::get('/services/{service:slug}', [CatalogController::class, 'service'])->name('services.show');
@@ -104,6 +105,7 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
+    Route::get('/referrals', [\App\Http\Controllers\Referrals\ReferralController::class, 'index'])->name('referrals.index');
     Route::get('/notifications', [NotificationController::class, 'index'])
         ->middleware('throttle:taskora-notifications')
         ->name('notifications.index');

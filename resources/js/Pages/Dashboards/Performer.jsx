@@ -11,6 +11,7 @@ const cards = [
     { title: 'Мои услуги', href: '/performer/services', description: 'Создавайте услуги и отправляйте их на модерацию.' },
     { title: 'Доступные задания', href: '/tasks', description: 'Ищите опубликованные задания заказчиков.' },
     { title: 'Мои отклики', href: '/performer/offers', description: 'Следите за предложениями по заданиям.' },
+    { title: 'Приглашайте друзей', href: '/referrals', description: 'Персональная ссылка и список приглашенных.' },
 ];
 
 export default function Performer({ recommendedTasks = null, onboarding = null, stats = null, attention = null }) {

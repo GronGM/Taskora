@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ReleaseDueOrdersCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->encryptCookies(except: [
+            \App\Http\Controllers\Referrals\ReferralController::COOKIE_NAME,
+        ]);
+
         $middleware->web(append: [
             EnsureBetaAccess::class,
             EnsureActiveUser::class,

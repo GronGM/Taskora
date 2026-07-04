@@ -8,6 +8,7 @@ const cards = [
     { title: 'Мои задания', href: '/customer/tasks', description: 'Публикуйте задачи и выбирайте исполнителей.' },
     { title: 'Создать задание', href: '/customer/tasks/create', description: 'Подготовьте новое задание для биржи.' },
     { title: 'Каталог услуг', href: '/catalog', description: 'Выберите готовую услугу и создайте заказ.' },
+    { title: 'Приглашайте друзей', href: '/referrals', description: 'Персональная ссылка и список приглашенных.' },
 ];
 
 export default function Customer({ onboarding = null, stats = null, attention = null }) {
