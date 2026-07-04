@@ -34,12 +34,13 @@ class CatalogController extends Controller
             ->when($request->filled('search'), fn (Builder $query) => app(RelevanceSearch::class)->apply($query, trim($request->string('search')->toString())))
             ->orderByDesc('is_featured')
             ->orderByDesc('orders_count')
-            ->get()
-            ->map(fn (Service $service): array => $this->serviceCard($service));
+            ->paginate(24)
+            ->withQueryString();
 
         return Inertia::render('Catalog/Index', [
             'categories' => $this->categories(),
-            'services' => $services,
+            'services' => collect($services->items())->map(fn (Service $service): array => $this->serviceCard($service))->values(),
+            'pagination' => $this->paginationPayload($services),
             'filters' => [
                 'category' => $activeCategory?->slug,
                 'search' => $request->string('search')->toString(),
@@ -58,16 +59,17 @@ class CatalogController extends Controller
         $services = $servicesQuery
             ->orderByDesc('is_featured')
             ->orderByDesc('orders_count')
-            ->get()
-            ->map(fn (Service $service): array => $this->serviceCard($service));
+            ->paginate(24)
+            ->withQueryString();
 
         return Inertia::render('Catalog/Category', [
+            'pagination' => $this->paginationPayload($services),
             'category' => $this->categoryPayload($category),
             'children' => $category->children()
                 ->where('is_active', true)
                 ->get()
                 ->map(fn (Category $category): array => $this->categoryPayload($category)),
-            'services' => $services,
+            'services' => collect($services->items())->map(fn (Service $service): array => $this->serviceCard($service))->values(),
         ]);
     }
 
@@ -151,11 +153,12 @@ class CatalogController extends Controller
             ->orderByDesc('performer_completed_orders_count')
             ->orderByDesc('performer_reviews_count')
             ->orderBy('name')
-            ->get()
-            ->map(fn (User $user): array => $this->performerCard($user));
+            ->paginate(24)
+            ->withQueryString();
 
         return Inertia::render('Performers/Index', [
-            'performers' => $performers,
+            'performers' => collect($performers->items())->map(fn (User $user): array => $this->performerCard($user))->values(),
+            'pagination' => $this->paginationPayload($performers),
             'categories' => $this->categories(),
             'filters' => [
                 'category' => $activeCategory?->slug,
@@ -221,6 +224,21 @@ class CatalogController extends Controller
     public function performerReviews(User $user): Response
     {
         return $this->performer($user);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function paginationPayload($paginator): array
+    {
+        return [
+            'total' => $paginator->total(),
+            'per_page' => $paginator->perPage(),
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+            'prev_page_url' => $paginator->previousPageUrl(),
+            'next_page_url' => $paginator->nextPageUrl(),
+        ];
     }
 
     private function publishedServicesQuery(): Builder

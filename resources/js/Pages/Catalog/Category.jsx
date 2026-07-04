@@ -1,10 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '../../Layouts/PublicLayout';
+import Pagination from '../../Components/Pagination';
 import ServiceCard from '../../Components/ServiceCard';
 
 const categoryLinkClass = 'rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-blue-700 dark:hover:bg-slate-800 dark:hover:text-white dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950';
 
-export default function Category({ category, children, services }) {
+export default function Category({ category, children, services, pagination = null }) {
     return (
         <PublicLayout>
             <Head title={category.name} />
@@ -54,6 +55,8 @@ export default function Category({ category, children, services }) {
                         </Link>
                     </div>
                 )}
+
+                <Pagination pagination={pagination} label="Пагинация категории" />
             </section>
         </PublicLayout>
     );

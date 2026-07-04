@@ -1,10 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '../../Layouts/PublicLayout';
+import Pagination from '../../Components/Pagination';
 import ServiceCard from '../../Components/ServiceCard';
 
 const focusClass = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950';
 
-export default function CatalogIndex({ categories, services, filters, activeCategory }) {
+export default function CatalogIndex({ categories, services, filters, activeCategory, pagination = null }) {
     return (
         <PublicLayout>
             <Head title="Каталог услуг" />
@@ -100,6 +101,8 @@ export default function CatalogIndex({ categories, services, filters, activeCate
                     ) : (
                         <EmptyCatalog />
                     )}
+
+                    <Pagination pagination={pagination} label="Пагинация каталога" />
                 </div>
             </section>
         </PublicLayout>

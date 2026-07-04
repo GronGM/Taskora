@@ -1,10 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
+import Pagination from '../../Components/Pagination';
 import PublicLayout from '../../Layouts/PublicLayout';
 
 const activeCategoryClass = 'bg-blue-600 text-white';
 const categoryClass = 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50';
 
-export default function PerformersIndex({ performers, categories = [], filters = {} }) {
+export default function PerformersIndex({ performers, categories = [], filters = {}, pagination = null }) {
     return (
         <PublicLayout>
             <Head title="Исполнители" />
@@ -105,6 +106,8 @@ export default function PerformersIndex({ performers, categories = [], filters =
                         </p>
                     </div>
                 )}
+
+                <Pagination pagination={pagination} label="Пагинация исполнителей" />
             </section>
         </PublicLayout>
     );
