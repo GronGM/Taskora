@@ -30,7 +30,7 @@ export default function Index({ users = {}, filters = {}, summary = {}, labels =
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Администрирование</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Пользователи</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Пользователи</h1>
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
                             Поиск аккаунтов, проверка ролей, блокировка доступа и админские заметки. Пароли и служебные токены здесь не выводятся.
                         </p>

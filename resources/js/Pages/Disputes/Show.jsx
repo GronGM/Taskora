@@ -23,7 +23,7 @@ export default function Show({ dispute }) {
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-red-700">Спор #{dispute.id}</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">{dispute.order.title}</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">{dispute.order.title}</h1>
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{dispute.description}</p>
                     </div>
                     <div className="flex flex-wrap gap-3">

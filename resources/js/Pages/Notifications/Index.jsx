@@ -31,7 +31,7 @@ export default function Index({ items = [], unreadCount = 0 }) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700 dark:text-blue-300">Активность</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">Уведомления</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">Уведомления</h1>
                         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
                             Здесь собраны события по услугам, заданиям, заказам, сообщениям и спорам внутри Таскоры.
                         </p>

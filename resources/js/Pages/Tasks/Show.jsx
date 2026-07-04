@@ -33,7 +33,7 @@ export default function TaskShow({ task, canOffer, existingOffer, offerStatusLab
                                 {task.badges.urgent && <span className="rounded-md bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">Срочно</span>}
                                 {task.badges.favorited && <span className="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">В избранном</span>}
                             </div>
-                            <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-normal text-slate-950">{task.title}</h1>
+                            <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950">{task.title}</h1>
                             <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-4">
                                 <p>Бюджет: <span className="font-semibold text-slate-950">{task.budget_label}</span></p>
                                 <p>Срок: <span className="font-semibold text-slate-950">{task.deadline_at ?? 'Не указан'}</span></p>

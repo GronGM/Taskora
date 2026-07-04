@@ -19,7 +19,7 @@ export default function Show({ profile, reviews, statusLabels }) {
                 <div className="mb-8 flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Проверка профиля</p>
-                        <h1 className="mt-2 max-w-4xl text-4xl font-semibold tracking-normal text-slate-950">{profile.display_name}</h1>
+                        <h1 className="mt-2 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950">{profile.display_name}</h1>
                         <p className="mt-4 text-sm text-slate-600">
                             Статус: <span className="font-semibold text-slate-950">{statusLabels[profile.verification_status]}</span>
                         </p>

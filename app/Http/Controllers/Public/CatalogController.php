@@ -292,6 +292,8 @@ class CatalogController extends Controller
                 'avatar_url' => $profile?->avatar_url,
                 'headline' => $profile?->headline,
                 'is_verified' => $profile?->verification_status === PerformerProfile::STATUS_VERIFIED,
+                'level' => $service->user->performer_level ?? PerformerLevel::NOVICE,
+                'level_label' => PerformerLevel::label($service->user->performer_level),
                 'rating' => $service->user->performer_reviews_count > 0 ? (float) $service->user->performer_rating : null,
                 'reviews_count' => $service->user->performer_reviews_count,
                 'completed_orders_count' => $service->user->performer_completed_orders_count,

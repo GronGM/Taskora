@@ -48,7 +48,7 @@ export default function TasksIndex({
                     <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
                         <div>
                             <p className="text-sm font-semibold uppercase text-blue-700 dark:text-blue-300">Биржа</p>
-                            <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">Биржа заданий</h1>
+                            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">Биржа заданий</h1>
                             <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600 dark:text-slate-300">
                                 Живая лента заказов: документы, презентации, расчеты, дизайн, сайты и бизнес-задачи. Фильтруйте по бюджету, сроку и любимым направлениям.
                             </p>

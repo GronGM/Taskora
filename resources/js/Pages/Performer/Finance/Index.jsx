@@ -22,7 +22,7 @@ export default function PerformerFinance({ summary, ledgerEntries, labels }) {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Внутренний ledger</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Финансы</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Финансы</h1>
                     </div>
                     <Link href="/performer/dashboard" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
                         Вернуться в кабинет

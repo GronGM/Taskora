@@ -13,7 +13,7 @@ export default function Reviews({ performer, reviews = [] }) {
                     <Link href="/performers" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
                         Исполнители
                     </Link>
-                    <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">{performer.name}</h1>
+                    <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">{performer.name}</h1>
                     <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
                         Публичные отзывы по завершенным заказам внутри Таскоры.
                     </p>

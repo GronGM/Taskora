@@ -38,7 +38,7 @@ export default function Show({ performer, services, portfolio, reviews }) {
                                         </Link>
                                     ))}
                                 </div>
-                                <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">{performer.name}</h1>
+                                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">{performer.name}</h1>
                                 <p className="mt-3 max-w-3xl text-lg leading-8 text-slate-600">
                                     {performer.headline || 'Исполнитель Таскоры'}
                                 </p>

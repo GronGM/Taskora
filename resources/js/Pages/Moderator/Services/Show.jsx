@@ -21,7 +21,7 @@ export default function Show({ service, flags }) {
                 <div className="mb-8 flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Модерация услуг</p>
-                        <h1 className="mt-2 max-w-4xl text-4xl font-semibold tracking-normal text-slate-950">{service.title}</h1>
+                        <h1 className="mt-2 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950">{service.title}</h1>
                         <p className="mt-4 text-sm text-slate-600">
                             Отправлена на проверку: <span className="font-semibold text-slate-950">{service.submitted_at}</span>
                         </p>

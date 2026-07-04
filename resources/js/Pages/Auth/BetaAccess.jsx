@@ -25,12 +25,12 @@ export default function BetaAccess() {
                         <span className="grid h-11 w-11 place-items-center rounded-md bg-blue-600" aria-hidden="true">
                             <span className="taskora-logo-mark h-4 w-4 rounded-sm bg-white" />
                         </span>
-                        <span className="text-xl font-semibold tracking-normal">Таскора</span>
+                        <span className="text-xl font-semibold tracking-tight">Таскора</span>
                     </div>
 
                     <div className="mt-8">
                         <p className="text-sm font-semibold uppercase text-blue-700 dark:text-blue-300">Beta access</p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-normal text-slate-950 dark:text-slate-50">
+                        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-slate-50">
                             Закрытое тестирование Таскоры
                         </h1>
                         <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">

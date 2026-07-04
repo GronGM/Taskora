@@ -10,7 +10,7 @@ export default function Show({ review }) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Отзыв опубликован</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">{review.order.title}</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">{review.order.title}</h1>
                         <p className="mt-3 text-sm text-slate-500">Исполнитель: {review.performer.name}</p>
                     </div>
                     <Link href="/customer/reviews" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50">

@@ -135,7 +135,7 @@ function ConversationListPanel({ conversations, pagination, filters, tabs, order
                 <p className="text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Мессенджер</p>
                 <div className="mt-2 flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                        <h1 className="text-2xl font-semibold tracking-normal text-slate-950 dark:text-white">Сообщения</h1>
+                        <h1 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Сообщения</h1>
                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Заказы и споры</p>
                     </div>
                     {hasActiveFilters && (
@@ -320,7 +320,7 @@ function ConversationHeader({ conversation }) {
                         <Badge tone="slate">{isDispute ? conversation.status_label : conversation.status_label}</Badge>
                         {!isDispute && <Badge tone="blue">{conversation.payment_status_label}</Badge>}
                     </div>
-                    <h1 className="mt-2 line-clamp-2 min-w-0 break-words text-xl font-semibold tracking-normal text-slate-950 [overflow-wrap:anywhere] dark:text-white sm:text-2xl lg:line-clamp-none" title={orderTitle}>{orderTitle}</h1>
+                    <h1 className="mt-2 line-clamp-2 min-w-0 break-words text-xl font-semibold tracking-tight text-slate-950 [overflow-wrap:anywhere] dark:text-white sm:text-2xl lg:line-clamp-none" title={orderTitle}>{orderTitle}</h1>
                     <p className="mt-1 break-words text-sm text-slate-600 dark:text-slate-300">
                         {isDispute ? `${conversation.reason_label} · ${conversation.order.payment_status_label}` : `${conversation.participant.role_label}: ${conversation.participant.name}`}
                     </p>

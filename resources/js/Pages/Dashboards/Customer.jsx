@@ -21,7 +21,7 @@ function DashboardContent({ title, cards }) {
     return (
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
             <p className="text-sm font-semibold uppercase text-blue-700">Рабочая область</p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">{title}</h1>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">{title}</h1>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {cards.map((card) => (
                     <article key={card.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">

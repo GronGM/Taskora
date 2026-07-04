@@ -22,7 +22,7 @@ export default function Create({ order, reasonOptions, storeUrl }) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-red-700">Арбитраж</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Открыть спор</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Открыть спор</h1>
                         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
                             Спор остановит автоматическую разблокировку оплаты до решения модератора.
                         </p>

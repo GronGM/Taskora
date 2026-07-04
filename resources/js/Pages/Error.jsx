@@ -45,7 +45,7 @@ export default function Error({ status }) {
                             <span className={`inline-flex rounded-md px-3 py-1 text-sm font-semibold ring-1 ${page.tone}`}>
                                 Ошибка {status}
                             </span>
-                            <h1 className="mt-6 max-w-3xl text-3xl font-semibold tracking-normal text-slate-950 sm:text-5xl">
+                            <h1 className="mt-6 max-w-3xl text-3xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
                                 {page.title}
                             </h1>
                             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">{page.text}</p>

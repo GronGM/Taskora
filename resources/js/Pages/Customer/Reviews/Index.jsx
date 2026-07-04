@@ -9,7 +9,7 @@ export default function Index({ reviews = [] }) {
             <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
                 <div>
                     <p className="text-sm font-semibold uppercase text-blue-700">Отзывы</p>
-                    <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Мои отзывы</h1>
+                    <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Мои отзывы</h1>
                     <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
                         Здесь собраны отзывы, которые вы оставили исполнителям после завершенных заказов.
                     </p>

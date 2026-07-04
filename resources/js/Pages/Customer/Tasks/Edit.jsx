@@ -28,7 +28,7 @@ export default function Edit({ task, categories, statusLabels }) {
                 <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Статус: {statusLabels[task.status]}</p>
-                        <h1 className="mt-2 text-4xl font-semibold tracking-normal text-slate-950">Редактирование задания</h1>
+                        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">Редактирование задания</h1>
                         <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
                             Опубликованное задание останется опубликованным, если описание проходит проверку ContactGuard.
                         </p>

@@ -21,7 +21,7 @@ export default function ServiceCard({ service }) {
     const hasReviews = service.reviews_count > 0;
 
     return (
-        <article className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <article className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
             <div className="flex items-start justify-between gap-4">
                 <Link
                     href={service.category.url}
@@ -29,8 +29,9 @@ export default function ServiceCard({ service }) {
                 >
                     {service.category.name}
                 </Link>
-                <span className="text-sm font-semibold text-slate-600">
-                    {hasReviews ? `${Number(service.rating).toFixed(2)} / 5` : 'Нет отзывов'}
+                <span className="inline-flex items-center gap-1 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                    {hasReviews && <span aria-hidden="true" className="text-amber-500">★</span>}
+                    {hasReviews ? `${Number(service.rating).toFixed(2)}` : 'Нет отзывов'}
                 </span>
             </div>
 
@@ -45,7 +46,7 @@ export default function ServiceCard({ service }) {
             <div className="mt-6 grid gap-3 border-t border-slate-100 pt-5 text-sm text-slate-600 sm:grid-cols-2">
                 <div>
                     <p className="text-xs font-medium uppercase text-slate-400">Цена от</p>
-                    <p className="mt-1 text-base font-semibold text-slate-950">{currency.format(service.price_from)} ₽</p>
+                    <p className="mt-1 text-lg font-semibold text-slate-950 dark:text-slate-100">{currency.format(service.price_from)} ₽</p>
                 </div>
                 <div>
                     <p className="text-xs font-medium uppercase text-slate-400">Срок</p>
@@ -59,7 +60,10 @@ export default function ServiceCard({ service }) {
                     <Link href={service.performer.profile_url ?? service.performer.reviews_url} className="font-semibold text-slate-900 hover:text-blue-700">
                         {service.performer.name}
                     </Link>
-                    {service.performer.is_verified && <p className="mt-1 text-xs font-semibold text-emerald-700">Проверен</p>}
+                    <p className="mt-1 flex flex-wrap gap-x-2 text-xs font-semibold">
+                        {service.performer.level_label && <span className="text-slate-500 dark:text-slate-400">{service.performer.level_label}</span>}
+                        {service.performer.is_verified && <span className="text-emerald-700">Проверен</span>}
+                    </p>
                 </div>
                 <div className="text-right">
                     <p className="text-slate-500">{hasReviews ? `${service.reviews_count} ${pluralReviews(service.reviews_count)}` : 'Нет отзывов'}</p>

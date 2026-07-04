@@ -25,7 +25,7 @@ export default function PaymentSettings({ settings, warning }) {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Администрирование</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Настройки платежей</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Настройки платежей</h1>
                         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
                             Read-only сводка платежного режима для локального beta-тестирования. Значения секретов не выводятся.
                         </p>

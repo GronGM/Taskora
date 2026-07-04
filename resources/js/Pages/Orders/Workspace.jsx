@@ -70,7 +70,7 @@ export default function Workspace({ role, order, statusLabels, paymentStatusLabe
                                 {paymentStatusLabels[order.payment_status]}
                             </span>
                         </div>
-                        <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-normal text-slate-950">{order.title}</h1>
+                        <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950">{order.title}</h1>
                         <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-7 text-slate-600">{order.description}</p>
                     </div>
 

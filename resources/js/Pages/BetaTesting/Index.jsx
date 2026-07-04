@@ -25,7 +25,7 @@ export default function BetaTesting({ accounts = [], roleChecklists = [], feedba
                     <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
                         <div>
                             <p className="text-sm font-semibold uppercase text-blue-700">Закрытая проверка MVP</p>
-                            <h1 className="mt-3 max-w-4xl text-4xl font-semibold leading-tight tracking-normal text-slate-950 sm:text-5xl">
+                            <h1 className="mt-3 max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl">
                                 Beta-тестирование Таскоры
                             </h1>
                             <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">

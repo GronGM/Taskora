@@ -14,7 +14,7 @@ export default function Category({ category, children, services }) {
                     <Link href="/catalog" className="text-sm font-semibold text-blue-700 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-blue-300 dark:hover:text-blue-200 dark:focus-visible:ring-blue-300 dark:focus-visible:ring-offset-slate-950">
                         Каталог услуг
                     </Link>
-                    <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">{category.name}</h1>
+                    <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">{category.name}</h1>
                     <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600 dark:text-slate-300">{category.description}</p>
 
                     {children.length > 0 && (

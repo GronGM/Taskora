@@ -15,7 +15,7 @@ export default function Index({ filters, tasks, categories, taskTypes }) {
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700 dark:text-blue-300">Исполнитель</p>
-                        <h1 className="mt-2 text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">Избранное</h1>
+                        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">Избранное</h1>
                         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
                             Сохраняйте подходящие задания, категории и виды работ, чтобы быстрее возвращаться к нужным направлениям на бирже.
                         </p>

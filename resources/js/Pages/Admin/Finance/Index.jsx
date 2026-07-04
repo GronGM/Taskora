@@ -24,7 +24,7 @@ export default function AdminFinance({ summary, operations, webhookEvents, label
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Администрирование</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Финансовая сводка</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Финансовая сводка</h1>
                     </div>
                     <Link href="/admin/dashboard" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
                         Вернуться в админ-панель

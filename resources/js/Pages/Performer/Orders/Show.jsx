@@ -36,7 +36,7 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                             </span>
                             <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{order.source_label}</span>
                         </div>
-                        <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-normal text-slate-950">{order.title}</h1>
+                        <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950">{order.title}</h1>
                         <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-7 text-slate-600">{order.description}</p>
                     </div>
                     <div className="flex flex-wrap gap-3">

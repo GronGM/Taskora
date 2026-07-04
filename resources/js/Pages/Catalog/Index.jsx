@@ -14,7 +14,7 @@ export default function CatalogIndex({ categories, services, filters, activeCate
                     <p className="text-sm font-semibold uppercase text-blue-700">Каталог</p>
                     <div className="mt-3 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
                         <div>
-                            <h1 className="text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">Каталог услуг</h1>
+                            <h1 className="text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">Каталог услуг</h1>
                             <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
                                 Выбирайте опубликованные услуги исполнителей Таскоры по категориям, срокам и цене.
                             </p>

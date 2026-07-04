@@ -10,7 +10,7 @@ export default function Index({ disputes, currentStatus, statusTabs }) {
 
             <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
                 <p className="text-sm font-semibold uppercase text-red-700">Модерация</p>
-                <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Споры и арбитраж</h1>
+                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Споры и арбитраж</h1>
 
                 <div className="mt-6 flex flex-wrap gap-2">
                     {statusTabs.map((tab) => (

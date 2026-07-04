@@ -22,7 +22,7 @@ export default function Edit({ user = {}, roleOptions = [] }) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Пользователь</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Редактирование аккаунта</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Редактирование аккаунта</h1>
                         <p className="mt-3 text-sm text-slate-600">
                             Пароль и служебные токены здесь не отображаются и не изменяются.
                         </p>

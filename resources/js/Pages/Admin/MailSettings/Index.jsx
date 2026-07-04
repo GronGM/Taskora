@@ -21,7 +21,7 @@ export default function MailSettings({ settings, warning, hint }) {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700 dark:text-blue-300">Администрирование</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">Настройки почты</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">Настройки почты</h1>
                         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
                             Read-only сводка почтового режима для staging и локального тестирования. Страница показывает только безопасные
                             значения и признаки наличия секретов.

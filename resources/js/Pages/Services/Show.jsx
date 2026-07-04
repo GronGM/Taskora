@@ -17,7 +17,7 @@ export default function Show({ service, similarServices = [] }) {
                         <Link href={service.category.url} className="text-sm font-semibold text-blue-700 hover:text-blue-800">
                             {service.category.name}
                         </Link>
-                        <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-normal text-slate-950">
+                        <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight text-slate-950">
                             {service.title}
                         </h1>
                         <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{service.short_description}</p>
@@ -138,14 +138,25 @@ export default function Show({ service, similarServices = [] }) {
                                 : 'У исполнителя пока нет публичных отзывов.'}
                         </p>
                     </div>
-                    <div className="rounded-lg border border-blue-100 bg-blue-50 p-5">
-                        <p className="text-sm font-semibold uppercase text-blue-700">Блок доверия</p>
-                        <div className="mt-4 space-y-3 text-sm text-blue-900">
-                            <p>Рейтинг: {hasReviews ? `${Number(service.rating).toFixed(2)} / 5` : 'Нет отзывов'}</p>
-                            <p>Отзывы: {service.reviews_count}</p>
-                            <p>Выполнено заказов: {service.orders_count}</p>
-                            <p>Обсуждение и файлы должны оставаться внутри Таскоры.</p>
-                        </div>
+                    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p className="text-sm font-semibold uppercase text-blue-700 dark:text-blue-300">Доверие</p>
+                        <dl className="mt-4 space-y-3 text-sm">
+                            <div className="flex items-baseline justify-between gap-3">
+                                <dt className="text-slate-500 dark:text-slate-400">Рейтинг</dt>
+                                <dd className="font-semibold text-slate-950 dark:text-slate-100">{hasReviews ? `★ ${Number(service.rating).toFixed(2)}` : 'Нет отзывов'}</dd>
+                            </div>
+                            <div className="flex items-baseline justify-between gap-3">
+                                <dt className="text-slate-500 dark:text-slate-400">Отзывы</dt>
+                                <dd className="font-semibold text-slate-950 dark:text-slate-100">{service.reviews_count}</dd>
+                            </div>
+                            <div className="flex items-baseline justify-between gap-3">
+                                <dt className="text-slate-500 dark:text-slate-400">Выполнено заказов</dt>
+                                <dd className="font-semibold text-slate-950 dark:text-slate-100">{service.orders_count}</dd>
+                            </div>
+                        </dl>
+                        <p className="mt-4 border-t border-slate-100 pt-3 text-xs leading-5 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                            Обсуждение, файлы и оплата остаются внутри Таскоры — так сделка под защитой.
+                        </p>
                     </div>
                 </aside>
             </section>

@@ -27,7 +27,7 @@ export default function Create({ categories, defaultPackages }) {
             <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
                 <div className="mb-8">
                     <p className="text-sm font-semibold uppercase text-blue-700">Мои услуги</p>
-                    <h1 className="mt-2 text-4xl font-semibold tracking-normal text-slate-950">Создать услугу</h1>
+                    <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">Создать услугу</h1>
                     <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
                         Сохраните черновик или сразу отправьте услугу на модерацию. Контакты и предложения перейти вне Таскоры будут заблокированы.
                     </p>

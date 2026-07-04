@@ -43,7 +43,7 @@ export default function Home({ categories = [], services = [] }) {
                         <div className="mb-4 inline-flex w-fit items-center rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200 sm:mb-6">
                             Маркетплейс задач и услуг
                         </div>
-                        <h1 className="max-w-4xl text-3xl font-semibold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
+                        <h1 className="max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
                             Найдите исполнителя для задачи — быстро, понятно и безопасно
                         </h1>
                         <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:mt-6 sm:text-lg sm:leading-8">

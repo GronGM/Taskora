@@ -31,7 +31,7 @@ export default function Show({ dispute, resolutionOptions }) {
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-red-700">Арбитраж</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Спор #{dispute.id}</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Спор #{dispute.id}</h1>
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{dispute.description}</p>
                     </div>
                     <Link href="/moderator/disputes" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50">

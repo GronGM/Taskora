@@ -54,7 +54,7 @@ export default function Create({
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Beta-обратная связь</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Сообщить о проблеме</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Сообщить о проблеме</h1>
                         <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
                             Опишите, что проверяли, где возникла проблема и что ожидали увидеть. Скриншот можно
                             приложить в сообщении отдельно, если нужно.

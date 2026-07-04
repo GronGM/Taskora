@@ -78,7 +78,7 @@ export default function DashboardLayout({ children }) {
                                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-blue-600" aria-hidden="true">
                                     <span className="taskora-logo-mark h-4 w-4 rounded-sm bg-white" />
                                 </span>
-                                <span className="truncate text-xl font-semibold tracking-normal text-slate-950 dark:text-white">Таскора</span>
+                                <span className="truncate text-xl font-semibold tracking-tight text-slate-950 dark:text-white">Таскора</span>
                             </Link>
 
                             <div className="min-w-0 text-right md:hidden">

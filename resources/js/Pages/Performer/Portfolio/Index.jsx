@@ -16,7 +16,7 @@ export default function Index({ items, statusLabels }) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Исполнитель</p>
-                        <h1 className="mt-2 text-4xl font-semibold tracking-normal text-slate-950">Портфолио</h1>
+                        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">Портфолио</h1>
                         <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
                             Публичные работы показываются в профиле исполнителя. Не добавляйте контакты, ссылки на мессенджеры и платежные реквизиты.
                         </p>

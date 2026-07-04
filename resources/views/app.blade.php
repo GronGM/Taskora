@@ -30,6 +30,8 @@
                 root.dataset.theme = preference;
             })();
         </script>
+        <link rel="preload" href="/fonts/onest-variable.woff2" as="font" type="font/woff2" crossorigin>
+
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @inertiaHead

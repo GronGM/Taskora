@@ -60,7 +60,7 @@ export default function Index({ orders = {}, filters = {}, summary = {}, options
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Администрирование</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Заказы</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Заказы</h1>
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
                             Диагностика заказов только для чтения: статусы, участники, источник, споры, события рабочей области и внутренний финансовый журнал. Статусы и платежи здесь не изменяются.
                         </p>

@@ -25,7 +25,7 @@ export default function Events({ order, events = {}, filters = {}, options = {},
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                     <div className="min-w-0">
                         <p className="text-sm font-semibold uppercase text-blue-700">События заказа</p>
-                        <h1 className="mt-3 break-words text-4xl font-semibold tracking-normal text-slate-950">
+                        <h1 className="mt-3 break-words text-4xl font-semibold tracking-tight text-slate-950">
                             Заказ #{order.id}: {order.title}
                         </h1>
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">

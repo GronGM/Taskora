@@ -36,7 +36,7 @@ export default function Edit({ service, categories, statusLabels }) {
                 <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Мои услуги</p>
-                        <h1 className="mt-2 text-4xl font-semibold tracking-normal text-slate-950">Редактировать услугу</h1>
+                        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">Редактировать услугу</h1>
                         <div className="mt-4 flex flex-wrap items-center gap-2">
                             <span className={`rounded-md px-3 py-1 text-sm font-semibold ${statusClasses[service.status] ?? statusClasses.draft}`}>
                                 {statusLabels[service.status]}

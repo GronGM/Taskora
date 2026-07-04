@@ -63,7 +63,7 @@ export default function Show({ profile, categories, statusLabels, requirements }
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Исполнитель</p>
-                        <h1 className="mt-2 text-4xl font-semibold tracking-normal text-slate-950">Профиль исполнителя</h1>
+                        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">Профиль исполнителя</h1>
                         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
                             Заполните публичную витрину, добавьте специализации и отправьте профиль на ручную проверку. Контакты и предложения перейти вне Таскоры будут заблокированы.
                         </p>

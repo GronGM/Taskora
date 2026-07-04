@@ -28,7 +28,7 @@ export default function Index({ feedback = [], summary = {}, labels = {} }) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Администрирование</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Beta-отзывы</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Beta-отзывы</h1>
                         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
                             Внутренняя очередь обращений от друзей и первых тестировщиков без внешних сервисов.
                         </p>

@@ -16,7 +16,7 @@ export default function Index({ profiles, filters, statusLabels }) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Модерация</p>
-                        <h1 className="mt-2 text-4xl font-semibold tracking-normal text-slate-950">Проверка профилей исполнителей</h1>
+                        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">Проверка профилей исполнителей</h1>
                         <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
                             Ручная проверка публичных данных, специализаций, портфолио, услуг и истории заказов без KYC и паспортных данных.
                         </p>

@@ -12,7 +12,7 @@ export default function PerformersIndex({ performers, categories = [], filters =
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
                     <p className="text-sm font-semibold uppercase text-blue-700">Исполнители</p>
-                    <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Исполнители Таскоры</h1>
+                    <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Исполнители Таскоры</h1>
                     <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
                         Публичные профили исполнителей с услугами, специализациями, отзывами, портфолио и ручной проверкой качества оформления.
                     </p>

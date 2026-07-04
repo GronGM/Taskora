@@ -27,7 +27,7 @@ export default function PublicLayout({ children }) {
                             <span className="grid h-10 w-10 place-items-center rounded-md bg-blue-600" aria-hidden="true">
                                 <span className="taskora-logo-mark h-4 w-4 rounded-sm bg-white" />
                             </span>
-                            <span className="truncate text-lg font-semibold tracking-normal text-slate-950 dark:text-white sm:text-xl">Таскора</span>
+                            <span className="truncate text-lg font-semibold tracking-tight text-slate-950 dark:text-white sm:text-xl">Таскора</span>
                         </Link>
 
                         <nav className="hidden items-center gap-1 lg:flex">

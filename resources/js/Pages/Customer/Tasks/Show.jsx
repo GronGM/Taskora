@@ -34,7 +34,7 @@ export default function Show({ task, statusLabels, offerStatusLabels }) {
                                 <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{task.task_type}</span>
                             )}
                         </div>
-                        <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-normal text-slate-950">{task.title}</h1>
+                        <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950">{task.title}</h1>
                         <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
                             <p>Бюджет: <span className="font-semibold text-slate-950">{task.budget_label}</span></p>
                             <p>Срок: <span className="font-semibold text-slate-950">{task.deadline_label ?? 'Не указан'}</span></p>

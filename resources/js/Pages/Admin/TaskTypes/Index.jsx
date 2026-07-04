@@ -24,7 +24,7 @@ export default function Index({ taskTypes = [], filters = {}, categoryOptions = 
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm font-semibold uppercase text-blue-700">Администрирование</p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-normal text-slate-950">Виды заданий</h1>
+                        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Виды заданий</h1>
                         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
                             Управление типами работ для биржи заданий и избранных направлений исполнителей.
                         </p>
