@@ -50,9 +50,11 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                     </div>
                 </div>
 
-                <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
-                    <p className="text-sm font-semibold text-amber-900">Это локальная заглушка оплаты. Реальный платежный шлюз будет подключен позже.</p>
-                </div>
+                {order.payment_mode !== 'yookassa' && (
+                    <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
+                        <p className="text-sm font-semibold text-amber-900">Это локальная заглушка оплаты. Реальный платежный шлюз будет подключен позже.</p>
+                    </div>
+                )}
 
                 {order.status === 'submitted_for_review' && (
                     <div className="mt-4 rounded-lg border border-purple-200 bg-purple-50 p-5">

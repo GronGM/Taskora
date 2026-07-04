@@ -98,7 +98,9 @@ export default function Workspace({ role, order, statusLabels, paymentStatusLabe
 
                 <div className="mt-6 space-y-3">
                     <Notice tone="amber">
-                        Оплата сейчас работает как локальная заглушка. Реальный платежный шлюз не подключен.
+                        {order.payment_mode === 'yookassa'
+                            ? 'Оплата проходит через ЮKassa: деньги удерживаются до приемки работы.'
+                            : 'Оплата сейчас работает как локальная заглушка. Реальный платежный шлюз не подключен.'}
                     </Notice>
                     {order.status === 'awaiting_payment' && (
                         <Notice tone="red">
