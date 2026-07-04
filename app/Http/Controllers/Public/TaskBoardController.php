@@ -76,6 +76,11 @@ class TaskBoardController extends Controller
             'taskTypes' => $taskTypePayloads,
             'popularTaskTypes' => $taskTypePayloads->sortByDesc('task_count')->take(10)->values(),
             'tasks' => $tasks,
+            'weeklyNewTasks' => \Illuminate\Support\Facades\Cache::remember(
+                'tasks.weekly_new',
+                600,
+                fn (): int => Task::query()->published()->where('created_at', '>=', now()->subDays(7))->count(),
+            ),
             'pagination' => [
                 'total' => $paginator->total(),
                 'per_page' => $paginator->perPage(),

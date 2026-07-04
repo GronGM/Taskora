@@ -19,6 +19,7 @@ export default function TasksIndex({
     popularTaskTypes = [],
     tasks = [],
     pagination = null,
+    weeklyNewTasks = 0,
     filters = {},
     activeCategory = null,
     activeTaskType = null,
@@ -154,6 +155,7 @@ export default function TasksIndex({
                         selectedCategorySlugs={selectedCategorySlugs}
                         selectedTaskTypeSlugs={selectedTaskTypeSlugs}
                         count={pagination?.total ?? tasks.length}
+                        weeklyNewTasks={weeklyNewTasks}
                     />
 
                     {tasks.length > 0 ? (
@@ -507,7 +509,7 @@ function BulkTaskTypeFavoriteButton({ selectedTaskTypeSlugs, url }) {
     );
 }
 
-function ActiveSummary({ filters, activeCategories, activeTaskTypes, selectedCategorySlugs, selectedTaskTypeSlugs, count }) {
+function ActiveSummary({ filters, activeCategories, activeTaskTypes, selectedCategorySlugs, selectedTaskTypeSlugs, count , weeklyNewTasks = 0 }) {
     const chips = [
         filters.q && ['search', 'Поиск', filters.q, { q: '' }],
         ...activeCategories.map((category) => [
@@ -542,7 +544,10 @@ function ActiveSummary({ filters, activeCategories, activeTaskTypes, selectedCat
         <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                    <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">Найдено заданий: {count}</p>
+                    <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                        Найдено заданий: {count}
+                        {weeklyNewTasks > 0 && <span className="ml-2 font-normal text-slate-500 dark:text-slate-400">· за неделю опубликовано {weeklyNewTasks}</span>}
+                    </p>
                     <h2 className="mt-1 text-2xl font-semibold text-slate-950 dark:text-white">{title}</h2>
                 </div>
                 <Link href="/tasks" className={`text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 ${focusClass}`}>

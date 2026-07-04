@@ -4,7 +4,11 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Service;
+use App\Models\Task;
+use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -39,6 +43,31 @@ class HomeController extends Controller
         return Inertia::render('Home', [
             'categories' => $categories,
             'services' => $services,
+            'activity' => $this->activityStats(),
+        ]);
+    }
+
+    /**
+     * Честные счетчики активности: только реальные данные, кэш на 10 минут.
+     *
+     * @return array<string, int>
+     */
+    private function activityStats(): array
+    {
+        return Cache::remember('home.activity_stats', 600, fn (): array => [
+            'tasks_week' => Task::query()
+                ->published()
+                ->where('created_at', '>=', now()->subDays(7))
+                ->count(),
+            'services_published' => Service::query()->published()->count(),
+            'performers_active' => User::query()
+                ->where('role', User::ROLE_PERFORMER)
+                ->whereHas('services', fn ($query) => $query->published())
+                ->count(),
+            'orders_completed' => Order::query()
+                ->where('status', Order::STATUS_COMPLETED)
+                ->where('payment_status', Order::PAYMENT_RELEASED)
+                ->count(),
         ]);
     }
 

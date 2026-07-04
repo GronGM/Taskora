@@ -32,7 +32,17 @@ const steps = [
     'Получите результат и оставьте отзыв',
 ];
 
-export default function Home({ categories = [], services = [] }) {
+const activityLabels = [
+    { key: 'tasks_week', label: 'заданий за неделю' },
+    { key: 'services_published', label: 'опубликованных услуг' },
+    { key: 'performers_active', label: 'исполнителей с услугами' },
+    { key: 'orders_completed', label: 'завершенных заказов' },
+];
+
+export default function Home({ categories = [], services = [], activity = null }) {
+    const activityItems = activity
+        ? activityLabels.filter(({ key }) => (activity[key] ?? 0) > 0)
+        : [];
     return (
         <PublicLayout>
             <Head title="Главная" />
@@ -100,6 +110,21 @@ export default function Home({ categories = [], services = [] }) {
                     </div>
                 </div>
             </section>
+
+            {activityItems.length > 0 && (
+                <section className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+                    <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-4 lg:px-8">
+                        {activityItems.map(({ key, label }) => (
+                            <div key={key}>
+                                <p className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                                    {new Intl.NumberFormat('ru-RU').format(activity[key])}
+                                </p>
+                                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{label}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
                 <div className="mb-8 max-w-2xl">
