@@ -343,7 +343,7 @@ function QuickActions({ role, order }) {
             <div className="mt-5 space-y-3">
                 {role === 'customer' && order.can.mark_paid && (
                     <Link href={order.mark_paid_url} method="post" as="button" className="w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                        Оплатить (заглушка)
+                        {order.payment_mode === 'yookassa' ? 'Оплатить картой' : 'Оплатить (заглушка)'}
                     </Link>
                 )}
                 {role === 'customer' && order.can.complete && (

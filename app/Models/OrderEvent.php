@@ -18,6 +18,8 @@ class OrderEvent extends Model
 
     public const TYPE_PAYMENT_STUB_PAID = 'payment_stub_paid';
 
+    public const TYPE_PAYMENT_CONFIRMED = 'payment_confirmed';
+
     public const TYPE_WORK_SUBMITTED = 'work_submitted';
 
     public const TYPE_REVIEW_HOLD_STARTED = 'review_hold_started';

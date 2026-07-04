@@ -135,7 +135,7 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                             {order.status === 'awaiting_payment' && (
                                 <>
                                     <Link href={order.mark_paid_url} method="post" as="button" className="w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                                        Оплатить (заглушка)
+                                        {order.payment_mode === 'yookassa' ? 'Оплатить картой' : 'Оплатить (заглушка)'}
                                     </Link>
                                     <Link href={order.cancel_url} method="post" as="button" className="w-full rounded-md border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50">
                                         Отменить

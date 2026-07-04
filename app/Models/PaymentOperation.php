@@ -32,6 +32,8 @@ class PaymentOperation extends Model
 
     public const PROVIDER_STUB = 'stub';
 
+    public const PROVIDER_YOOKASSA = 'yookassa';
+
     public const TYPE_PAYMENT_HOLD = 'payment_hold';
 
     public const TYPE_RELEASE_TO_PERFORMER = 'release_to_performer';

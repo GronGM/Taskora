@@ -67,6 +67,26 @@ class OrderEventLogger
     /**
      * @param  array<string, mixed>  $payload
      */
+    public function paymentConfirmed(Order $order, ?User $user, array $payload = []): OrderEvent
+    {
+        $event = $this->log($order, $user, OrderEvent::TYPE_PAYMENT_CONFIRMED, $payload);
+
+        $this->notifyOrderParticipant(
+            $order,
+            $order->performer,
+            'order.payment_held',
+            'Заказ оплачен',
+            "Заказ «{$order->title}» оплачен, средства удержаны до приемки. Можно приступать к работе.",
+            fn (User $recipient): string => $this->orderUrlFor($recipient, $order),
+            $this->orderMeta($order, $user, 'order', 'success'),
+        );
+
+        return $event;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function workSubmitted(Order $order, ?User $user, array $payload = []): OrderEvent
     {
         $event = $this->log($order, $user, OrderEvent::TYPE_WORK_SUBMITTED, $payload);

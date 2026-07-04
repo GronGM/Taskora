@@ -74,6 +74,7 @@ Route::post('/beta-feedback', [BetaFeedbackController::class, 'store'])
 Route::get('/', HomeController::class)->name('home');
 
 Route::get('/r/{code}', [\App\Http\Controllers\Referrals\ReferralController::class, 'redirect'])->name('referral.redirect');
+Route::post('/webhooks/yookassa', \App\Http\Controllers\Webhooks\YooKassaWebhookController::class)->name('webhooks.yookassa');
 Route::get('/how-it-works', [\App\Http\Controllers\Public\HelpController::class, 'howItWorks'])->name('help.how-it-works');
 Route::get('/faq', [\App\Http\Controllers\Public\HelpController::class, 'faq'])->name('help.faq');
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');

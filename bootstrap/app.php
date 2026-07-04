@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ReleaseDueOrdersCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/*',
+        ]);
+
         $middleware->encryptCookies(except: [
             \App\Http\Controllers\Referrals\ReferralController::COOKIE_NAME,
         ]);

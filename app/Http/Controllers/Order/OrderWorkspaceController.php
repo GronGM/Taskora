@@ -64,6 +64,7 @@ class OrderWorkspaceController extends Controller
             'release_reason_label' => $this->releaseReasonLabel($order->release_reason),
             'price' => $order->price,
             'performer_amount' => $order->performer_amount,
+            'payment_mode' => (string) config('payments.mode', 'stub'),
             'platform_fee_amount' => $order->platform_fee_amount,
             'platform_fee_percent' => $order->platform_fee_percent,
             'delivery_days' => $order->delivery_days,
@@ -219,6 +220,7 @@ class OrderWorkspaceController extends Controller
         return match ($event->type) {
             OrderEvent::TYPE_MESSAGE_SENT => 'Новое сообщение в чате заказа.',
             OrderEvent::TYPE_FILE_UPLOADED => isset($payload['file_name']) ? 'Загружен файл: '.$payload['file_name'] : 'Загружен файл.',
+            OrderEvent::TYPE_PAYMENT_CONFIRMED => 'Оплата подтверждена, средства удержаны до приемки.',
             OrderEvent::TYPE_CONTACT_BLOCKED => 'ContactGuard заблокировал контактные данные.',
             OrderEvent::TYPE_PAYMENT_STUB_PAID => 'Оплата отмечена локальной заглушкой.',
             OrderEvent::TYPE_WORK_SUBMITTED => 'Исполнитель отправил работу на проверку.',

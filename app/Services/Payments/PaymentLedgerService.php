@@ -12,17 +12,41 @@ class PaymentLedgerService
 {
     public function recordStubHold(Order $order, User $customer): PaymentOperation
     {
-        return DB::transaction(function () use ($order, $customer): PaymentOperation {
+        return $this->recordHold(
+            $order,
+            $customer,
+            PaymentOperation::PROVIDER_STUB,
+            null,
+            'Локальная заглушка оплаты: средства удержаны внутри Taskora.',
+        );
+    }
+
+    public function recordYooKassaHold(Order $order, User $customer, string $providerPaymentId): PaymentOperation
+    {
+        return $this->recordHold(
+            $order,
+            $customer,
+            PaymentOperation::PROVIDER_YOOKASSA,
+            $providerPaymentId,
+            'Оплата через ЮKassa: средства удержаны до приемки работы.',
+        );
+    }
+
+    private function recordHold(Order $order, User $customer, string $provider, ?string $providerOperationId, string $description): PaymentOperation
+    {
+        return DB::transaction(function () use ($order, $customer, $provider, $providerOperationId, $description): PaymentOperation {
             $operation = $this->createSucceededOperation(
                 order: $order,
                 user: $customer,
                 type: PaymentOperation::TYPE_PAYMENT_HOLD,
                 amount: (int) $order->price,
-                description: 'Локальная заглушка оплаты: средства удержаны внутри Taskora.',
+                description: $description,
                 payload: [
                     'payment_status' => Order::PAYMENT_HELD,
-                    'provider_mode' => PaymentOperation::PROVIDER_STUB,
+                    'provider_mode' => $provider,
                 ],
+                provider: $provider,
+                providerOperationId: $providerOperationId,
             );
 
             if (! $operation->wasRecentlyCreated) {
@@ -256,6 +280,8 @@ class PaymentLedgerService
         int $amount,
         string $description,
         array $payload = [],
+        ?string $provider = null,
+        ?string $providerOperationId = null,
     ): PaymentOperation {
         $idempotencyKey = $this->idempotencyKey($order, $type);
 
@@ -264,8 +290,8 @@ class PaymentLedgerService
             [
                 'order_id' => $order->id,
                 'user_id' => $user?->id,
-                'provider' => PaymentOperation::PROVIDER_STUB,
-                'provider_operation_id' => $idempotencyKey,
+                'provider' => $provider ?? PaymentOperation::PROVIDER_STUB,
+                'provider_operation_id' => $providerOperationId ?? $idempotencyKey,
                 'type' => $type,
                 'status' => PaymentOperation::STATUS_SUCCEEDED,
                 'amount' => $amount,

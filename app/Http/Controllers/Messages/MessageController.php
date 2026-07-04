@@ -660,6 +660,7 @@ class MessageController extends Controller
             OrderEvent::TYPE_FILE_UPLOADED => isset($payload['file_name'])
                 ? 'Загружен файл: '.$payload['file_name']
                 : 'В рабочую область добавлен файл.',
+            OrderEvent::TYPE_PAYMENT_CONFIRMED => 'Оплата подтверждена, средства удержаны до приемки.',
             OrderEvent::TYPE_CONTACT_BLOCKED => 'ContactGuard заблокировал контактные данные.',
             default => 'Системное событие заказа.',
         };

@@ -55,6 +55,24 @@ class CustomerOrderController extends Controller
         Gate::authorize('markPaid', $order);
         $user = request()->user();
 
+        if (config('payments.mode') === 'yookassa') {
+            $payment = app(\App\Services\Payments\YooKassaClient::class)->createPayment(
+                $order,
+                "order:{$order->id}:yookassa_payment",
+                route('customer.orders.show', $order),
+            );
+
+            $confirmationUrl = $payment['confirmation']['confirmation_url'] ?? null;
+
+            if (! is_string($confirmationUrl)) {
+                return redirect()
+                    ->route('customer.orders.show', $order)
+                    ->with('error', 'Не удалось начать оплату. Попробуйте еще раз чуть позже.');
+            }
+
+            return redirect()->away($confirmationUrl);
+        }
+
         $applied = DB::transaction(function () use ($order, $events, $ledger, $user): bool {
             $fresh = Order::query()->whereKey($order->getKey())->lockForUpdate()->firstOrFail();
 
@@ -229,6 +247,7 @@ class CustomerOrderController extends Controller
             'completed_at' => $order->completed_at?->format('d.m.Y H:i'),
             'canceled_at' => $order->canceled_at?->format('d.m.Y H:i'),
             'mark_paid_url' => route('customer.orders.mark-paid', $order),
+            'payment_mode' => (string) config('payments.mode', 'stub'),
             'request_revision_url' => route('customer.orders.request-revision', $order),
             'complete_url' => route('customer.orders.complete', $order),
             'cancel_url' => route('customer.orders.cancel', $order),
