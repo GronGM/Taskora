@@ -243,6 +243,35 @@ class OrderWorkspaceTest extends TestCase
         $this->assertStringStartsWith("orders/{$order->id}/", $file->path);
     }
 
+    public function test_customer_can_download_file_uploaded_by_performer(): void
+    {
+        [$customer, $performer, $order] = $this->orderScenario();
+
+        $this->actingAs($performer)->post(route('performer.orders.files.store', $order), [
+            'file' => \Illuminate\Http\UploadedFile::fake()->create('result.docx', 100, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+        ]);
+
+        $file = $order->orderFiles()->firstOrFail();
+
+        $this->actingAs($customer)
+            ->get(route('customer.orders.files.download', [$order, $file]))
+            ->assertOk()
+            ->assertDownload('result.docx');
+    }
+
+    public function test_file_download_links_are_plain_anchors_not_inertia_links(): void
+    {
+        // Скачивание — StreamedResponse: Inertia Link выполняет XHR и молча
+        // проглатывает бинарный ответ, поэтому нужны обычные <a href>.
+        $workspace = file_get_contents(resource_path('js/Pages/Orders/Workspace.jsx'));
+        $messenger = file_get_contents(resource_path('js/Pages/Messages/Partials/MessengerLayout.jsx'));
+
+        $this->assertStringContainsString('<a href={file.download_url}', $workspace);
+        $this->assertStringNotContainsString('<Link href={file.download_url}', $workspace);
+        $this->assertStringContainsString('<a href={file.download_url}', $messenger);
+        $this->assertStringNotContainsString('<Link href={file.download_url}', $messenger);
+    }
+
     public function test_foreign_user_cannot_download_file(): void
     {
         Storage::fake('local');

@@ -725,9 +725,9 @@ function FileCard({ file }) {
                 </div>
             </div>
             {file.download_url ? (
-                <Link href={file.download_url} className={`mt-3 inline-flex rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900 ${focusClass}`}>
+                <a href={file.download_url} className={`mt-3 inline-flex rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900 ${focusClass}`}>
                     Скачать
-                </Link>
+                </a>
             ) : (
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Скачивание недоступно для этой роли или статуса файла.</p>
             )}

@@ -320,9 +320,9 @@ function FileItem({ file }) {
                         {file.author_role}: {file.author} · {formatBytes(file.size)}
                     </p>
                 </div>
-                <Link href={file.download_url} className="shrink-0 rounded-md bg-white px-3 py-2 text-xs font-semibold text-slate-800 ring-1 ring-slate-200 hover:bg-slate-100">
+                <a href={file.download_url} className="shrink-0 rounded-md bg-white px-3 py-2 text-xs font-semibold text-slate-800 ring-1 ring-slate-200 hover:bg-slate-100">
                     Скачать
-                </Link>
+                </a>
             </div>
         </article>
     );
