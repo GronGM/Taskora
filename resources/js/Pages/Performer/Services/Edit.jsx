@@ -20,6 +20,7 @@ export default function Edit({ service, categories, statusLabels }) {
         description: service.description ?? '',
         price_from: service.price_from,
         delivery_days: service.delivery_days,
+        max_review_hold_days: service.max_review_hold_days ?? null,
         packages: service.packages.length > 0 ? service.packages : [],
         cover: null,
         current_cover_url: service.cover_url ?? null,

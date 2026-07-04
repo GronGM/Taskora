@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'budget_min',
     'budget_max',
     'deadline_at',
+    'review_hold_days',
     'status',
     'offers_count',
     'views_count',

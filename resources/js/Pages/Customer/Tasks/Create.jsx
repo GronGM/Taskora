@@ -11,6 +11,7 @@ export default function Create({ categories }) {
         budget_min: '',
         budget_max: '',
         deadline_at: '',
+        review_hold_days: 10,
         publish: false,
     });
 

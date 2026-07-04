@@ -26,6 +26,7 @@ abstract class TaskPayloadRequest extends FormRequest
             'budget_min' => ['nullable', 'integer', 'min:0', 'max:10000000'],
             'budget_max' => ['nullable', 'integer', 'min:0', 'max:10000000'],
             'deadline_at' => ['nullable', 'date', 'after_or_equal:today'],
+            'review_hold_days' => ['nullable', 'integer', 'min:'.\App\Models\Order::REVIEW_HOLD_MIN_DAYS, 'max:'.\App\Models\Order::REVIEW_HOLD_MAX_DAYS],
             'publish' => ['nullable', 'boolean'],
         ];
     }
@@ -135,6 +136,7 @@ abstract class TaskPayloadRequest extends FormRequest
             'budget_min',
             'budget_max',
             'deadline_at',
+            'review_hold_days',
         ]))->all();
     }
 }

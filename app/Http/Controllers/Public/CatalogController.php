@@ -296,6 +296,7 @@ class CatalogController extends Controller
             'cover_url' => $service->cover_url,
             'price_from' => $service->price_from,
             'delivery_days' => $service->delivery_days,
+            'max_review_hold_days' => min($service->max_review_hold_days ?? \App\Models\Order::REVIEW_HOLD_MAX_DAYS, \App\Models\Order::REVIEW_HOLD_MAX_DAYS),
             'rating' => $service->reviews_count > 0 ? (float) $service->rating : null,
             'reviews_count' => $service->reviews_count,
             'orders_count' => $service->orders_count,

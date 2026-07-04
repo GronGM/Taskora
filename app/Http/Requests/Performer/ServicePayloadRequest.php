@@ -24,6 +24,7 @@ abstract class ServicePayloadRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:6000'],
             'price_from' => ['required', 'integer', 'min:100', 'max:10000000'],
             'delivery_days' => ['required', 'integer', 'min:1', 'max:365'],
+            'max_review_hold_days' => ['nullable', 'integer', 'min:'.\App\Models\Order::REVIEW_HOLD_MIN_DAYS, 'max:'.\App\Models\Order::REVIEW_HOLD_MAX_DAYS],
             'cover' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'submit_for_review' => ['nullable', 'boolean'],
             'packages' => ['required', 'array', 'min:1', 'max:3'],
@@ -125,6 +126,7 @@ abstract class ServicePayloadRequest extends FormRequest
             'description',
             'price_from',
             'delivery_days',
+            'max_review_hold_days',
         ]))->all();
     }
 

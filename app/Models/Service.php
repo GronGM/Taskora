@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'cover_path',
     'price_from',
     'delivery_days',
+    'max_review_hold_days',
     'status',
     'rating',
     'reviews_count',

@@ -130,6 +130,24 @@ export default function ServiceWizard({ form, categories, onSubmit }) {
                                 <Field id="delivery_days" label="Срок выполнения, дней" error={errors.delivery_days}>
                                     <input id="delivery_days" type="number" min="1" value={data.delivery_days} onChange={(event) => setData('delivery_days', event.target.value)} className={inputClass} />
                                 </Field>
+
+                                <Field id="max_review_hold_days" label="Максимальный срок проверки" error={errors.max_review_hold_days} className="lg:col-span-2">
+                                    <select
+                                        id="max_review_hold_days"
+                                        value={data.max_review_hold_days ?? ''}
+                                        onChange={(event) => setData('max_review_hold_days', event.target.value === '' ? null : Number(event.target.value))}
+                                        className={inputClass}
+                                    >
+                                        <option value="">Без ограничения (до 40 дней)</option>
+                                        <option value="5">До 5 дней</option>
+                                        <option value="10">До 10 дней</option>
+                                        <option value="20">До 20 дней</option>
+                                        <option value="30">До 30 дней</option>
+                                    </select>
+                                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                                        Заказчик выбирает срок проверки работы при оформлении заказа, но не больше вашего максимума. Короткий максимум — быстрее выплаты вам.
+                                    </p>
+                                </Field>
                             </div>
                         </section>
 

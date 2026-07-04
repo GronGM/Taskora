@@ -265,6 +265,7 @@ class PerformerServiceController extends Controller
             'description' => $service->description,
             'price_from' => $service->price_from,
             'delivery_days' => $service->delivery_days,
+            'max_review_hold_days' => $service->max_review_hold_days,
             'status' => $service->status,
             'rejection_reason' => $service->rejection_reason,
             'is_locked' => $service->status === Service::STATUS_PENDING_REVIEW,

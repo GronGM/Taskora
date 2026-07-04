@@ -361,6 +361,7 @@ class TaskBoardController extends Controller
             'deadline_at' => $deadline?->format('d.m.Y'),
             'deadline_iso' => $deadline?->toDateString(),
             'offers_count' => $task->offers_count,
+            'review_hold_days' => $task->review_hold_days ?? \App\Models\Order::REVIEW_HOLD_DEFAULT_DAYS,
             'published_at' => $task->created_at?->format('d.m.Y'),
             'category' => [
                 'id' => $task->category?->id,

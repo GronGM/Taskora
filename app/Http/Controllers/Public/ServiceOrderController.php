@@ -21,7 +21,7 @@ class ServiceOrderController extends Controller
 
         $service->load(['category', 'packages']);
         $package = $this->selectedPackage($request, $service);
-        $reviewHoldDays = $this->reviewHoldDays($request);
+        $reviewHoldDays = $this->reviewHoldDays($request, $service);
 
         $order = DB::transaction(function () use ($request, $service, $package, $events, $reviewHoldDays): Order {
             $price = $package?->price ?? $service->price_from;
@@ -81,18 +81,23 @@ class ServiceOrderController extends Controller
         return (float) config('payments.platform_fee_percent', 15);
     }
 
-    private function reviewHoldDays(Request $request): int
+    private function reviewHoldDays(Request $request, Service $service): int
     {
-        // TODO: Add customer-facing review period selection in the service order flow.
+        $maxDays = min($service->max_review_hold_days ?? Order::REVIEW_HOLD_MAX_DAYS, Order::REVIEW_HOLD_MAX_DAYS);
+
         $request->validate([
             'review_hold_days' => [
                 'nullable',
                 'integer',
                 'min:'.Order::REVIEW_HOLD_MIN_DAYS,
-                'max:'.Order::REVIEW_HOLD_MAX_DAYS,
+                'max:'.$maxDays,
             ],
+        ], [
+            'review_hold_days.max' => "Для этой услуги срок проверки не может превышать {$maxDays} дн.",
         ]);
 
-        return (int) ($request->integer('review_hold_days') ?: Order::REVIEW_HOLD_DEFAULT_DAYS);
+        $days = (int) ($request->integer('review_hold_days') ?: Order::REVIEW_HOLD_DEFAULT_DAYS);
+
+        return min($days, $maxDays);
     }
 }

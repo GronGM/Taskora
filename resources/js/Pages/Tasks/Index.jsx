@@ -590,6 +590,7 @@ function TaskCard({ task }) {
                         <p>Бюджет: <span className="font-semibold text-slate-950 dark:text-white">{task.budget_label}</span></p>
                         <p>Срок: <span className="font-semibold text-slate-950 dark:text-white">{task.deadline_at ?? 'Не указан'}</span></p>
                         <p>Отклики: <span className="font-semibold text-slate-950 dark:text-white">{task.offers_count}</span></p>
+                        <p>Проверка: <span className="font-semibold text-slate-950 dark:text-white">{task.review_hold_days} дн.</span></p>
                         <p>Заказчик: <span className="font-semibold text-slate-950 dark:text-white">{task.customer?.name ?? 'Заказчик'}</span></p>
                         <p>Опубликовано: <span className="font-semibold text-slate-950 dark:text-white">{task.published_at ?? 'Недавно'}</span></p>
                     </div>

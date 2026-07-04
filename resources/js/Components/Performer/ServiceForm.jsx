@@ -90,6 +90,22 @@ export default function ServiceForm({ form, categories, onSubmit, submitLabel, c
                         />
                     </Field>
 
+                    <Field id="max_review_hold_days" label="Максимальный срок проверки" error={errors.max_review_hold_days}>
+                        <select
+                            id="max_review_hold_days"
+                            disabled={disabled}
+                            value={data.max_review_hold_days ?? ''}
+                            onChange={(event) => setData('max_review_hold_days', event.target.value === '' ? null : Number(event.target.value))}
+                            className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        >
+                            <option value="">Без ограничения (до 40 дней)</option>
+                            <option value="5">До 5 дней</option>
+                            <option value="10">До 10 дней</option>
+                            <option value="20">До 20 дней</option>
+                            <option value="30">До 30 дней</option>
+                        </select>
+                    </Field>
+
                     <Field id="cover" label="Обложка услуги" error={errors.cover} className="lg:col-span-2">
                         <input
                             id="cover"

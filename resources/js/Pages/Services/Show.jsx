@@ -1,11 +1,17 @@
 import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
 import ServiceCard from '../../Components/ServiceCard';
 import PublicLayout from '../../Layouts/PublicLayout';
 
 const currency = new Intl.NumberFormat('ru-RU');
 
+const reviewHoldOptions = [5, 10, 20, 30, 40];
+
 export default function Show({ service, similarServices = [] }) {
     const hasReviews = service.reviews_count > 0;
+    const maxReviewHold = service.max_review_hold_days ?? 40;
+    const availableReviewHolds = reviewHoldOptions.filter((days) => days <= maxReviewHold);
+    const [reviewHoldDays, setReviewHoldDays] = useState(availableReviewHolds.includes(10) ? 10 : availableReviewHolds[0]);
 
     return (
         <PublicLayout>
@@ -72,6 +78,24 @@ export default function Show({ service, similarServices = [] }) {
 
                     <div id="service-packages">
                         <p className="text-sm font-semibold uppercase text-blue-700">Пакеты услуги</p>
+
+                        <div className="mt-4 max-w-md">
+                            <label htmlFor="review_hold_days" className="text-sm font-semibold text-slate-900 dark:text-slate-200">Срок проверки работы</label>
+                            <select
+                                id="review_hold_days"
+                                value={reviewHoldDays}
+                                onChange={(event) => setReviewHoldDays(Number(event.target.value))}
+                                className="mt-2 w-full rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                            >
+                                {availableReviewHolds.map((days) => (
+                                    <option key={days} value={days}>{days} дней</option>
+                                ))}
+                            </select>
+                            <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                                Столько дней после сдачи работы деньги остаются замороженными: можно проверить результат, запросить доработку или открыть спор. Приняли раньше — исполнитель получит оплату сразу.
+                            </p>
+                        </div>
+
                         <div className="mt-5 grid gap-4 lg:grid-cols-3">
                             {service.packages.map((pack) => (
                                 <article key={pack.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -85,7 +109,7 @@ export default function Show({ service, similarServices = [] }) {
                                     <Link
                                         href={service.order_url}
                                         method="post"
-                                        data={{ package_id: pack.id }}
+                                        data={{ package_id: pack.id, review_hold_days: reviewHoldDays }}
                                         as="button"
                                         className="mt-5 w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                                     >
