@@ -983,6 +983,7 @@ Favicon assets лежат в `public`: `favicon.ico`, `favicon-32x32.png`, `favi
 - [Закрытое тестирование](docs/testing-access.md)
 - [Beta checklist](docs/beta-testing-checklist.md)
 - [Инструкция для друзей](docs/beta-friends-message.md)
+- [Платежная архитектура](docs/payments-architecture.md)
 - [Production checklist](docs/production-checklist.md)
 
 ## Следующий Шаг
