@@ -28,7 +28,7 @@ class EnsureBetaAccess
             return true;
         }
 
-        if ($request->is('build/*') || $request->is('storage/*')) {
+        if ($request->is('build/*') || $request->is('storage/*') || $request->is('webhooks/*')) {
             return true;
         }
 

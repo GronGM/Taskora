@@ -167,6 +167,15 @@ class YooKassaPaymentTest extends TestCase
         $this->assertSame(0, PaymentOperation::query()->count());
     }
 
+    public function test_webhook_bypasses_beta_access_gate(): void
+    {
+        config(['beta.enabled' => true, 'beta.password' => 'secret-beta']);
+
+        $this->postJson(route('webhooks.yookassa'), [])
+            ->assertOk()
+            ->assertJson(['status' => 'ignored']);
+    }
+
     public function test_stub_mode_still_works_by_default(): void
     {
         config(['payments.mode' => 'stub']);
