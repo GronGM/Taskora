@@ -1,4 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
+import AttentionList from '../../Components/Dashboard/AttentionList';
+import StatTiles from '../../Components/Dashboard/StatTiles';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
 const cards = [
@@ -8,7 +10,7 @@ const cards = [
     { title: 'Каталог услуг', href: '/catalog', description: 'Выберите готовую услугу и создайте заказ.' },
 ];
 
-export default function Customer({ onboarding = null }) {
+export default function Customer({ onboarding = null, stats = null, attention = null }) {
     return (
         <DashboardLayout>
             <Head title="Кабинет заказчика" />
@@ -34,6 +36,33 @@ export default function Customer({ onboarding = null }) {
                     </div>
                 </section>
             )}
+            <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
+                {stats && (
+                    <StatTiles
+                        tiles={[
+                            { label: 'Заказы в работе', value: stats.orders_in_progress, href: '/customer/orders' },
+                            { label: 'Ждут вашей приемки', value: stats.orders_to_review, href: '/customer/orders', hint: stats.orders_to_review > 0 ? 'проверьте результат' : null },
+                            { label: 'Ждут оплаты', value: stats.orders_awaiting_payment, href: '/customer/orders' },
+                            { label: 'Откликов на задания', value: stats.pending_offers, href: '/customer/tasks' },
+                        ]}
+                    />
+                )}
+                {attention && (
+                    <>
+                        <AttentionList
+                            title="Работа сдана — проверьте результат"
+                            description="Если не принять работу до даты автоприемки, оплата разблокируется автоматически."
+                            items={attention.needs_review}
+                            actionLabel="Проверить"
+                        />
+                        <AttentionList
+                            title="Новые отклики на ваши задания"
+                            items={attention.tasks_with_offers}
+                            actionLabel="Посмотреть"
+                        />
+                    </>
+                )}
+            </section>
             <DashboardContent title="Кабинет заказчика" cards={cards} />
         </DashboardLayout>
     );

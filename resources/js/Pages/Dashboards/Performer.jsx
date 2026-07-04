@@ -1,4 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
+import AttentionList from '../../Components/Dashboard/AttentionList';
+import StatTiles from '../../Components/Dashboard/StatTiles';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
 const cards = [
@@ -11,7 +13,8 @@ const cards = [
     { title: 'Мои отклики', href: '/performer/offers', description: 'Следите за предложениями по заданиям.' },
 ];
 
-export default function Performer({ recommendedTasks = null, onboarding = null }) {
+export default function Performer({ recommendedTasks = null, onboarding = null, stats = null, attention = null }) {
+    const rub = (kopecks) => new Intl.NumberFormat('ru-RU').format(kopecks) + ' ₽';
     const items = recommendedTasks?.items ?? [];
     const hasFavorites = recommendedTasks?.has_favorites === true;
     const isNewPerformer = onboarding && !onboarding.has_services && !onboarding.has_offers;
@@ -22,6 +25,26 @@ export default function Performer({ recommendedTasks = null, onboarding = null }
             <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <p className="text-sm font-semibold uppercase text-blue-700">Рабочая область</p>
                 <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Кабинет исполнителя</h1>
+
+                {stats && (
+                    <StatTiles
+                        tiles={[
+                            { label: 'Заказы в работе', value: stats.orders_in_progress + stats.orders_revision, href: '/performer/orders', hint: stats.orders_revision > 0 ? `в том числе на доработке: ${stats.orders_revision}` : null },
+                            { label: 'На проверке у заказчика', value: stats.orders_on_review, href: '/performer/orders' },
+                            { label: 'Активные отклики', value: stats.active_offers, href: '/performer/offers' },
+                            { label: 'Доступно к выводу', value: rub(stats.available_amount), href: '/performer/finance', hint: stats.pending_amount > 0 ? `еще ${rub(stats.pending_amount)} ожидает` : null },
+                        ]}
+                    />
+                )}
+
+                {attention && (
+                    <AttentionList
+                        title="Заказчик запросил доработку"
+                        description="Внесите правки и отправьте работу на повторную проверку."
+                        items={attention.needs_revision}
+                        actionLabel="Открыть заказ"
+                    />
+                )}
 
                 {isNewPerformer && (
                     <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-800 dark:bg-blue-950">
