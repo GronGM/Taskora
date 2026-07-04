@@ -242,8 +242,50 @@
 
     .dark .text-red-600,
     .dark .text-red-700,
-    .dark .text-red-800 {
+    .dark .text-red-800,
+    .dark .text-red-900 {
         color: rgb(252 165 165 / var(--tw-text-opacity, 1));
+    }
+
+    /* Насыщенные -900 тексты цветных плашек: в темной теме нужны светлые тона. */
+    .dark .text-blue-900 {
+        color: rgb(191 219 254 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .text-emerald-900,
+    .dark .text-green-900 {
+        color: rgb(167 243 208 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .bg-purple-50 {
+        background-color: rgb(59 7 100 / 0.35);
+    }
+
+    .dark .text-purple-700,
+    .dark .text-purple-800,
+    .dark .text-purple-900 {
+        color: rgb(216 180 254 / var(--tw-text-opacity, 1));
+    }
+
+    .dark .border-purple-100,
+    .dark .border-purple-200 {
+        border-color: rgb(147 51 234 / 0.5);
+    }
+
+    .dark .ring-purple-200 {
+        --tw-ring-color: rgb(147 51 234 / 0.5);
+    }
+
+    .dark .ring-emerald-200 {
+        --tw-ring-color: rgb(5 150 105 / 0.55);
+    }
+
+    .dark .ring-blue-200 {
+        --tw-ring-color: rgb(37 99 235 / 0.55);
+    }
+
+    .dark .hover\:bg-blue-100:hover {
+        background-color: rgb(30 64 175 / 0.5);
     }
 
     .dark .ring-slate-200,
