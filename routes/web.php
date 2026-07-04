@@ -75,6 +75,10 @@ Route::get('/', HomeController::class)->name('home');
 
 Route::get('/r/{code}', [\App\Http\Controllers\Referrals\ReferralController::class, 'redirect'])->name('referral.redirect');
 Route::post('/webhooks/yookassa', \App\Http\Controllers\Webhooks\YooKassaWebhookController::class)->name('webhooks.yookassa');
+Route::get('/legal/offer', [\App\Http\Controllers\Public\LegalController::class, 'offer'])->name('legal.offer');
+Route::get('/legal/safe-deal', [\App\Http\Controllers\Public\LegalController::class, 'safeDeal'])->name('legal.safe-deal');
+Route::get('/legal/payments', [\App\Http\Controllers\Public\LegalController::class, 'payments'])->name('legal.payments');
+Route::get('/legal/privacy', [\App\Http\Controllers\Public\LegalController::class, 'privacy'])->name('legal.privacy');
 Route::get('/how-it-works', [\App\Http\Controllers\Public\HelpController::class, 'howItWorks'])->name('help.how-it-works');
 Route::get('/faq', [\App\Http\Controllers\Public\HelpController::class, 'faq'])->name('help.faq');
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');

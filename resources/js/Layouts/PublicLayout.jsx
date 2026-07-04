@@ -169,6 +169,43 @@ export default function PublicLayout({ children }) {
             </header>
 
             <main>{children}</main>
+
+            <footer className="mt-16 border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+                <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-3 lg:px-8">
+                    <div>
+                        <p className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">Платформа</p>
+                        <nav className="mt-3 grid gap-2 text-sm" aria-label="Разделы платформы">
+                            <Link href="/how-it-works" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Как это работает</Link>
+                            <Link href="/faq" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Вопросы и ответы</Link>
+                            <Link href="/catalog" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Каталог услуг</Link>
+                            <Link href="/tasks" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Биржа заданий</Link>
+                        </nav>
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">Документы</p>
+                        <nav className="mt-3 grid gap-2 text-sm" aria-label="Юридические документы">
+                            <Link href="/legal/offer" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Публичная оферта</Link>
+                            <Link href="/legal/safe-deal" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Правила «Безопасной сделки»</Link>
+                            <Link href="/legal/payments" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Оплата и возвраты</Link>
+                            <Link href="/legal/privacy" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Политика персональных данных</Link>
+                        </nav>
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">Реквизиты</p>
+                        <div className="mt-3 space-y-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                            <p>ООО «ЗЕЛЁНАЯ МИЛЯ»</p>
+                            <p>ОГРН 1214300009351 · ИНН 4312157043</p>
+                            <p>613040, Кировская область, г. Кирово-Чепецк, ул. Спортивная, д. 2, кв. 417</p>
+                            <p>
+                                <a href="mailto:79628999009@yandex.ru" className="hover:text-blue-700 dark:hover:text-blue-300">79628999009@yandex.ru</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div className="border-t border-slate-100 py-4 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-500">
+                    © {new Date().getFullYear()} Таскора · Расчеты защищены сервисом «Безопасная сделка»
+                </div>
+            </footer>
         </div>
     );
 }
