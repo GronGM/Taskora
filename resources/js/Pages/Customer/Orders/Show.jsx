@@ -50,7 +50,7 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                     </div>
                 </div>
 
-                {order.payment_mode !== 'yookassa' && (
+                {order.payment_mode === 'stub' && (
                     <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
                         <p className="text-sm font-semibold text-amber-900">Это локальная заглушка оплаты. Реальный платежный шлюз будет подключен позже.</p>
                     </div>
@@ -137,7 +137,7 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                             {order.status === 'awaiting_payment' && (
                                 <>
                                     <Link href={order.mark_paid_url} method="post" as="button" className="w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                                        {order.payment_mode === 'yookassa' ? 'Оплатить картой' : 'Оплатить (заглушка)'}
+                                        {order.payment_mode !== 'stub' ? 'Оплатить картой' : 'Оплатить (заглушка)'}
                                     </Link>
                                     <Link href={order.cancel_url} method="post" as="button" className="w-full rounded-md border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50">
                                         Отменить

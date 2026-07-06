@@ -110,8 +110,8 @@ export default function Workspace({ role, order, statusLabels, paymentStatusLabe
 
                 <div className="mt-6 space-y-3">
                     <Notice tone="amber">
-                        {order.payment_mode === 'yookassa'
-                            ? 'Оплата проходит через ЮKassa: деньги удерживаются до приемки работы.'
+                        {order.payment_mode !== 'stub'
+                            ? 'Оплата защищена: деньги удерживаются до приемки работы.'
                             : 'Оплата сейчас работает как локальная заглушка. Реальный платежный шлюз не подключен.'}
                     </Notice>
                     {order.status === 'awaiting_payment' && (
@@ -362,7 +362,7 @@ function QuickActions({ role, order }) {
             <div className="mt-5 space-y-3">
                 {role === 'customer' && order.can.mark_paid && (
                     <Link href={order.mark_paid_url} method="post" as="button" className="w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                        {order.payment_mode === 'yookassa' ? 'Оплатить картой' : 'Оплатить (заглушка)'}
+                        {order.payment_mode !== 'stub' ? 'Оплатить картой' : 'Оплатить (заглушка)'}
                     </Link>
                 )}
                 {role === 'customer' && order.can.complete && (

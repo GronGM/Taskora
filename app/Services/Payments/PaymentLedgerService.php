@@ -32,6 +32,17 @@ class PaymentLedgerService
         );
     }
 
+    public function recordTBankHold(Order $order, User $customer, string $providerPaymentId): PaymentOperation
+    {
+        return $this->recordHold(
+            $order,
+            $customer,
+            PaymentOperation::PROVIDER_TBANK,
+            $providerPaymentId,
+            'Оплата через Т-Банк: средства удержаны до приемки работы.',
+        );
+    }
+
     private function recordHold(Order $order, User $customer, string $provider, ?string $providerOperationId, string $description): PaymentOperation
     {
         return DB::transaction(function () use ($order, $customer, $provider, $providerOperationId, $description): PaymentOperation {

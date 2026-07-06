@@ -34,6 +34,8 @@ class PaymentOperation extends Model
 
     public const PROVIDER_YOOKASSA = 'yookassa';
 
+    public const PROVIDER_TBANK = 'tbank';
+
     public const TYPE_PAYMENT_HOLD = 'payment_hold';
 
     public const TYPE_RELEASE_TO_PERFORMER = 'release_to_performer';

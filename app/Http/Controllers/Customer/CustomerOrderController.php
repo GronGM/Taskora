@@ -55,6 +55,25 @@ class CustomerOrderController extends Controller
         Gate::authorize('markPaid', $order);
         $user = request()->user();
 
+        if (config('payments.mode') === 'tbank') {
+            $payment = app(\App\Services\Payments\TBankClient::class)->init(
+                $order,
+                route('customer.orders.show', $order),
+                route('customer.orders.show', $order),
+                route('webhooks.tbank'),
+            );
+
+            $paymentUrl = $payment['PaymentURL'] ?? null;
+
+            if (! is_string($paymentUrl)) {
+                return redirect()
+                    ->route('customer.orders.show', $order)
+                    ->with('error', 'Не удалось начать оплату. Попробуйте еще раз чуть позже.');
+            }
+
+            return Inertia::location($paymentUrl);
+        }
+
         if (config('payments.mode') === 'yookassa') {
             $payment = app(\App\Services\Payments\YooKassaClient::class)->createPayment(
                 $order,
