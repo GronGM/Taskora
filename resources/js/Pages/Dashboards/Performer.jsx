@@ -13,6 +13,7 @@ const cards = [
     { title: 'Доступные задания', href: '/tasks', description: 'Ищите опубликованные задания заказчиков.' },
     { title: 'Мои отклики', href: '/performer/offers', description: 'Следите за предложениями по заданиям.' },
     { title: 'Приглашайте друзей', href: '/referrals', description: 'Персональная ссылка и список приглашенных.' },
+    { title: 'Настройки аккаунта', href: '/settings', description: 'Имя, email и смена пароля.' },
 ];
 
 export default function Performer({ recommendedTasks = null, onboarding = null, stats = null, attention = null }) {

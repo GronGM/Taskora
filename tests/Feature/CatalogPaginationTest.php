@@ -45,6 +45,21 @@ class CatalogPaginationTest extends TestCase
         $this->assertStringContainsString('page=2', $pagination['next_page_url']);
     }
 
+    public function test_catalog_filters_by_price_and_sorts(): void
+    {
+        $performer = User::factory()->create(['role' => User::ROLE_PERFORMER]);
+
+        Service::factory()->for($performer, 'user')->create(['status' => Service::STATUS_PUBLISHED, 'title' => 'Дешевая услуга', 'price_from' => 500]);
+        Service::factory()->for($performer, 'user')->create(['status' => Service::STATUS_PUBLISHED, 'title' => 'Средняя услуга', 'price_from' => 3000]);
+        Service::factory()->for($performer, 'user')->create(['status' => Service::STATUS_PUBLISHED, 'title' => 'Дорогая услуга', 'price_from' => 9000]);
+
+        $titles = collect($this->get('/catalog?price_min=1000&price_max=5000')->assertOk()->inertiaProps('services'))->pluck('title');
+        $this->assertSame(['Средняя услуга'], $titles->all());
+
+        $sorted = collect($this->get('/catalog?sort=price_high')->assertOk()->inertiaProps('services'))->pluck('title');
+        $this->assertSame('Дорогая услуга', $sorted->first());
+    }
+
     public function test_category_page_is_paginated(): void
     {
         $performer = User::factory()->create(['role' => User::ROLE_PERFORMER]);

@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import PublicLayout from '../../Layouts/PublicLayout';
 
 const sortLabels = {
@@ -216,6 +216,14 @@ function FilterForm({
     const [taskTypeSearch, setTaskTypeSearch] = useState('');
     const [draftCategorySlugs, setDraftCategorySlugs] = useState(selectedCategorySlugs);
     const [draftTaskTypeSlugs, setDraftTaskTypeSlugs] = useState(selectedTaskTypeSlugs);
+    const formRef = useRef(null);
+    const submitTimer = useRef(null);
+
+    // Выбор категории или вида применяется сам — кнопка нужна только для бюджета и поиска.
+    const scheduleSubmit = () => {
+        clearTimeout(submitTimer.current);
+        submitTimer.current = setTimeout(() => formRef.current?.requestSubmit(), 450);
+    };
     const visibleCategories = useMemo(() => filterDirections(categories, categorySearch), [categories, categorySearch]);
     const visibleTaskTypes = useMemo(() => filterDirections(taskTypes, taskTypeSearch), [taskTypes, taskTypeSearch]);
     const canUseFavorites = viewer.is_performer === true;
@@ -229,7 +237,7 @@ function FilterForm({
     }, [selectedTaskTypeSlugs.join('|')]);
 
     return (
-        <form action="/tasks" method="get" className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <form ref={formRef} action="/tasks" method="get" className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-start justify-between gap-4">
                 <div>
                     <h2 className="text-lg font-semibold text-slate-950 dark:text-white">Фильтры</h2>
@@ -252,7 +260,7 @@ function FilterForm({
                     name="categories[]"
                     items={visibleCategories}
                     selectedSlugs={draftCategorySlugs}
-                    onToggle={(slug) => setDraftCategorySlugs((slugs) => toggleSlug(slugs, slug))}
+                    onToggle={(slug) => { setDraftCategorySlugs((slugs) => toggleSlug(slugs, slug)); scheduleSubmit(); }}
                     searchValue={categorySearch}
                     onSearchChange={setCategorySearch}
                     searchLabel="Найти категорию"
@@ -268,7 +276,7 @@ function FilterForm({
                     name="task_types[]"
                     items={visibleTaskTypes}
                     selectedSlugs={draftTaskTypeSlugs}
-                    onToggle={(slug) => setDraftTaskTypeSlugs((slugs) => toggleSlug(slugs, slug))}
+                    onToggle={(slug) => { setDraftTaskTypeSlugs((slugs) => toggleSlug(slugs, slug)); scheduleSubmit(); }}
                     searchValue={taskTypeSearch}
                     onSearchChange={setTaskTypeSearch}
                     searchLabel="Найти вид задания"

@@ -27,7 +27,7 @@ class TaskBoardV2Test extends TestCase
         $this->seed(CategorySeeder::class);
         $this->seed(TaskTypeSeeder::class);
 
-        $this->assertSame(39, TaskType::count());
+        $this->assertSame(55, TaskType::count());
         $this->assertDatabaseHas('task_types', ['name' => 'Консультация по работе', 'is_active' => true]);
         $this->assertDatabaseHas('task_types', ['name' => 'Word-документ', 'is_active' => true]);
         $this->assertDatabaseHas('task_types', ['name' => 'Лендинг', 'is_active' => true]);

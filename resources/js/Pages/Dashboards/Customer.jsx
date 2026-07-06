@@ -10,6 +10,7 @@ const cards = [
     { title: 'Создать задание', href: '/customer/tasks/create', description: 'Подготовьте новое задание для биржи.' },
     { title: 'Каталог услуг', href: '/catalog', description: 'Выберите готовую услугу и создайте заказ.' },
     { title: 'Приглашайте друзей', href: '/referrals', description: 'Персональная ссылка и список приглашенных.' },
+    { title: 'Настройки аккаунта', href: '/settings', description: 'Имя, email и смена пароля.' },
 ];
 
 export default function Customer({ onboarding = null, stats = null, attention = null }) {

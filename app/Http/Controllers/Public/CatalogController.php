@@ -29,11 +29,25 @@ class CatalogController extends Controller
                 ->first();
         }
 
-        $services = $this->publishedServicesQuery()
+        $sort = in_array($request->string('sort')->toString(), ['popular', 'newest', 'price_low', 'price_high', 'rating'], true)
+            ? $request->string('sort')->toString()
+            : 'popular';
+
+        $servicesQuery = $this->publishedServicesQuery()
             ->when($activeCategory, fn (Builder $query) => $this->applyCategoryFilter($query, $activeCategory))
             ->when($request->filled('search'), fn (Builder $query) => app(RelevanceSearch::class)->apply($query, trim($request->string('search')->toString())))
-            ->orderByDesc('is_featured')
-            ->orderByDesc('orders_count')
+            ->when($request->filled('price_min'), fn (Builder $query) => $query->where('price_from', '>=', max(0, (int) $request->input('price_min'))))
+            ->when($request->filled('price_max'), fn (Builder $query) => $query->where('price_from', '<=', max(0, (int) $request->input('price_max'))));
+
+        match ($sort) {
+            'newest' => $servicesQuery->latest(),
+            'price_low' => $servicesQuery->orderBy('price_from')->latest(),
+            'price_high' => $servicesQuery->orderByDesc('price_from')->latest(),
+            'rating' => $servicesQuery->orderByDesc('rating')->orderByDesc('reviews_count')->latest(),
+            default => $servicesQuery->orderByDesc('is_featured')->orderByDesc('orders_count')->latest(),
+        };
+
+        $services = $servicesQuery
             ->paginate(24)
             ->withQueryString();
 
@@ -44,6 +58,9 @@ class CatalogController extends Controller
             'filters' => [
                 'category' => $activeCategory?->slug,
                 'search' => $request->string('search')->toString(),
+                'price_min' => $request->string('price_min')->toString(),
+                'price_max' => $request->string('price_max')->toString(),
+                'sort' => $sort,
             ],
             'activeCategory' => $activeCategory ? $this->categoryPayload($activeCategory) : null,
         ]);

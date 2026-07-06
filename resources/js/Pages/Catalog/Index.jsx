@@ -20,19 +20,43 @@ export default function CatalogIndex({ categories, services, filters, activeCate
                                 Выбирайте опубликованные услуги исполнителей Таскоры по категориям, срокам и цене.
                             </p>
                         </div>
-                        <form action="/catalog" method="get" className="flex w-full gap-2 lg:max-w-md">
+                        <form action="/catalog" method="get" className="grid w-full gap-2 sm:grid-cols-[minmax(0,1fr)_110px_110px_170px_auto] lg:max-w-3xl">
                             {filters.category && <input type="hidden" name="category" value={filters.category} />}
                             <input
                                 type="search"
                                 name="search"
                                 defaultValue={filters.search}
                                 placeholder="Поиск по услугам"
-                                className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-blue-400 dark:focus:ring-blue-950"
+                                className="w-full rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                             />
-                            <button
-                                type="submit"
-                                className="rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                            <input
+                                type="number"
+                                name="price_min"
+                                min="0"
+                                defaultValue={filters.price_min}
+                                placeholder="Цена от"
+                                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                            />
+                            <input
+                                type="number"
+                                name="price_max"
+                                min="0"
+                                defaultValue={filters.price_max}
+                                placeholder="до"
+                                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                            />
+                            <select
+                                name="sort"
+                                defaultValue={filters.sort ?? 'popular'}
+                                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                             >
+                                <option value="popular">Популярные</option>
+                                <option value="newest">Новые</option>
+                                <option value="rating">С высоким рейтингом</option>
+                                <option value="price_low">Дешевле</option>
+                                <option value="price_high">Дороже</option>
+                            </select>
+                            <button type="submit" className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
                                 Найти
                             </button>
                         </form>

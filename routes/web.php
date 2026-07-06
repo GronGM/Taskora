@@ -113,6 +113,9 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
+    Route::get('/settings', [\App\Http\Controllers\Settings\AccountSettingsController::class, 'edit'])->name('settings.edit');
+    Route::patch('/settings', [\App\Http\Controllers\Settings\AccountSettingsController::class, 'update'])->name('settings.update');
+    Route::patch('/settings/password', [\App\Http\Controllers\Settings\AccountSettingsController::class, 'updatePassword'])->name('settings.password');
     Route::get('/referrals', [\App\Http\Controllers\Referrals\ReferralController::class, 'index'])->name('referrals.index');
     Route::get('/notifications', [NotificationController::class, 'index'])
         ->middleware('throttle:taskora-notifications')

@@ -21,6 +21,10 @@ class CategorySeeder extends Seeder
                     ['name' => 'Расчеты и таблицы', 'slug' => 'raschety-i-tablicy'],
                     ['name' => 'Рефераты и доклады', 'slug' => 'referaty-i-doklady'],
                     ['name' => 'Дипломные консультации', 'slug' => 'diplomnye-konsultacii'],
+                    ['name' => 'Контрольные и задачи', 'slug' => 'kontrolnye-i-zadachi'],
+                    ['name' => 'Отчеты по практике', 'slug' => 'otchety-po-praktike'],
+                    ['name' => 'Эссе и сочинения', 'slug' => 'esse-i-sochineniya'],
+                    ['name' => 'Чертежи', 'slug' => 'chertezhi'],
                 ],
             ],
             [
@@ -48,6 +52,12 @@ class CategorySeeder extends Seeder
                 'slug' => 'dizayn',
                 'icon' => 'palette',
                 'description' => 'Визуальные материалы, обложки, простые макеты и презентационная графика.',
+                'children' => [
+                    ['name' => 'Логотипы и фирменный стиль', 'slug' => 'logotipy-i-firmennyy-stil'],
+                    ['name' => 'Баннеры и соцсети', 'slug' => 'bannery-i-socseti'],
+                    ['name' => 'Полиграфия', 'slug' => 'poligrafiya'],
+                    ['name' => 'Обработка фото', 'slug' => 'obrabotka-foto'],
+                ],
             ],
             [
                 'name' => 'Сайты и разработка',
@@ -64,12 +74,69 @@ class CategorySeeder extends Seeder
                 'slug' => 'marketing',
                 'icon' => 'megaphone',
                 'description' => 'Упаковка предложений, базовая аналитика и подготовка материалов для продвижения.',
+                'children' => [
+                    ['name' => 'SEO и трафик', 'slug' => 'seo-i-trafik'],
+                    ['name' => 'Контекстная реклама', 'slug' => 'kontekstnaya-reklama'],
+                    ['name' => 'SMM и соцсети', 'slug' => 'smm-i-socseti'],
+                    ['name' => 'Маркетплейсы', 'slug' => 'marketpleysy'],
+                ],
             ],
             [
                 'name' => 'Бизнес-задачи',
                 'slug' => 'biznes-zadachi',
                 'icon' => 'briefcase',
                 'description' => 'Документы, таблицы, описания процессов и операционные задачи для команд.',
+                'children' => [
+                    ['name' => 'Таблицы и расчеты', 'slug' => 'tablicy-i-raschety'],
+                    ['name' => 'Документы и договоры', 'slug' => 'dokumenty-i-dogovory'],
+                    ['name' => 'Финансовые модели', 'slug' => 'finansovye-modeli'],
+                    ['name' => 'Ассистент и поручения', 'slug' => 'assistent-i-porucheniya'],
+                ],
+            ],
+            [
+                'name' => 'Тексты и переводы',
+                'slug' => 'teksty-i-perevody',
+                'icon' => 'languages',
+                'description' => 'Копирайтинг, редактура, переводы и подготовка продающих текстов.',
+                'children' => [
+                    ['name' => 'Копирайтинг', 'slug' => 'kopirayting'],
+                    ['name' => 'Редактура и корректура', 'slug' => 'redaktura-i-korrektura'],
+                    ['name' => 'Переводы', 'slug' => 'perevody'],
+                    ['name' => 'Резюме и сопроводительные', 'slug' => 'rezyume-i-soprovoditelnye'],
+                ],
+            ],
+            [
+                'name' => 'Аудио и видео',
+                'slug' => 'audio-i-video',
+                'icon' => 'video',
+                'description' => 'Монтаж роликов, обработка звука, озвучка и субтитры.',
+                'children' => [
+                    ['name' => 'Монтаж видео', 'slug' => 'montazh-video'],
+                    ['name' => 'Обработка аудио', 'slug' => 'obrabotka-audio'],
+                    ['name' => 'Озвучка', 'slug' => 'ozvuchka'],
+                    ['name' => 'Субтитры', 'slug' => 'subtitry'],
+                ],
+            ],
+            [
+                'name' => 'Данные и аналитика',
+                'slug' => 'dannye-i-analitika',
+                'icon' => 'chart-column',
+                'description' => 'Сбор данных, таблицы, отчеты, дашборды и аналитические выводы.',
+                'children' => [
+                    ['name' => 'Парсинг и сбор данных', 'slug' => 'parsing-i-sbor-dannyh'],
+                    ['name' => 'Отчеты и аналитика', 'slug' => 'otchety-i-analitika'],
+                    ['name' => 'Дашборды', 'slug' => 'dashbordy'],
+                ],
+            ],
+            [
+                'name' => 'Репетиторство и обучение',
+                'slug' => 'repetitorstvo-i-obuchenie',
+                'icon' => 'graduation-cap',
+                'description' => 'Разбор тем, подготовка к экзаменам и индивидуальные консультации.',
+                'children' => [
+                    ['name' => 'Разбор темы', 'slug' => 'razbor-temy'],
+                    ['name' => 'Подготовка к экзамену', 'slug' => 'podgotovka-k-ekzamenu'],
+                ],
             ],
         ];
 
