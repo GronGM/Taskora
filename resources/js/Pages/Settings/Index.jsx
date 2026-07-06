@@ -17,6 +17,15 @@ export default function SettingsIndex({ account }) {
         password_confirmation: '',
     });
 
+    const avatarForm = useForm({ avatar: null });
+
+    const submitAvatar = (event) => {
+        event.preventDefault();
+        avatarForm.post('/settings/avatar', {
+            onSuccess: () => avatarForm.reset(),
+        });
+    };
+
     const submitProfile = (event) => {
         event.preventDefault();
         profileForm.patch('/settings');
@@ -41,7 +50,34 @@ export default function SettingsIndex({ account }) {
                     <p className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">{flash.success}</p>
                 )}
 
-                <form onSubmit={submitProfile} className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <form onSubmit={submitAvatar} className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-100">Аватар</h2>
+                    <div className="mt-5 flex flex-wrap items-center gap-5">
+                        <span className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-blue-100 text-2xl font-semibold text-blue-700 ring-1 ring-slate-200 dark:bg-blue-950 dark:text-blue-300 dark:ring-slate-700">
+                            {avatarForm.data.avatar
+                                ? <img src={URL.createObjectURL(avatarForm.data.avatar)} alt="Превью аватара" className="h-full w-full object-cover" />
+                                : account.avatar_url
+                                    ? <img src={account.avatar_url} alt="Текущий аватар" className="h-full w-full object-cover" />
+                                    : (account.name ?? '?').slice(0, 1).toUpperCase()}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                            <input
+                                id="avatar"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={(event) => avatarForm.setData('avatar', event.target.files?.[0] ?? null)}
+                                className="w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                            />
+                            <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">JPG, PNG или WebP до 5 МБ. Аватар виден в шапке, откликах и карточках.</p>
+                            {avatarForm.errors.avatar && <p className="mt-2 text-sm text-red-600">{avatarForm.errors.avatar}</p>}
+                        </div>
+                    </div>
+                    <button type="submit" disabled={avatarForm.processing || !avatarForm.data.avatar} className="mt-5 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
+                        Сохранить аватар
+                    </button>
+                </form>
+
+                <form onSubmit={submitProfile} className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-100">Основные данные</h2>
                     <div className="mt-5 grid gap-5 sm:grid-cols-2">
                         <div>

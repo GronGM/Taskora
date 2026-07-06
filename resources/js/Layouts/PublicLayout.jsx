@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import ThemeToggle from '../Components/Theme/ThemeToggle';
+import { HeaderAvatar, WalletBadge } from '../Components/Header/AccountWidgets';
 import TestModeBanner from '../Components/TestModeBanner';
 
 const navigation = [
@@ -66,7 +67,9 @@ export default function PublicLayout({ children }) {
                                             </span>
                                         )}
                                     </Link>
-                                    <Link
+                                    <WalletBadge />
+                                <HeaderAvatar name={user?.name} />
+                                <Link
                                         href="/logout"
                                         method="post"
                                         as="button"

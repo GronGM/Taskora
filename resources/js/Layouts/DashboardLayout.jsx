@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import ThemeToggle from '../Components/Theme/ThemeToggle';
+import { HeaderAvatar, WalletBadge } from '../Components/Header/AccountWidgets';
 import TestModeBanner from '../Components/TestModeBanner';
 
 const roleLabels = {
@@ -128,6 +129,8 @@ export default function DashboardLayout({ children }) {
                                     </span>
                                 )}
                             </Link>
+                            <WalletBadge />
+                            <HeaderAvatar name={user?.name} />
                             <Link
                                 href="/logout"
                                 method="post"

@@ -16,6 +16,7 @@ use Illuminate\Notifications\Notifiable;
 #[Fillable([
     'name',
     'email',
+    'avatar_path',
     'password',
     'role',
     'status',
@@ -155,6 +156,15 @@ class User extends Authenticatable
         static::creating(function (User $user): void {
             $user->referral_code ??= strtolower(\Illuminate\Support\Str::random(10));
         });
+    }
+
+    public function accountAvatarUrl(): ?string
+    {
+        if ($this->avatar_path) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($this->avatar_path);
+        }
+
+        return $this->performerProfile?->avatar_url;
     }
 
     public function referrals(): HasMany

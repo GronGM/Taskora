@@ -67,6 +67,12 @@ class HandleInertiaRequests extends Middleware
                 : [
                     'unread_count' => 0,
                 ],
+            'account' => fn (): ?array => $user
+                ? [
+                    'avatar_url' => $user->accountAvatarUrl(),
+                    'wallet' => $this->walletPayload($user),
+                ]
+                : null,
             'testMode' => [
                 'enabled' => BetaAccess::shouldShowTestModeBanner(),
                 'message' => BetaAccess::BANNER_TEXT,
@@ -77,5 +83,46 @@ class HandleInertiaRequests extends Middleware
                 'status' => fn (): ?string => $request->session()->get('status'),
             ],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function walletPayload(\App\Models\User $user): ?array
+    {
+        return \Illuminate\Support\Facades\Cache::remember(
+            "wallet:{$user->id}",
+            30,
+            function () use ($user): ?array {
+                if ($user->isPerformer()) {
+                    $summary = app(\App\Services\Payments\PaymentLedgerService::class)->getPerformerFinanceSummary($user);
+
+                    return [
+                        'total' => (int) $summary['available_amount'] + (int) $summary['pending_amount'],
+                        'rows' => [
+                            ['label' => 'Доступно к выводу', 'amount' => (int) $summary['available_amount'], 'tone' => 'emerald'],
+                            ['label' => 'Ожидает разблокировки', 'amount' => (int) $summary['pending_amount'], 'tone' => 'amber'],
+                        ],
+                        'url' => route('performer.finance.index'),
+                    ];
+                }
+
+                if ($user->isCustomer()) {
+                    $reserved = (int) $user->customerOrders()
+                        ->where('payment_status', \App\Models\Order::PAYMENT_HELD)
+                        ->sum('price');
+
+                    return [
+                        'total' => $reserved,
+                        'rows' => [
+                            ['label' => 'Зарезервировано в заказах', 'amount' => $reserved, 'tone' => 'amber'],
+                        ],
+                        'url' => route('customer.orders.index'),
+                    ];
+                }
+
+                return null;
+            },
+        );
     }
 }
