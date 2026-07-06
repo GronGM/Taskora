@@ -14,23 +14,9 @@ class BetaTestingController extends Controller
         abort_unless(BetaAccess::betaToolingAvailable(), 404);
 
         return Inertia::render('BetaTesting/Index', [
-            'accounts' => $this->accounts(),
             'roleChecklists' => $this->roleChecklists(),
             'feedbackUrl' => route('beta-feedback.create'),
         ]);
-    }
-
-    /**
-     * @return array<int, array{role: string, email: string, password: string, dashboard: string}>
-     */
-    private function accounts(): array
-    {
-        return [
-            ['role' => 'Заказчик', 'email' => 'customer@taskora.local', 'password' => 'password', 'dashboard' => '/customer/dashboard'],
-            ['role' => 'Исполнитель', 'email' => 'performer@taskora.local', 'password' => 'password', 'dashboard' => '/performer/dashboard'],
-            ['role' => 'Модератор', 'email' => 'moderator@taskora.local', 'password' => 'password', 'dashboard' => '/moderator/dashboard'],
-            ['role' => 'Администратор', 'email' => 'admin@taskora.local', 'password' => 'password', 'dashboard' => '/admin/dashboard'],
-        ];
     }
 
     /**

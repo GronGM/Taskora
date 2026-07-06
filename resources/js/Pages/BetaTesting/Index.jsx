@@ -15,7 +15,7 @@ const forbidden = [
     'Персональные данные третьих лиц и реальные клиентские материалы.',
 ];
 
-export default function BetaTesting({ accounts = [], roleChecklists = [], feedbackUrl = '/beta-feedback/create' }) {
+export default function BetaTesting({ roleChecklists = [], feedbackUrl = '/beta-feedback/create' }) {
     return (
         <PublicLayout>
             <Head title="Beta-тестирование Таскоры" />
@@ -60,41 +60,14 @@ export default function BetaTesting({ accounts = [], roleChecklists = [], feedba
             </section>
 
             <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-                    <div>
-                        <p className="text-sm font-semibold uppercase text-blue-700">Аккаунты</p>
-                        <h2 className="mt-2 text-3xl font-semibold text-slate-950">Тестовые роли</h2>
-                    </div>
-                    <p className="max-w-xl text-sm leading-6 text-slate-600">
-                        Пароль у demo-аккаунтов одинаковый и нужен только для закрытого тестирования.
+                <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <p className="text-sm font-semibold uppercase text-blue-700">Аккаунты</p>
+                    <h2 className="mt-2 text-3xl font-semibold text-slate-950 dark:text-slate-100">Тестовые роли</h2>
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+                        Вы можете зарегистрироваться самостоятельно в роли заказчика или исполнителя. Доступ к тестовым
+                        аккаунтам модератора и администратора выдается организатором тестирования по запросу — напишите
+                        через форму обратной связи или на почту из раздела «Реквизиты и контакты».
                     </p>
-                </div>
-
-                <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-                        <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                            <tr>
-                                <th className="px-4 py-3 font-semibold">Роль</th>
-                                <th className="px-4 py-3 font-semibold">Email</th>
-                                <th className="px-4 py-3 font-semibold">Пароль</th>
-                                <th className="px-4 py-3 font-semibold">Кабинет</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {accounts.map((account) => (
-                                <tr key={account.email}>
-                                    <td className="whitespace-nowrap px-4 py-4 font-semibold text-slate-950">{account.role}</td>
-                                    <td className="whitespace-nowrap px-4 py-4 font-mono text-slate-700">{account.email}</td>
-                                    <td className="whitespace-nowrap px-4 py-4 font-mono text-slate-700">{account.password}</td>
-                                    <td className="whitespace-nowrap px-4 py-4">
-                                        <Link href={account.dashboard} className="font-semibold text-blue-700 hover:text-blue-800">
-                                            {account.dashboard}
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
                 </div>
             </section>
 

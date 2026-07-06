@@ -41,18 +41,16 @@ class BetaTestingToolingTest extends TestCase
         $this->get(route('beta-testing'))->assertNotFound();
     }
 
-    public function test_beta_testing_page_shows_test_accounts(): void
+    public function test_beta_testing_page_does_not_expose_test_accounts(): void
     {
         $this->enableLocalBetaTooling();
 
         $response = $this->get(route('beta-testing'))->assertOk();
 
-        $emails = collect($response->inertiaProps('accounts'))->pluck('email');
-
-        $this->assertTrue($emails->contains('customer@taskora.local'));
-        $this->assertTrue($emails->contains('performer@taskora.local'));
-        $this->assertTrue($emails->contains('moderator@taskora.local'));
-        $this->assertTrue($emails->contains('admin@taskora.local'));
+        // Учетные данные demo-аккаунтов выдаются организатором по запросу
+        // и не должны публиковаться на странице.
+        $this->assertNull($response->inertiaProps('accounts'));
+        $this->assertStringNotContainsString('taskora.local', json_encode($response->inertiaProps(), JSON_UNESCAPED_UNICODE));
     }
 
     public function test_guest_after_beta_access_can_open_feedback_form(): void

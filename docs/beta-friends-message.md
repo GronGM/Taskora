@@ -9,10 +9,7 @@
 
 ## Тестовые аккаунты
 
-- Заказчик: [customer@taskora.local](mailto:customer@taskora.local) / `password`
-- Исполнитель: [performer@taskora.local](mailto:performer@taskora.local) / `password`
-- Модератор: [moderator@taskora.local](mailto:moderator@taskora.local) / `password`
-- Админ: [admin@taskora.local](mailto:admin@taskora.local) / `password`
+Зарегистрируйтесь самостоятельно как заказчик или исполнитель. Доступ к demo-аккаунтам (в том числе модератора и администратора) выдает организатор тестирования по запросу — данные не публикуются.
 
 ## Правила
 
