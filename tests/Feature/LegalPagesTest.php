@@ -11,7 +11,7 @@ class LegalPagesTest extends TestCase
 
     public function test_all_legal_pages_are_public(): void
     {
-        foreach (['legal.offer', 'legal.safe-deal', 'legal.payments', 'legal.privacy'] as $route) {
+        foreach (['legal.offer', 'legal.safe-deal', 'legal.payments', 'legal.privacy', 'legal.requisites'] as $route) {
             $this->get(route($route))
                 ->assertOk()
                 ->assertInertia(fn ($page) => $page

@@ -188,17 +188,16 @@ export default function PublicLayout({ children }) {
                             <Link href="/legal/safe-deal" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Правила «Безопасной сделки»</Link>
                             <Link href="/legal/payments" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Оплата и возвраты</Link>
                             <Link href="/legal/privacy" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Политика персональных данных</Link>
+                            <Link href="/legal/requisites" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Реквизиты и контакты</Link>
                         </nav>
                     </div>
                     <div>
-                        <p className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">Реквизиты</p>
+                        <p className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">Контакты</p>
                         <div className="mt-3 space-y-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
-                            <p>ООО «ЗЕЛЁНАЯ МИЛЯ»</p>
-                            <p>ОГРН 1214300009351 · ИНН 4312157043</p>
-                            <p>613040, Кировская область, г. Кирово-Чепецк, ул. Спортивная, д. 2, кв. 417</p>
                             <p>
-                                <a href="mailto:79628999009@yandex.ru" className="hover:text-blue-700 dark:hover:text-blue-300">79628999009@yandex.ru</a>
+                                <a href="mailto:taskora@yandex.ru" className="hover:text-blue-700 dark:hover:text-blue-300">taskora@yandex.ru</a>
                             </p>
+                            <p>Ответим в течение 10 рабочих дней.</p>
                         </div>
                     </div>
                 </div>
