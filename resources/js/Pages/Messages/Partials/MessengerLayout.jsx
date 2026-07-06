@@ -1,4 +1,4 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Clock, FileText, Info, MessageCircle, Paperclip, Search, Send, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -36,6 +36,17 @@ export function MessengerLayout({
     details,
 }) {
     const hasActiveConversation = Boolean(activeKey);
+
+    // Живой мессенджер: мягкое автообновление, пока вкладка видима.
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                router.reload({ preserveScroll: true });
+            }
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, []);
     const layoutColumns = hasActiveConversation
         ? 'md:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_320px]'
         : 'md:grid-cols-[320px_minmax(0,1fr)]';

@@ -62,7 +62,7 @@ class CustomerTaskController extends Controller
     {
         Gate::authorize('view', $task);
 
-        $task->load(['category', 'taskType', 'customer', 'offers.performer']);
+        $task->load(['category', 'taskType', 'customer', 'offers.performer.performerProfile']);
 
         return Inertia::render('Customer/Tasks/Show', [
             'task' => $this->taskDetailPayload($task),
@@ -183,6 +183,11 @@ class CustomerTaskController extends Controller
                     'created_at' => $offer->created_at?->format('d.m.Y H:i'),
                     'performer' => [
                         'name' => $offer->performer?->name,
+                        'avatar_url' => $offer->performer?->performerProfile?->avatar_url,
+                        'level_label' => \App\Support\PerformerLevel::label($offer->performer?->performer_level),
+                        'rating' => ($offer->performer?->performer_reviews_count ?? 0) > 0 ? (float) $offer->performer->performer_rating : null,
+                        'completed_orders_count' => (int) ($offer->performer?->performer_completed_orders_count ?? 0),
+                        'profile_url' => $offer->performer ? route('performers.show', $offer->performer) : null,
                     ],
                     'accept_url' => route('customer.task-offers.accept', $offer),
                     'reject_url' => route('customer.task-offers.reject', $offer),

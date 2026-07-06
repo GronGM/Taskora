@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import AttentionList from '../../Components/Dashboard/AttentionList';
+import OnboardingChecklist from '../../Components/Dashboard/OnboardingChecklist';
 import StatTiles from '../../Components/Dashboard/StatTiles';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
@@ -18,7 +19,6 @@ export default function Performer({ recommendedTasks = null, onboarding = null, 
     const rub = (kopecks) => new Intl.NumberFormat('ru-RU').format(kopecks) + ' ₽';
     const items = recommendedTasks?.items ?? [];
     const hasFavorites = recommendedTasks?.has_favorites === true;
-    const isNewPerformer = onboarding && !onboarding.has_services && !onboarding.has_offers;
 
     return (
         <DashboardLayout>
@@ -47,22 +47,16 @@ export default function Performer({ recommendedTasks = null, onboarding = null, 
                     />
                 )}
 
-                {isNewPerformer && (
-                    <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-800 dark:bg-blue-950">
-                        <h2 className="text-xl font-semibold text-slate-950 dark:text-slate-100">Начните зарабатывать на Таскоре</h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700 dark:text-slate-300">
-                            Два пути к первому заказу: создайте услугу-витрину, чтобы заказчики находили вас сами,
-                            или откликайтесь на задания биржи. Новички получают равные шансы — сортировка не только по рейтингу.
-                        </p>
-                        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                            <Link href="/performer/services/create" className="inline-flex justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                                Создать первую услугу
-                            </Link>
-                            <Link href="/tasks" className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-                                Смотреть задания
-                            </Link>
-                        </div>
-                    </div>
+                {onboarding && (
+                    <OnboardingChecklist
+                        title="Путь к первому заказу"
+                        description="Новички получают равные шансы: сортировка не только по рейтингу, продвижение не продается."
+                        steps={[
+                            { label: 'Заполните профиль', done: onboarding.has_profile, href: '/performer/profile', action: 'Заполнить' },
+                            { label: 'Создайте услугу-витрину', done: onboarding.has_services, href: '/performer/services/create', action: 'Создать' },
+                            { label: 'Откликнитесь на задание', done: onboarding.has_offers, href: '/tasks', action: 'К заданиям' },
+                        ]}
+                    />
                 )}
 
                 {recommendedTasks && (

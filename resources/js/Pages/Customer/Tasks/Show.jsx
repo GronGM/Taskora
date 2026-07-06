@@ -97,11 +97,29 @@ export default function Show({ task, statusLabels, offerStatusLabels }) {
                                 <article key={offer.id} className="rounded-lg border border-slate-200 bg-slate-50 p-5">
                                     <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                                         <div>
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <span className={`rounded-md px-3 py-1 text-xs font-semibold ${offerClasses[offer.status] ?? offerClasses.submitted}`}>
-                                                    {offerStatusLabels[offer.status]}
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <span aria-hidden="true" className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                                                    {offer.performer.avatar_url
+                                                        ? <img src={offer.performer.avatar_url} alt="" className="h-full w-full object-cover" />
+                                                        : (offer.performer.name ?? '?').slice(0, 1).toUpperCase()}
                                                 </span>
-                                                <span className="text-sm font-semibold text-slate-950">{offer.performer.name}</span>
+                                                <div className="min-w-0">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        {offer.performer.profile_url ? (
+                                                            <a href={offer.performer.profile_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-slate-950 hover:text-blue-700">{offer.performer.name}</a>
+                                                        ) : (
+                                                            <span className="text-sm font-semibold text-slate-950">{offer.performer.name}</span>
+                                                        )}
+                                                        <span className={`rounded-md px-3 py-1 text-xs font-semibold ${offerClasses[offer.status] ?? offerClasses.submitted}`}>
+                                                            {offerStatusLabels[offer.status]}
+                                                        </span>
+                                                    </div>
+                                                    <p className="mt-0.5 text-xs text-slate-500">
+                                                        {[offer.performer.level_label, offer.performer.rating ? `★ ${Number(offer.performer.rating).toFixed(2)}` : null, offer.performer.completed_orders_count ? `заказов: ${offer.performer.completed_orders_count}` : null]
+                                                            .filter(Boolean)
+                                                            .join(' · ')}
+                                                    </p>
+                                                </div>
                                             </div>
                                             <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-700">{offer.message}</p>
                                             <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-3">

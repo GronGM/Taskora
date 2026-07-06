@@ -22,6 +22,7 @@ class PerformerOnboardingTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Dashboards/Performer')
+                ->where('onboarding.has_profile', false)
                 ->where('onboarding.has_services', false)
                 ->where('onboarding.has_offers', false));
     }

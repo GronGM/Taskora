@@ -144,6 +144,7 @@ class RoleDashboardController extends Controller
                 'needs_revision' => $needsRevision,
             ],
             'onboarding' => [
+                'has_profile' => $user->performerProfile()->exists(),
                 'has_services' => $user->services()->exists(),
                 'has_offers' => $user->taskOffers()->exists(),
             ],

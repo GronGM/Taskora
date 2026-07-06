@@ -20,12 +20,18 @@ export default function Show({ service, similarServices = [] }) {
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
                     <div>
+                        <nav aria-label="Хлебные крошки" className="mb-4 flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                            <Link href="/" className="hover:text-blue-700 dark:hover:text-blue-300">Главная</Link>
+                            <span aria-hidden="true">/</span>
+                            <Link href="/catalog" className="hover:text-blue-700 dark:hover:text-blue-300">Каталог</Link>
+                            <span aria-hidden="true">/</span>
+                            <Link href={service.category.url} className="hover:text-blue-700 dark:hover:text-blue-300">{service.category.name}</Link>
+                            <span aria-hidden="true">/</span>
+                            <span className="truncate text-slate-700 dark:text-slate-300">{service.title}</span>
+                        </nav>
                         {service.cover_url && (
                             <img src={service.cover_url} alt="" className="mb-6 aspect-[2/1] w-full rounded-lg object-cover shadow-sm" />
                         )}
-                        <Link href={service.category.url} className="text-sm font-semibold text-blue-700 hover:text-blue-800">
-                            {service.category.name}
-                        </Link>
                         <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight text-slate-950">
                             {service.title}
                         </h1>

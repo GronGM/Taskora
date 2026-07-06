@@ -286,6 +286,22 @@ class CustomerTaskOfferTest extends TestCase
         $this->assertSame(TaskOffer::STATUS_SUBMITTED, $offer->refresh()->status);
     }
 
+    public function test_offer_payload_contains_performer_card_data(): void
+    {
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        $performer = User::factory()->create(['role' => User::ROLE_PERFORMER]);
+        $task = Task::factory()->for($customer, 'customer')->create(['status' => Task::STATUS_PUBLISHED]);
+        TaskOffer::factory()->for($task)->for($performer, 'performer')->create();
+
+        $this->actingAs($customer)
+            ->get(route('customer.tasks.show', $task))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('task.offers.0.performer.name', $performer->name)
+                ->has('task.offers.0.performer.level_label')
+                ->has('task.offers.0.performer.profile_url'));
+    }
+
     public function test_customer_sees_offers_on_own_task(): void
     {
         $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);

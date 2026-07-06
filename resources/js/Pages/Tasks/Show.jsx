@@ -19,9 +19,19 @@ export default function TaskShow({ task, canOffer, existingOffer, offerStatusLab
 
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-                    <Link href="/tasks" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
-                        Биржа заданий
-                    </Link>
+                    <nav aria-label="Хлебные крошки" className="flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                        <Link href="/" className="hover:text-blue-700 dark:hover:text-blue-300">Главная</Link>
+                        <span aria-hidden="true">/</span>
+                        <Link href="/tasks" className="hover:text-blue-700 dark:hover:text-blue-300">Биржа заданий</Link>
+                        {task.category && (
+                            <>
+                                <span aria-hidden="true">/</span>
+                                <Link href={`/tasks?categories[]=${task.category.slug}`} className="hover:text-blue-700 dark:hover:text-blue-300">{task.category.name}</Link>
+                            </>
+                        )}
+                        <span aria-hidden="true">/</span>
+                        <span className="truncate text-slate-700 dark:text-slate-300">{task.title}</span>
+                    </nav>
                     <div className="mt-4 flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
                         <div>
                             <div className="flex flex-wrap items-center gap-2">

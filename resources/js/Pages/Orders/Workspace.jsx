@@ -1,4 +1,5 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 
 const currency = new Intl.NumberFormat('ru-RU');
@@ -32,6 +33,17 @@ const eventClasses = {
 };
 
 export default function Workspace({ role, order, statusLabels, paymentStatusLabels }) {
+    // Живой чат: мягкое автообновление данных заказа, пока вкладка видима.
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                router.reload({ only: ['order'], preserveScroll: true });
+            }
+        }, 8000);
+
+        return () => clearInterval(interval);
+    }, []);
+
     const messageForm = useForm({ body: '' });
     const fileForm = useForm({ file: null });
 
@@ -258,9 +270,14 @@ function Message({ message }) {
     return (
         <article className={`rounded-lg border p-5 ${isSystem ? 'border-blue-200 bg-blue-50' : 'border-slate-200 bg-slate-50'}`}>
             <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <p className="text-sm font-semibold text-slate-950">{message.author}</p>
-                    <p className="mt-1 text-xs uppercase text-slate-500">{message.author_role}</p>
+                <div className="flex items-center gap-3">
+                    <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                        {(message.author ?? '?').slice(0, 1).toUpperCase()}
+                    </span>
+                    <div>
+                        <p className="text-sm font-semibold text-slate-950">{message.author}</p>
+                        <p className="mt-1 text-xs uppercase text-slate-500">{message.author_role}</p>
+                    </div>
                 </div>
                 <p className="text-xs text-slate-500">{message.created_at}</p>
             </div>

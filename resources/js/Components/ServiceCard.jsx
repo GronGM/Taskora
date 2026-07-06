@@ -65,7 +65,13 @@ export default function ServiceCard({ service }) {
             </div>
 
             <div className="mt-5 flex items-center justify-between gap-4 text-sm">
-                <div>
+                <div className="flex min-w-0 items-center gap-3">
+                    <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                        {service.performer.avatar_url
+                            ? <img src={service.performer.avatar_url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                            : (service.performer.name ?? '?').slice(0, 1).toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
                     <p className="text-slate-500">Исполнитель</p>
                     <Link href={service.performer.profile_url ?? service.performer.reviews_url} className="font-semibold text-slate-900 hover:text-blue-700">
                         {service.performer.name}
@@ -74,6 +80,7 @@ export default function ServiceCard({ service }) {
                         {service.performer.level_label && <span className="text-slate-500 dark:text-slate-400">{service.performer.level_label}</span>}
                         {service.performer.is_verified && <span className="text-emerald-700">Проверен</span>}
                     </p>
+                    </div>
                 </div>
                 <div className="text-right">
                     <p className="text-slate-500">{hasReviews ? `${service.reviews_count} ${pluralReviews(service.reviews_count)}` : 'Нет отзывов'}</p>
