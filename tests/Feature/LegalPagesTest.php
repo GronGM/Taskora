@@ -43,7 +43,7 @@ class LegalPagesTest extends TestCase
 
                 return str_contains($text, 'Условия предоставления услуги')
                     && str_contains($text, 'Порядок заключения сделки')
-                    && str_contains($text, 'Удержание вознаграждения Платформы')
+                    && str_contains($text, 'Удержание и возврат вознаграждения Платформы')
                     && str_contains($text, 'Расторжение сделки и возвраты')
                     && str_contains($text, 'Гарантии и зоны ответственности');
             }));
