@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'enabled' => filter_var(env('TASKORA_PAYMENTS_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
     'mode' => env('TASKORA_PAYMENTS_MODE', 'stub'),
     'platform_fee_percent' => (float) env('TASKORA_PLATFORM_FEE_PERCENT', 15),
     'provider' => env('PAYMENT_PROVIDER', 'stub'),

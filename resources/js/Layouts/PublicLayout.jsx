@@ -188,7 +188,6 @@ export default function PublicLayout({ children }) {
                         <p className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">Документы</p>
                         <nav className="mt-3 grid gap-2 text-sm" aria-label="Юридические документы">
                             <Link href="/legal/offer" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Публичная оферта</Link>
-                            <Link href="/legal/safe-deal" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Правила «Безопасной сделки»</Link>
                             <Link href="/legal/payments" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Оплата и возвраты</Link>
                             <Link href="/legal/privacy" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Политика персональных данных</Link>
                             <Link href="/legal/requisites" className="text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">Реквизиты и контакты</Link>
@@ -205,7 +204,7 @@ export default function PublicLayout({ children }) {
                     </div>
                 </div>
                 <div className="border-t border-slate-100 py-4 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-500">
-                    © {new Date().getFullYear()} Таскора · Расчеты защищены сервисом «Безопасная сделка»
+                    © {new Date().getFullYear()} Таскора
                 </div>
             </footer>
         </div>

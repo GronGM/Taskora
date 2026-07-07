@@ -77,7 +77,6 @@ Route::get('/r/{code}', [\App\Http\Controllers\Referrals\ReferralController::cla
 Route::post('/webhooks/tbank', \App\Http\Controllers\Webhooks\TBankWebhookController::class)->name('webhooks.tbank');
 Route::post('/webhooks/yookassa', \App\Http\Controllers\Webhooks\YooKassaWebhookController::class)->name('webhooks.yookassa');
 Route::get('/legal/offer', [\App\Http\Controllers\Public\LegalController::class, 'offer'])->name('legal.offer');
-Route::get('/legal/safe-deal', [\App\Http\Controllers\Public\LegalController::class, 'safeDeal'])->name('legal.safe-deal');
 Route::get('/legal/payments', [\App\Http\Controllers\Public\LegalController::class, 'payments'])->name('legal.payments');
 Route::get('/legal/requisites', [\App\Http\Controllers\Public\LegalController::class, 'requisites'])->name('legal.requisites');
 Route::get('/legal/privacy', [\App\Http\Controllers\Public\LegalController::class, 'privacy'])->name('legal.privacy');

@@ -50,7 +50,13 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                     </div>
                 </div>
 
-                {order.payment_mode === 'stub' && (
+                {!order.payment_enabled && order.status === 'awaiting_payment' && (
+                    <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5 dark:border-amber-800 dark:bg-amber-950">
+                        <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Онлайн-оплата временно недоступна: мы подключаем платежную систему. Заказ сохранен — как только оплата заработает, здесь появится кнопка.</p>
+                    </div>
+                )}
+
+                {order.payment_enabled && order.payment_mode === 'stub' && (
                     <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
                         <p className="text-sm font-semibold text-amber-900">Это локальная заглушка оплаты. Реальный платежный шлюз будет подключен позже.</p>
                     </div>
@@ -136,9 +142,15 @@ export default function Show({ order, statusLabels, paymentStatusLabels }) {
                             </Link>
                             {order.status === 'awaiting_payment' && (
                                 <>
-                                    <Link href={order.mark_paid_url} method="post" as="button" className="w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                                        {order.payment_mode !== 'stub' ? 'Оплатить картой' : 'Оплатить (заглушка)'}
-                                    </Link>
+                                    {order.payment_enabled ? (
+                                        <Link href={order.mark_paid_url} method="post" as="button" className="w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+                                            {order.payment_mode !== 'stub' ? 'Оплатить картой' : 'Оплатить (заглушка)'}
+                                        </Link>
+                                    ) : (
+                                        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                                            Онлайн-оплата временно недоступна. Заказ сохранен и ждет подключения оплаты.
+                                        </p>
+                                    )}
                                     <Link href={order.cancel_url} method="post" as="button" className="w-full rounded-md border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50">
                                         Отменить
                                     </Link>

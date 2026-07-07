@@ -5,7 +5,7 @@ export default function LegalShow({ title, updatedAt, sections = [] }) {
     return (
         <PublicLayout>
             <Head title={title}>
-                <meta name="description" content={`${title} сервиса Таскора: условия использования платформы, безопасная сделка и защита пользователей.`} />
+                <meta name="description" content={`${title} сервиса Таскора: условия использования платформы и защита пользователей.`} />
             </Head>
 
             <section className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">

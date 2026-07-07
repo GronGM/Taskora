@@ -60,6 +60,23 @@ class TBankPaymentTest extends TestCase
         });
     }
 
+    public function test_disabled_payments_block_mark_paid(): void
+    {
+        config(['payments.enabled' => false]);
+        Http::fake();
+
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        $order = Order::factory()->for($customer, 'customer')->create(['price' => 5000]);
+
+        $this->actingAs($customer)
+            ->post(route('customer.orders.mark-paid', $order))
+            ->assertRedirect(route('customer.orders.show', $order))
+            ->assertSessionHas('error');
+
+        $this->assertSame(Order::STATUS_AWAITING_PAYMENT, $order->refresh()->status);
+        Http::assertNothingSent();
+    }
+
     public function test_failed_init_shows_error_instead_of_500(): void
     {
         Http::fake([

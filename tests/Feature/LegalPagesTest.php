@@ -11,7 +11,7 @@ class LegalPagesTest extends TestCase
 
     public function test_all_legal_pages_are_public(): void
     {
-        foreach (['legal.offer', 'legal.safe-deal', 'legal.payments', 'legal.privacy', 'legal.requisites'] as $route) {
+        foreach (['legal.offer', 'legal.payments', 'legal.privacy', 'legal.requisites'] as $route) {
             $this->get(route($route))
                 ->assertOk()
                 ->assertInertia(fn ($page) => $page
@@ -34,19 +34,9 @@ class LegalPagesTest extends TestCase
                 ->where('sections', fn ($sections) => str_contains(json_encode($sections, JSON_UNESCAPED_UNICODE), '15% от суммы Сделки')));
     }
 
-    public function test_safe_deal_rules_contain_required_topics(): void
+    public function test_safe_deal_page_is_removed(): void
     {
-        $this->get(route('legal.safe-deal'))
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page->where('sections', function ($sections): bool {
-                $text = json_encode($sections, JSON_UNESCAPED_UNICODE);
-
-                return str_contains($text, 'Условия предоставления услуги')
-                    && str_contains($text, 'Порядок заключения сделки')
-                    && str_contains($text, 'Удержание и возврат вознаграждения Платформы')
-                    && str_contains($text, 'Расторжение сделки и возвраты')
-                    && str_contains($text, 'Гарантии и зоны ответственности');
-            }));
+        $this->get('/legal/safe-deal')->assertNotFound();
     }
 
     public function test_privacy_policy_mentions_152_fz_and_operator(): void

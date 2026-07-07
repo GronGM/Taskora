@@ -56,6 +56,12 @@ class CustomerOrderController extends Controller
         Gate::authorize('markPaid', $order);
         $user = request()->user();
 
+        if (! config('payments.enabled')) {
+            return redirect()
+                ->route('customer.orders.show', $order)
+                ->with('error', 'Онлайн-оплата временно недоступна: мы подключаем платежную систему. Заказ сохранен и будет ждать оплаты.');
+        }
+
         if (config('payments.mode') === 'tbank') {
             try {
                 $payment = app(\App\Services\Payments\TBankClient::class)->init(
@@ -290,6 +296,7 @@ class CustomerOrderController extends Controller
             'canceled_at' => $order->canceled_at?->format('d.m.Y H:i'),
             'mark_paid_url' => route('customer.orders.mark-paid', $order),
             'payment_mode' => (string) config('payments.mode', 'stub'),
+            'payment_enabled' => (bool) config('payments.enabled', true),
             'request_revision_url' => route('customer.orders.request-revision', $order),
             'complete_url' => route('customer.orders.complete', $order),
             'cancel_url' => route('customer.orders.cancel', $order),

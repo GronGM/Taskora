@@ -15,7 +15,7 @@ export default function Faq({ items = [] }) {
     return (
         <PublicLayout>
             <Head title="Вопросы и ответы">
-                <meta name="description" content="Ответы на частые вопросы о Таскоре: комиссия, безопасная сделка, сроки выплат, споры, уровни исполнителей и отзывы." />
+                <meta name="description" content="Ответы на частые вопросы о Таскоре: комиссия, оплата и ее удержание, споры, уровни исполнителей и отзывы." />
                 <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
             </Head>
 
