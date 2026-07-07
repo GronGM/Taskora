@@ -14,6 +14,7 @@ use App\Services\Reviews\ReviewAggregateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -56,12 +57,16 @@ class CustomerOrderController extends Controller
         $user = request()->user();
 
         if (config('payments.mode') === 'tbank') {
-            $payment = app(\App\Services\Payments\TBankClient::class)->init(
-                $order,
-                route('customer.orders.show', $order),
-                route('customer.orders.show', $order),
-                route('webhooks.tbank'),
-            );
+            try {
+                $payment = app(\App\Services\Payments\TBankClient::class)->init(
+                    $order,
+                    route('customer.orders.show', $order),
+                    route('customer.orders.show', $order),
+                    route('webhooks.tbank'),
+                );
+            } catch (\Throwable $exception) {
+                return $this->paymentInitFailed($order, 'tbank', $exception);
+            }
 
             $paymentUrl = $payment['PaymentURL'] ?? null;
 
@@ -75,11 +80,15 @@ class CustomerOrderController extends Controller
         }
 
         if (config('payments.mode') === 'yookassa') {
-            $payment = app(\App\Services\Payments\YooKassaClient::class)->createPayment(
-                $order,
-                "order:{$order->id}:yookassa_payment",
-                route('customer.orders.show', $order),
-            );
+            try {
+                $payment = app(\App\Services\Payments\YooKassaClient::class)->createPayment(
+                    $order,
+                    "order:{$order->id}:yookassa_payment",
+                    route('customer.orders.show', $order),
+                );
+            } catch (\Throwable $exception) {
+                return $this->paymentInitFailed($order, 'yookassa', $exception);
+            }
 
             $confirmationUrl = $payment['confirmation']['confirmation_url'] ?? null;
 
@@ -121,6 +130,19 @@ class CustomerOrderController extends Controller
             ->with('success', $applied
                 ? 'Оплата отмечена локальной заглушкой. Заказ перешел в работу.'
                 : 'Заказ уже переведен в работу.');
+    }
+
+    private function paymentInitFailed(Order $order, string $provider, \Throwable $exception): RedirectResponse
+    {
+        Log::error('Не удалось создать платеж у провайдера', [
+            'provider' => $provider,
+            'order_id' => $order->id,
+            'error' => $exception->getMessage(),
+        ]);
+
+        return redirect()
+            ->route('customer.orders.show', $order)
+            ->with('error', 'Не удалось начать оплату. Попробуйте еще раз чуть позже.');
     }
 
     public function requestRevision(RequestRevisionRequest $request, Order $order, OrderEventLogger $events): RedirectResponse

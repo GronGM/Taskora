@@ -60,6 +60,33 @@ class TBankPaymentTest extends TestCase
         });
     }
 
+    public function test_failed_init_shows_error_instead_of_500(): void
+    {
+        Http::fake([
+            'securepay.tinkoff.ru/v2/Init' => Http::response([
+                'Success' => false,
+                'ErrorCode' => '204',
+                'Message' => 'Неверные параметры.',
+                'Details' => 'Неверный токен. Проверьте пару TerminalKey/SecretKey.',
+            ], 200),
+        ]);
+
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        $order = Order::factory()->for($customer, 'customer')->create(['price' => 5000]);
+
+        $this->actingAs($customer)
+            ->from(route('customer.orders.show', $order))
+            ->post(route('customer.orders.mark-paid', $order))
+            ->assertRedirect(route('customer.orders.show', $order))
+            ->assertSessionHas('error');
+
+        // Заказ не изменился, деньги не двигались.
+        $this->assertSame(Order::STATUS_AWAITING_PAYMENT, $order->refresh()->status);
+        $this->assertSame(Order::PAYMENT_UNPAID, $order->payment_status);
+        $this->assertSame(0, PaymentOperation::query()->count());
+        $this->assertSame(0, LedgerEntry::query()->count());
+    }
+
     public function test_webhook_with_valid_token_confirms_payment(): void
     {
         $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
